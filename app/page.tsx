@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
+import './globals.css'
 
 type ArtistResult = {
   name: string
@@ -67,25 +68,28 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-screen bg-black text-white px-4 py-12">
-      <div className="max-w-2xl mx-auto">
-        <h1 className="text-green-500 text-4xl font-extrabold text-center mb-10 tracking-tight">Spotify 人気度バトル</h1>
+    <main className="min-h-screen bg-black text-white px-6 py-14 font-sans">
+      <div className="max-w-3xl mx-auto space-y-12">
+        <header className="text-center">
+          <h1 className="text-green-500 text-5xl font-extrabold tracking-tight">Spotify 人気度バトル</h1>
+          <p className="text-zinc-400 mt-2">推しの人気度、競ってみよう</p>
+        </header>
 
-        <form onSubmit={handleResult} className="space-y-8">
+        <form onSubmit={handleResult} className="space-y-8 bg-zinc-900 p-6 rounded-xl shadow-lg ring-1 ring-zinc-800">
           <div>
-            <label className="text-green-500 font-medium text-sm mb-1 block">お題アーティスト</label>
+            <label className="text-green-400 font-semibold text-sm mb-2 block">お題アーティスト</label>
             <input
               type="text"
               value={baseArtist}
               onChange={(e) => setBaseArtist(e.target.value)}
-              className="w-full bg-zinc-900 text-white p-3 rounded-lg outline-none focus:ring-2 focus:ring-green-500"
+              className="w-full bg-zinc-800 text-white p-3 rounded-lg outline-none focus:ring-2 focus:ring-green-500 transition-all"
               placeholder="例：ラルク"
               required
             />
           </div>
 
           <div className="space-y-4">
-            <label className="text-green-500 font-medium text-sm">プレイヤーのアーティスト</label>
+            <label className="text-green-400 font-semibold text-sm">プレイヤーのアーティスト</label>
             {players.map((p, i) => (
               <input
                 key={i}
@@ -96,7 +100,7 @@ export default function Home() {
                   copy[i] = e.target.value
                   setPlayers(copy)
                 }}
-                className="w-full bg-zinc-800 text-white p-3 rounded-lg outline-none focus:ring-2 focus:ring-green-500"
+                className="w-full bg-zinc-800 text-white p-3 rounded-lg outline-none focus:ring-2 focus:ring-green-500 transition-all"
                 placeholder={`プレイヤー${i + 1}`}
               />
             ))}
@@ -105,18 +109,20 @@ export default function Home() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-green-500 text-black py-3 rounded-lg font-semibold hover:bg-green-400 transition"
+            className="w-full bg-green-500 text-black py-3 rounded-lg font-semibold hover:bg-green-400 transition-all duration-300"
           >
             {loading ? '検索中...' : '人気度バトル！'}
           </button>
         </form>
 
         {error && (
-          <div className="mt-6 bg-red-800 text-white p-4 rounded-lg">{error}</div>
+          <div className="bg-red-800/80 text-white p-4 rounded-lg shadow ring-1 ring-red-900">
+            {error}
+          </div>
         )}
 
         {result && (
-          <div className="mt-10 bg-zinc-900 p-6 rounded-xl shadow-md">
+          <section className="bg-zinc-900 p-6 rounded-xl shadow-lg ring-1 ring-zinc-800">
             <h2 className="text-green-500 text-xl font-bold mb-4">お題：{result.baseName}（人気度：{result.basePop}）</h2>
             <ul className="space-y-4">
               {result.results.map((r, i) => (
@@ -129,7 +135,7 @@ export default function Home() {
                 </li>
               ))}
             </ul>
-          </div>
+          </section>
         )}
       </div>
     </main>
