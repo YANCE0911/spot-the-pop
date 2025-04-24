@@ -73,7 +73,7 @@ export default function Home() {
 
         <form onSubmit={handleResult} className="space-y-8">
           <div>
-            <label className="text-green-400 font-medium text-sm mb-1 block">お題アーティスト</label>
+            <label className="text-green-500 font-medium text-sm mb-1 block">お題アーティスト</label>
             <input
               type="text"
               value={baseArtist}
@@ -85,7 +85,7 @@ export default function Home() {
           </div>
 
           <div className="space-y-4">
-            <label className="text-green-400 font-medium text-sm">プレイヤーのアーティスト</label>
+            <label className="text-green-500 font-medium text-sm">プレイヤーのアーティスト</label>
             {players.map((p, i) => (
               <input
                 key={i}
