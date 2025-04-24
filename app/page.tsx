@@ -66,76 +66,51 @@ export default function Home() {
     }
   }
 
-  // 人気度をビジュアル表示するためのヘルパー関数
-  const getPopularityBar = (popularity: number) => {
-    return (
-      <div className="w-full bg-zinc-800 rounded-full h-2.5 mt-1">
-        <div 
-          className="bg-gradient-to-r from-green-500 to-green-300 h-2.5 rounded-full" 
-          style={{ width: `${popularity}%` }}
-        ></div>
-      </div>
-    )
-  }
-
   return (
-    <main className="min-h-screen bg-gradient-to-b from-zinc-900 to-black text-white py-10 px-4 font-sans">
-      <div className="max-w-4xl mx-auto">
-        <div className="flex items-center mb-10">
-          <div className="w-12 h-12 mr-4 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center">
-            <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2Z" fill="black"/>
-              <path d="M16.5 12.25C14.9 11.25 13 11 11.5 11.25C10 11.5 8.5 12.25 7.5 13.5C7.25 14 7.25 14.5 7.5 15C7.75 15.5 8.25 15.75 8.75 15.75C9 15.75 9.25 15.75 9.5 15.5C10.25 14.75 11.25 14.25 12.25 14.25C13.25 14.25 14.25 14.5 15.25 15C15.5 15.25 15.75 15.25 16 15.25C16.5 15.25 16.75 15 17 14.5C17.25 14 17 13.5 16.5 12.25ZM18 10C15.75 8.75 13.5 8.25 11 8.75C8.75 9.25 7 10.25 5.75 12C5.25 12.75 5.25 13.75 5.75 14.5C6.25 15.25 7.25 15.75 8 15.75C8.5 15.75 9 15.5 9.5 15.25C10.5 14.25 12 13.75 13.25 13.75C14.75 13.75 16.25 14.25 17.5 15C17.75 15.25 18.25 15.25 18.75 15.25C19.5 15.25 20.25 14.75 20.75 14C21.25 13.25 21.25 12.25 20.75 11.5C20 10.75 19 10.25 18 10Z" fill="white"/>
-            </svg>
-          </div>
-          <h1 className="text-5xl font-bold bg-gradient-to-r from-green-400 to-green-600 text-transparent bg-clip-text">
-            SPOTIFY 人気度バトル
-          </h1>
-        </div>
+    <main className="min-h-screen bg-black text-white py-8 px-4">
+      <div className="max-w-2xl mx-auto">
+        <header className="mb-8 flex items-center">
+          <svg className="w-8 h-8 mr-3 text-green-500" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.839-.179-.959-.6-.12-.421.18-.84.6-.96 4.56-1.021 8.52-.6 11.64 1.32.42.237.48.659.301 1.141zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/>
+          </svg>
+          <h1 className="text-3xl font-bold text-white">Spotify 人気度バトル</h1>
+        </header>
 
-        <div className="bg-zinc-900/60 backdrop-blur-sm p-8 rounded-2xl shadow-xl border border-zinc-800">
+        <section className="bg-zinc-900 rounded-lg p-6 shadow-lg mb-6">
           <form onSubmit={handleResult} className="space-y-6">
-            <div className="space-y-2">
-              <label className="block text-lg font-medium text-green-400 mb-2">お題のアーティスト</label>
-              <div className="relative">
-                <input
-                  type="text"
-                  value={baseArtist}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setBaseArtist(e.target.value)}
-                  className="w-full p-4 pl-12 bg-zinc-800/70 text-white border border-zinc-700 rounded-xl focus:border-green-400 focus:ring-2 focus:ring-green-400/20 focus:outline-none transition duration-200"
-                  placeholder="例: ラルク"
-                  required
-                />
-                <svg className="w-6 h-6 absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
-                </svg>
-              </div>
+            <div>
+              <label className="block text-sm font-medium text-green-400 mb-2">
+                お題のアーティスト名
+              </label>
+              <input
+                type="text"
+                value={baseArtist}
+                onChange={(e) => setBaseArtist(e.target.value)}
+                className="w-full p-3 bg-zinc-800 border border-zinc-700 rounded-md text-white focus:ring-2 focus:ring-green-500 focus:border-green-500 focus:outline-none"
+                placeholder="例: ラルク"
+                required
+              />
             </div>
 
-            <div className="space-y-4">
-              <h2 className="text-xl font-semibold text-green-300 mb-3 flex items-center">
-                <svg className="w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                </svg>
+            <div>
+              <h2 className="text-sm font-medium text-green-400 mb-2">
                 プレイヤーのアーティスト入力
               </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-3">
                 {players.map((p, i) => (
-                  <div key={i} className="relative">
+                  <div key={i} className="flex items-center">
+                    <span className="mr-2 text-sm text-zinc-400 w-10 flex-shrink-0">P{i + 1}</span>
                     <input
                       type="text"
                       value={p}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                      onChange={(e) => {
                         const copy = [...players]
                         copy[i] = e.target.value
                         setPlayers(copy)
                       }}
-                      className="w-full p-4 pl-12 bg-zinc-800/70 text-white border border-zinc-700 rounded-xl focus:border-green-400 focus:ring-2 focus:ring-green-400/20 focus:outline-none transition duration-200"
+                      className="w-full p-3 bg-zinc-800 border border-zinc-700 rounded-md text-white focus:ring-2 focus:ring-green-500 focus:border-green-500 focus:outline-none"
                       placeholder={`プレイヤー${i + 1} のアーティスト名`}
                     />
-                    <div className="absolute left-3 top-1/2 transform -translate-y-1/2 w-6 h-6 flex items-center justify-center rounded-full bg-green-400/20 text-green-300 font-bold text-sm">
-                      {i + 1}
-                    </div>
                   </div>
                 ))}
               </div>
@@ -144,117 +119,105 @@ export default function Home() {
             <button
               type="submit"
               disabled={loading}
-              className={`w-full mt-6 px-6 py-4 bg-gradient-to-r from-green-500 to-green-600 text-black font-bold rounded-xl hover:from-green-400 hover:to-green-500 transition duration-300 transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-opacity-50 flex items-center justify-center ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
+              className="w-full p-3 bg-green-500 text-black font-medium rounded-md hover:bg-green-400 transition-colors focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-offset-2 focus:ring-offset-zinc-900"
             >
               {loading ? (
-                <>
-                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-black" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <span className="flex items-center justify-center">
+                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-black" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
                   取得中...
-                </>
+                </span>
               ) : (
-                <>
-                  結果を表示
-                  <svg className="ml-2 w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                  </svg>
-                </>
+                '結果を表示'
               )}
             </button>
           </form>
-        </div>
+        </section>
 
         {error && (
-          <div className="mt-6 bg-red-900/30 border border-red-700 p-4 rounded-xl text-red-200 flex items-center">
-            <svg className="w-6 h-6 mr-3 text-red-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            {error}
+          <div className="bg-red-900/50 border border-red-800 rounded-md p-4 mb-6 text-red-200">
+            <p className="flex items-center">
+              <svg className="h-5 w-5 mr-2 text-red-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+              </svg>
+              {error}
+            </p>
           </div>
         )}
 
         {result && (
-          <div className="mt-8 bg-zinc-900/60 backdrop-blur-sm p-6 rounded-2xl shadow-xl border border-zinc-800 animate-fade-in">
-            <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-6 pb-4 border-b border-zinc-700">
-              <div>
-                <div className="text-sm uppercase tracking-wider text-green-400 font-medium mb-1">お題</div>
-                <h3 className="text-2xl font-bold">{result.baseName}</h3>
+          <section className="bg-zinc-900 rounded-lg p-6 shadow-lg">
+            <div className="mb-6 pb-4 border-b border-zinc-800">
+              <div className="flex justify-between items-center mb-2">
+                <h3 className="text-lg font-medium text-green-400">お題</h3>
+                <span className="text-sm text-zinc-400">Popularity スコア</span>
               </div>
-              <div className="mt-3 md:mt-0">
-                <div className="text-sm text-zinc-400 mb-1">Popularity スコア</div>
-                <div className="flex items-center">
-                  <span className="text-3xl font-bold mr-2">{result.basePop}</span>
-                  <span className="text-sm text-zinc-400">/100</span>
-                </div>
-                {getPopularityBar(result.basePop)}
+              <div className="flex justify-between items-center">
+                <h4 className="text-xl font-bold">{result.baseName}</h4>
+                <div className="text-xl font-bold">{result.basePop}</div>
+              </div>
+              <div className="mt-2 w-full bg-zinc-800 rounded-full h-2">
+                <div 
+                  className="bg-green-500 h-2 rounded-full" 
+                  style={{ width: `${result.basePop}%` }}
+                ></div>
               </div>
             </div>
             
-            <div className="space-y-4">
-              <h4 className="text-xl font-semibold text-green-300 flex items-center">
-                <svg className="w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                </svg>
-                結果ランキング
-              </h4>
+            <div>
+              <h3 className="text-lg font-medium text-green-400 mb-4">結果ランキング</h3>
               
-              <div className="space-y-3">
+              <div className="space-y-4">
                 {result.results.map((r, i) => (
                   <div 
                     key={i} 
-                    className={`p-4 rounded-xl transition-all ${
-                      i === 0 
-                        ? 'bg-gradient-to-r from-green-900/30 to-green-700/20 border border-green-700/50' 
-                        : 'bg-zinc-800/50 border border-zinc-700 hover:bg-zinc-800/80'
-                    }`}
+                    className={`p-4 rounded-md ${i === 0 ? 'bg-zinc-800 border-l-4 border-green-500' : 'bg-zinc-800/50'}`}
                   >
-                    <div className="flex items-center justify-between mb-2">
+                    <div className="flex justify-between items-center mb-1">
                       <div className="flex items-center">
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center mr-3 ${
-                          i === 0 
-                            ? 'bg-green-400 text-black' 
-                            : 'bg-zinc-700 text-white'
-                        }`}>
+                        <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full mr-2 ${
+                          i === 0 ? 'bg-green-500 text-black' : 'bg-zinc-700 text-white'
+                        } text-xs font-medium`}>
                           {i + 1}
-                        </div>
-                        <h5 className={`font-bold text-lg ${i === 0 ? 'text-green-300' : 'text-white'}`}>
-                          {r.name}
-                        </h5>
+                        </span>
+                        <h5 className="font-medium">{r.name}</h5>
                       </div>
-                      <div className="text-right">
-                        <div className="text-sm text-zinc-400">人気度の差</div>
-                        <div className={`font-bold ${i === 0 ? 'text-green-400' : 'text-white'}`}>
-                          {r.diff}
-                        </div>
+                      <div className="text-sm text-zinc-400">
+                        差: <span className="font-medium text-white">{r.diff}</span>
                       </div>
                     </div>
-                    <div className="flex items-center justify-between">
-                      <div className="w-full mr-4">
-                        {getPopularityBar(r.popularity)}
+                    <div className="mt-2 flex items-center">
+                      <div className="flex-grow mr-2">
+                        <div className="w-full bg-zinc-700 rounded-full h-2">
+                          <div 
+                            className={`${i === 0 ? 'bg-green-500' : 'bg-green-700'} h-2 rounded-full`}
+                            style={{ width: `${r.popularity}%` }}
+                          ></div>
+                        </div>
                       </div>
-                      <div className="text-lg font-semibold whitespace-nowrap">{r.popularity}</div>
+                      <div className="text-sm font-medium">{r.popularity}</div>
                     </div>
                   </div>
                 ))}
               </div>
 
               {result.results.length > 0 && (
-                <div className="mt-6 p-5 bg-gradient-to-r from-green-900/40 to-green-700/20 rounded-xl border border-green-600/40">
+                <div className="mt-6 p-4 bg-zinc-800 rounded-md border-l-4 border-green-500">
                   <div className="flex items-center">
-                    <svg className="w-8 h-8 mr-3 text-green-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    <svg className="h-5 w-5 mr-2 text-green-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                     </svg>
                     <div>
-                      <div className="text-sm uppercase tracking-wider text-green-400 font-medium">優勝</div>
-                      <h3 className="text-2xl font-bold text-white">{result.results[0].name}</h3>
+                      <div className="text-xs text-green-400 uppercase tracking-wide font-medium">優勝</div>
+                      <div className="font-bold">{result.results[0].name}</div>
                     </div>
                   </div>
                 </div>
               )}
             </div>
-          </div>
+          </section>
         )}
       </div>
     </main>
