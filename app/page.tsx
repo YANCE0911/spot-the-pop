@@ -1,5 +1,6 @@
 'use client'
 import { useState } from 'react'
+import { motion } from 'framer-motion'
 
 // 型定義
 type ArtistResult = {
@@ -51,8 +52,15 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-black via-neutral-900 to-black text-white flex flex-col items-center justify-start py-12 px-6 space-y-10 font-sans">
-      <h1 className="text-5xl font-extrabold text-[#1DB954] drop-shadow-xl">🎵 Spotify 人気度バトル</h1>
+    <motion.main
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.8 }}
+      className="min-h-screen bg-gradient-to-br from-black via-neutral-900 to-black text-white flex flex-col items-center justify-start py-12 px-6 space-y-10 font-sans"
+    >
+      <h1 className="text-5xl font-extrabold text-[#1DB954] drop-shadow-[0_4px_6px_rgba(0,0,0,0.4)] tracking-wider">
+        🎵 Spotify 人気度バトル
+      </h1>
 
       <form
         onSubmit={(e) => {
@@ -62,7 +70,7 @@ export default function Home() {
         className="flex flex-col md:flex-row md:flex-wrap gap-4 w-full max-w-5xl justify-center items-center"
       >
         <input
-          className="p-3 rounded bg-neutral-800 border border-neutral-600 text-white w-72 focus:outline-none focus:ring-2 focus:ring-[#1DB954]"
+          className="p-3 rounded bg-white/10 backdrop-blur-md border border-white/20 text-white w-72 focus:outline-none focus:ring-2 focus:ring-[#1DB954] focus:ring-offset-2"
           placeholder="🎯 お題のアーティスト名"
           value={baseArtist}
           onChange={e => setBaseArtist(e.target.value)}
@@ -70,7 +78,7 @@ export default function Home() {
         {players.map((p, i) => (
           <input
             key={i}
-            className="p-3 rounded bg-neutral-800 border border-neutral-600 text-white w-72 focus:outline-none focus:ring-2 focus:ring-[#1DB954]"
+            className="p-3 rounded bg-white/10 backdrop-blur-md border border-white/20 text-white w-72 focus:outline-none focus:ring-2 focus:ring-[#1DB954] focus:ring-offset-2"
             placeholder={`👤 プレイヤー${i + 1}`}
             value={p}
             onChange={e => {
@@ -82,7 +90,7 @@ export default function Home() {
         ))}
         <button
           type="submit"
-          className="px-6 py-3 mt-2 md:mt-0 bg-[#1DB954] text-black text-lg font-semibold rounded-full hover:bg-green-400 transition shadow-lg"
+          className="px-6 py-3 mt-2 md:mt-0 bg-[#1DB954] text-black text-lg font-semibold rounded-full hover:bg-green-400 transition transform hover:scale-105 shadow-md"
         >
           🏁 勝負する！
         </button>
@@ -95,22 +103,32 @@ export default function Home() {
           <h2 className="text-2xl font-bold mb-4 text-white">📊 結果発表</h2>
           <ul className="space-y-2">
             {results.map((r, i) => (
-              <li
+              <motion.li
                 key={i}
-                className={`p-4 rounded-lg flex justify-between items-center text-lg font-medium ${r.isBase ? 'bg-neutral-800 text-[#1DB954]' : 'bg-neutral-700 text-white'} shadow-md`}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.1 }}
+                className={`p-4 rounded-lg flex justify-between items-center text-lg font-medium ${r.isBase
+                  ? 'bg-gradient-to-r from-neutral-700 via-neutral-800 to-black text-[#1DB954]'
+                  : 'bg-gradient-to-r from-neutral-800 via-black to-neutral-900 text-white'} shadow-lg`}
               >
                 <span>{r.name}</span>
                 <span>{r.popularity}</span>
-              </li>
+              </motion.li>
             ))}
           </ul>
           {results.length > 1 && (
-            <p className="mt-6 text-xl text-[#1DB954] font-extrabold animate-pulse">
+            <motion.p
+              className="mt-6 text-xl text-[#1DB954] font-extrabold animate-pulse"
+              initial={{ scale: 0.9 }}
+              animate={{ scale: 1 }}
+              transition={{ yoyo: Infinity, duration: 0.8 }}
+            >
               🎉 優勝：{results[1].name}（popularity {results[1].popularity}）
-            </p>
+            </motion.p>
           )}
         </div>
       )}
-    </main>
+    </motion.main>
   )
 }
