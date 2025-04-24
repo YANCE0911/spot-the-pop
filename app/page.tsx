@@ -2,21 +2,20 @@
 
 import React, { useState } from 'react'
 
-// 型定義
-interface ArtistResult {
+type ArtistResult = {
   name: string
   popularity: number
   diff: number
 }
 
-interface FetchedArtist {
+type FetchedArtist = {
   name: string
   popularity: number
   error?: string
 }
 
 export default function Home() {
-  const [baseArtist, setBaseArtist] = useState<string>('')
+  const [baseArtist, setBaseArtist] = useState('')
   const [players, setPlayers] = useState<string[]>(['', '', '', '', ''])
   const [result, setResult] = useState<{
     baseName: string
@@ -24,7 +23,7 @@ export default function Home() {
     results: ArtistResult[]
   } | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const [loading, setLoading] = useState<boolean>(false)
+  const [loading, setLoading] = useState(false)
 
   const handleResult = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -68,86 +67,70 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-screen bg-black text-white py-10 px-4 font-sans transition-all duration-200 ease-in-out">
+    <main className="min-h-screen bg-black text-white px-4 py-12">
       <div className="max-w-2xl mx-auto">
-        <header className="text-center mb-12">
-          <div className="flex flex-col items-center justify-center mb-4">
-            <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mb-4">
-              <svg className="w-10 h-10" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="12" cy="12" r="10" fill="black" />
-                <path d="M17 15c-3 2-7 2-10 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                <path d="M17 12c-3 2-8 2-11 0" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                <path d="M16 9c-2 1-6 1-9 0" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-              </svg>
-            </div>
-            <h1 className="text-5xl font-bold text-green-500 tracking-tight">Spotify 人気度バトル</h1>
-            <p className="text-zinc-400 text-sm mt-2">アーティストの人気度を比較して勝者を決めよう</p>
-          </div>
-        </header>
+        <h1 className="text-green-500 text-4xl font-extrabold text-center mb-10 tracking-tight">Spotify 人気度バトル</h1>
 
-        <form onSubmit={handleResult} className="space-y-6 bg-zinc-900 p-6 rounded-lg shadow">
+        <form onSubmit={handleResult} className="space-y-8">
           <div>
-            <label className="text-green-500 block mb-2">お題アーティスト</label>
+            <label className="text-green-400 font-medium text-sm mb-1 block">お題アーティスト</label>
             <input
               type="text"
               value={baseArtist}
               onChange={(e) => setBaseArtist(e.target.value)}
-              className="w-full p-3 rounded-md bg-zinc-800 text-white focus:ring-2 focus:ring-green-500 outline-none"
-              placeholder="例: L'Arc~en~Ciel"
+              className="w-full bg-zinc-900 text-white p-3 rounded-lg outline-none focus:ring-2 focus:ring-green-500"
+              placeholder="例：ラルク"
               required
             />
           </div>
-          <div className="space-y-3">
+
+          <div className="space-y-4">
+            <label className="text-green-400 font-medium text-sm">プレイヤーのアーティスト</label>
             {players.map((p, i) => (
               <input
                 key={i}
                 type="text"
                 value={p}
                 onChange={(e) => {
-                  const updated = [...players]
-                  updated[i] = e.target.value
-                  setPlayers(updated)
+                  const copy = [...players]
+                  copy[i] = e.target.value
+                  setPlayers(copy)
                 }}
+                className="w-full bg-zinc-800 text-white p-3 rounded-lg outline-none focus:ring-2 focus:ring-green-500"
                 placeholder={`プレイヤー${i + 1}`}
-                className="w-full p-3 rounded-md bg-zinc-800 text-white focus:ring-2 focus:ring-green-500 outline-none"
               />
             ))}
           </div>
+
           <button
             type="submit"
-            className="w-full p-3 bg-green-500 hover:bg-green-400 text-black font-semibold rounded-md transition"
+            disabled={loading}
+            className="w-full bg-green-500 text-black py-3 rounded-lg font-semibold hover:bg-green-400 transition"
           >
-            {loading ? '取得中...' : '結果を表示'}
+            {loading ? '検索中...' : '人気度バトル！'}
           </button>
         </form>
 
-        {error && <p className="text-red-400 mt-4 text-sm">{error}</p>}
-
-        {result && (
-          <div className="mt-8 bg-zinc-900 p-6 rounded-lg">
-            <div className="flex justify-between mb-4">
-              <h2 className="text-lg font-semibold text-green-400">お題: {result.baseName}</h2>
-              <span className="text-sm text-white/70">Popularity: {result.basePop}</span>
-            </div>
-            <div className="space-y-3">
-              {result.results.map((r, i) => (
-                <div key={i} className={`p-4 rounded-md ${i === 0 ? 'bg-green-500 text-black' : 'bg-zinc-800 text-white'}`}>
-                  <div className="flex justify-between items-center">
-                    <span className="font-semibold">{i + 1}. {r.name} {i === 0 && '👑'}</span>
-                    <span className="text-sm">popularity: {r.popularity}（差 {r.diff}）</span>
-                  </div>
-                  <div className="mt-1 w-full bg-zinc-700 rounded-full h-2">
-                    <div className={`h-2 rounded-full ${i === 0 ? 'bg-black' : 'bg-green-500'}`} style={{ width: `${r.popularity}%` }}></div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+        {error && (
+          <div className="mt-6 bg-red-800 text-white p-4 rounded-lg">{error}</div>
         )}
 
-        <footer className="mt-10 text-center text-zinc-500 text-xs">
-          <p>Powered by DIGLE MAGAZINE</p>
-        </footer>
+        {result && (
+          <div className="mt-10 bg-zinc-900 p-6 rounded-xl shadow-md">
+            <h2 className="text-green-500 text-xl font-bold mb-4">お題：{result.baseName}（人気度：{result.basePop}）</h2>
+            <ul className="space-y-4">
+              {result.results.map((r, i) => (
+                <li
+                  key={i}
+                  className={`flex justify-between items-center p-4 rounded-lg ${i === 0 ? 'bg-green-600 text-black' : 'bg-zinc-800 text-white'}`}
+                >
+                  <span className="font-medium">{i + 1}. {r.name}</span>
+                  <span className="text-sm">差 {r.diff}｜人気度 {r.popularity}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </div>
     </main>
   )
