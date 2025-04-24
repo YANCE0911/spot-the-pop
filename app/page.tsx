@@ -1,90 +1,85 @@
-"use client"
-import { useState } from "react"
-
-type PlayerResult = {
-  name: string
-  popularity: number
-  diff: number
-}
+'use client'
+import { useState } from 'react'
 
 export default function Home() {
-  const [base, setBase] = useState("")
-  const [players, setPlayers] = useState(["", "", ""])
-  const [result, setResult] = useState<PlayerResult[] | null>(null)
-  const [basePop, setBasePop] = useState<number | null>(null)
+  const [baseArtist, setBaseArtist] = useState('')
+  const [players, setPlayers] = useState(['', '', ''])
+  const [results, setResults] = useState<any[]>([])
+  const [error, setError] = useState('')
+
+  const fetchPopularity = async (name: string) => {
+    const res = await fetch(`/api/popularity?artist=${encodeURIComponent(name)}`)
+    if (!res.ok) throw new Error(`${name} not found`)
+    return await res.json()
+  }
 
   const handleSubmit = async () => {
-    const baseRes = await fetch(`/api/popularity?artist=${encodeURIComponent(base)}`)
-    const baseData = await baseRes.json()
-    if (!baseData.popularity) {
-      alert("お題のアーティストが見つかりませんでした")
-      return
+    setError('')
+    setResults([])
+
+    try {
+      const base = await fetchPopularity(baseArtist)
+      const others = await Promise.all(players.map(p => p ? fetchPopularity(p) : null))
+      const scored = others
+        .map((p, i) => p && ({ name: p.name, pop: p.popularity, diff: Math.abs(p.popularity - base.popularity) }))
+        .filter(Boolean)
+        .sort((a, b) => a!.diff - b!.diff)
+
+      setResults([
+        { name: base.name, pop: base.popularity, isBase: true },
+        ...scored,
+      ])
+    } catch (err: any) {
+      setError(err.message)
     }
-    setBasePop(baseData.popularity)
-
-    const results = await Promise.all(players.map(async (name) => {
-      if (!name) return null
-      const res = await fetch(`/api/popularity?artist=${encodeURIComponent(name)}`)
-      const data = await res.json()
-      if (!data.popularity) return null
-      return {
-        name: data.name,
-        popularity: data.popularity,
-        diff: Math.abs(data.popularity - baseData.popularity)
-      }
-    }))
-
-    const filtered = results.filter(Boolean) as PlayerResult[]
-    filtered.sort((a, b) => a.diff - b.diff)
-    setResult(filtered)
   }
 
   return (
-    <main className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-6 space-y-6 font-sans">
-      <h1 className="text-4xl font-bold text-[#1DB954] mb-6">🎵 Spotify 人気度バトル</h1>
+    <main className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-6 space-y-8">
+      <h1 className="text-4xl font-bold text-[#1DB954]">🎵 Spotify 人気度バトル</h1>
 
-      <div className="flex flex-col items-center space-y-4 w-full max-w-md">
+      <div className="flex flex-wrap gap-2 w-full justify-center max-w-4xl">
         <input
-          type="text"
-          value={base}
-          onChange={(e) => setBase(e.target.value)}
+          className="p-2 rounded bg-neutral-900 border border-gray-600 text-white w-40"
           placeholder="🎯 お題のアーティスト名"
-          className="w-full px-4 py-2 rounded bg-white text-black placeholder-gray-500 shadow"
+          value={baseArtist}
+          onChange={e => setBaseArtist(e.target.value)}
         />
-
         {players.map((p, i) => (
           <input
             key={i}
-            type="text"
-            value={players[i]}
-            onChange={(e) => {
-              const newP = [...players]
-              newP[i] = e.target.value
-              setPlayers(newP)
-            }}
+            className="p-2 rounded bg-neutral-900 border border-gray-600 text-white w-40"
             placeholder={`👤 プレイヤー${i + 1}`}
-            className="w-full px-4 py-2 rounded bg-white text-black placeholder-gray-500 shadow"
+            value={p}
+            onChange={e => {
+              const copy = [...players]
+              copy[i] = e.target.value
+              setPlayers(copy)
+            }}
           />
         ))}
-
         <button
           onClick={handleSubmit}
-          className="mt-4 w-full bg-[#1DB954] text-black font-semibold py-2 rounded hover:opacity-90 shadow"
+          className="px-4 py-2 bg-[#1DB954] text-black font-bold rounded hover:bg-green-400 transition"
         >
           勝負する！
         </button>
       </div>
 
-      {result && (
-        <div className="mt-8 text-center space-y-2">
-          <p className="text-lg text-[#1DB954]">🎯 お題のpopularity: {basePop}</p>
-          <h2 className="text-xl font-bold mb-2">🏆 結果発表</h2>
-          {result.map((r, i) => (
-            <p key={i} className="text-white">
-              {r.name}: popularity {r.popularity}（差: {r.diff}）
-            </p>
-          ))}
-          <p className="mt-4 text-[#1DB954] font-bold text-lg">🎉 優勝：{result[0].name}</p>
+      {error && <p className="text-red-400 mt-4">{error}</p>}
+
+      {results.length > 0 && (
+        <div className="mt-6 w-full max-w-3xl">
+          <h2 className="text-xl font-semibold text-white mb-2">結果</h2>
+          <ul className="space-y-1">
+            {results.map((r, i) => (
+              <li key={i} className={`p-2 rounded ${r.isBase ? 'bg-neutral-800' : 'bg-neutral-700'} flex justify-between`}>
+                <span>{r.name}</span>
+                <span>{r.pop}</span>
+              </li>
+            ))}
+          </ul>
+          <p className="mt-4 text-green-400 font-bold">🎉 優勝：{results[1]?.name}（popularity {results[1]?.pop}）</p>
         </div>
       )}
     </main>
