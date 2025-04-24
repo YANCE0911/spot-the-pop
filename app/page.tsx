@@ -1,134 +1,102 @@
 'use client'
-import { useState } from 'react'
-import { motion } from 'framer-motion'
 
-// 型定義
-type ArtistResult = {
-  name: string
-  popularity: number
-  diff?: number
-  isBase?: boolean
-}
+import { useState } from 'react'
 
 export default function Home() {
   const [baseArtist, setBaseArtist] = useState('')
-  const [players, setPlayers] = useState<string[]>(['', '', ''])
-  const [results, setResults] = useState<ArtistResult[]>([])
+  const [playerInputs, setPlayerInputs] = useState(['', '', '', '', ''])
+  const [results, setResults] = useState<any[]>([])
   const [error, setError] = useState('')
+  const [baseName, setBaseName] = useState('')
+  const [basePop, setBasePop] = useState<number | null>(null)
 
-  const fetchPopularity = async (name: string): Promise<ArtistResult> => {
+  const getPopularity = async (name: string) => {
     const res = await fetch(`/api/popularity?artist=${encodeURIComponent(name)}`)
-    if (!res.ok) throw new Error(`${name} not found`)
-    return await res.json()
+    if (!res.ok) return null
+    const data = await res.json()
+    return data
   }
 
-  const handleSubmit = async () => {
+  const handleClick = async () => {
     setError('')
     setResults([])
+    const base = await getPopularity(baseArtist)
+    if (!base) return setError('お題のアーティストが見つかりませんでした')
 
-    try {
-      const base = await fetchPopularity(baseArtist)
-      const others = await Promise.all(players.map(p => p ? fetchPopularity(p) : null))
+    setBaseName(base.name)
+    setBasePop(base.popularity)
 
-      const scored = others
-        .map((p) => {
-          if (!p) return null
-          return {
-            name: p.name,
-            popularity: p.popularity,
-            diff: Math.abs(p.popularity - base.popularity),
-          } as ArtistResult
+    const resultsList = []
+    for (const input of playerInputs) {
+      const data = await getPopularity(input)
+      if (data) {
+        resultsList.push({
+          name: data.name,
+          popularity: data.popularity,
+          diff: Math.abs(data.popularity - base.popularity)
         })
-        .filter((p): p is ArtistResult => p !== null)
-        .sort((a, b) => a.diff! - b.diff!)
-
-      setResults([
-        { name: base.name, popularity: base.popularity, isBase: true },
-        ...scored,
-      ])
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Unknown error')
+      }
     }
+    setResults(resultsList.sort((a, b) => a.diff - b.diff))
   }
 
   return (
-    <motion.main
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.8 }}
-      className="min-h-screen bg-gradient-to-br from-black via-neutral-900 to-black text-white flex flex-col items-center justify-start py-12 px-6 space-y-10 font-sans"
-    >
-      <h1 className="text-5xl font-extrabold text-[#1DB954] drop-shadow-[0_4px_6px_rgba(0,0,0,0.4)] tracking-wider">
-        🎵 Spotify 人気度バトル
-      </h1>
+    <main className="min-h-screen bg-black text-white p-8">
+      <div className="max-w-3xl mx-auto">
+        <h1 className="text-4xl font-bold text-[#1DB954] mb-8">Spotify 人気度バトル</h1>
 
-      <form
-        onSubmit={(e) => {
-          e.preventDefault()
-          handleSubmit()
-        }}
-        className="flex flex-col md:flex-row md:flex-wrap gap-4 w-full max-w-5xl justify-center items-center"
-      >
+        <label className="block mb-2 text-white">お題のアーティスト名を入力：</label>
         <input
-          className="p-3 rounded bg-white/10 backdrop-blur-md border border-white/20 text-white w-72 focus:outline-none focus:ring-2 focus:ring-[#1DB954] focus:ring-offset-2"
-          placeholder="🎯 お題のアーティスト名"
           value={baseArtist}
-          onChange={e => setBaseArtist(e.target.value)}
+          onChange={(e) => setBaseArtist(e.target.value)}
+          className="w-full p-3 mb-6 text-black rounded focus:outline-none"
         />
-        {players.map((p, i) => (
+
+        {baseName && (
+          <div className="mb-6">
+            <h2 className="text-xl font-semibold text-white">お題：{baseName}</h2>
+          </div>
+        )}
+
+        <h3 className="text-white mb-4 text-lg font-semibold">プレイヤーのアーティスト入力</h3>
+        {playerInputs.map((value, i) => (
           <input
             key={i}
-            className="p-3 rounded bg-white/10 backdrop-blur-md border border-white/20 text-white w-72 focus:outline-none focus:ring-2 focus:ring-[#1DB954] focus:ring-offset-2"
-            placeholder={`👤 プレイヤー${i + 1}`}
-            value={p}
-            onChange={e => {
-              const copy = [...players]
-              copy[i] = e.target.value
-              setPlayers(copy)
+            value={value}
+            onChange={(e) => {
+              const newInputs = [...playerInputs]
+              newInputs[i] = e.target.value
+              setPlayerInputs(newInputs)
             }}
+            className="w-full p-3 mb-4 text-black rounded focus:outline-none"
+            placeholder={`プレイヤー${i + 1} のアーティスト名`}
           />
         ))}
+
         <button
-          type="submit"
-          className="px-6 py-3 mt-2 md:mt-0 bg-[#1DB954] text-black text-lg font-semibold rounded-full hover:bg-green-400 transition transform hover:scale-105 shadow-md"
+          onClick={handleClick}
+          className="mt-2 px-6 py-3 bg-[#1DB954] text-black font-semibold rounded hover:bg-green-500 transition"
         >
-          🏁 勝負する！
+          結果を表示
         </button>
-      </form>
 
-      {error && <p className="text-red-400 font-semibold text-sm">⚠️ {error}</p>}
+        {error && <p className="text-red-500 mt-4">{error}</p>}
 
-      {results.length > 0 && (
-        <div className="mt-10 w-full max-w-3xl text-center">
-          <h2 className="text-2xl font-bold mb-4 text-white">📊 結果発表</h2>
-          <ul className="space-y-2">
-            {results.map((r, i) => (
-              <motion.li
-                key={i}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.1 }}
-                className={`p-4 rounded-lg flex justify-between items-center text-lg font-medium ${r.isBase
-                  ? 'bg-gradient-to-r from-neutral-700 via-neutral-800 to-black text-[#1DB954]'
-                  : 'bg-gradient-to-r from-neutral-800 via-black to-neutral-900 text-white'} shadow-lg`}
-              >
-                <span>{r.name}</span>
-                <span>{r.popularity}</span>
-              </motion.li>
-            ))}
-          </ul>
-          {results.length > 1 && (
-            <motion.p
-              className="mt-6 text-xl text-[#1DB954] font-extrabold animate-pulse"
-              initial={{ scale: 0.9 }}
-              animate={{ scale: 1 }}
-              transition={{ yoyo: Infinity, duration: 0.8 }}
-            >
-              🎉 優勝：{results[1].name}（popularity {results[1].popularity}）
-            </motion.p>
-          )}
-        </div>
-      )}
-    </motion.main>
+        {results.length > 0 && (
+          <div className="mt-10">
+            <h3 className="text-xl font-bold mb-4 text-white">🎉 結果</h3>
+            <ul className="space-y-2">
+              {results.map((r, i) => (
+                <li key={i} className="bg-gray-800 rounded px-4 py-2">
+                  <strong>{r.name}</strong>（{r.popularity}）- 差: {r.diff}
+                </li>
+              ))}
+            </ul>
+
+            <p className="mt-6 text-white">👑 優勝：<strong>{results[0].name}</strong>（{results[0].popularity}）</p>
+          </div>
+        )}
+      </div>
+    </main>
   )
 }
