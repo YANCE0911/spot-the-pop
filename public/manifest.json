@@ -1,0 +1,21 @@
+{
+    "name": "Spotify 人気度バトル",
+    "short_name": "人気度バトル",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#000000",
+    "theme_color": "#1DB954",
+    "icons": [
+      {
+        "src": "/icon-192x192.png",
+        "type": "image/png",
+        "sizes": "192x192"
+      },
+      {
+        "src": "/icon-512x512.png",
+        "type": "image/png",
+        "sizes": "512x512"
+      }
+    ]
+  }
+  
