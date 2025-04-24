@@ -1,10 +1,16 @@
 "use client"
 import { useState } from "react"
 
+type PlayerResult = {
+  name: string
+  popularity: number
+  diff: number
+}
+
 export default function Home() {
   const [base, setBase] = useState("")
   const [players, setPlayers] = useState(["", "", ""])
-  const [result, setResult] = useState<any[] | null>(null)
+  const [result, setResult] = useState<PlayerResult[] | null>(null)
   const [basePop, setBasePop] = useState<number | null>(null)
 
   const handleSubmit = async () => {
@@ -28,7 +34,7 @@ export default function Home() {
       }
     }))
 
-    const filtered = results.filter(Boolean) as any[]
+    const filtered = results.filter(Boolean) as PlayerResult[]
     filtered.sort((a, b) => a.diff - b.diff)
     setResult(filtered)
   }
