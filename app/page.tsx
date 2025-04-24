@@ -11,6 +11,7 @@ type ArtistResult = {
 type FetchedArtist = {
   name: string
   popularity: number
+  error?: string
 }
 
 export default function Home() {
@@ -32,7 +33,7 @@ export default function Home() {
       const baseRes = await fetch(`/api/popularity?artist=${encodeURIComponent(baseArtist)}`)
       const baseData: FetchedArtist = await baseRes.json()
 
-      if (!baseRes.ok) throw new Error((baseData as any).error)
+      if (!baseRes.ok || !('popularity' in baseData)) throw new Error(baseData.error || 'アーティスト取得に失敗しました')
 
       const basePop = baseData.popularity
       const baseName = baseData.name
@@ -42,7 +43,7 @@ export default function Home() {
         if (!name.trim()) continue
         const res = await fetch(`/api/popularity?artist=${encodeURIComponent(name)}`)
         const data: FetchedArtist = await res.json()
-        if (!res.ok) continue
+        if (!res.ok || !('popularity' in data)) continue
         results.push({
           name: data.name,
           popularity: data.popularity,
