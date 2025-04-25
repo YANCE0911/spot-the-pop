@@ -111,7 +111,7 @@ export default function Home() {
             disabled={loading}
             className="w-full bg-green-500 text-black py-3 rounded-lg font-semibold hover:bg-green-400 transition-all duration-300"
           >
-            {loading ? '検索中...' : '人気度バトル！'}
+            {loading ? '検索中...' : '結果を見る'}
           </button>
         </form>
 
