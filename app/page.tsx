@@ -101,12 +101,10 @@ export default function Home() {
 
         <div className="bg-zinc-800 text-zinc-300 p-5 rounded-lg text-left space-y-2 text-sm">
           <p className="text-base text-white font-medium">
-            本ゲームでは、Spotifyが独自に算出する「人気度（0〜100）」をもとに、<br />
-            お題となるアーティストに人気度が最も近いアーティストを予想します。
+            本ゲームでは、Spotifyが独自に算出する「人気度（0〜100）」をもとに、お題となるアーティストに人気度が最も近いアーティストを予想します。
           </p>
           <p className="text-sm text-zinc-400">
-            ※ 人気度は、直近約1ヶ月の再生回数・リスナー数・成長速度などを総合的に<br />
-            反映した内部指標であり、スコアは日々変動します。
+            ※ 人気度は直近1ヶ月の再生回数・リスナー数などを総合的に反映した内部指標であり、スコアは日々変動します。
           </p>
         </div>
       </header>
