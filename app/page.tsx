@@ -71,10 +71,11 @@ export default function Home() {
     <main className="min-h-screen bg-black text-white px-6 py-14 font-sans">
       <div className="max-w-3xl mx-auto space-y-12">
         <header className="text-center mb-12">
-          <h1 className="text-green-500 text-5xl font-extrabold tracking-tight mb-6">Spotify 人気度バトル</h1>
+          <h1 className="text-green-500 text-5xl font-extrabold tracking-tight mb-10">Spotify 人気度バトル</h1>
           <div className="bg-zinc-800 text-white p-5 rounded-lg shadow-lg max-w-xl mx-auto">
             <p className="text-base leading-relaxed">
-              <span className="text-green-400 font-medium">人気度（popularity）</span>はSpotifyの内部指標です。再生回数・リスナー数・成長速度などから算出され、<span className="text-green-400 font-medium">0〜100の数値</span>で表されます。
+              <span className="text-green-400 font-medium">人気度（popularity）</span>はSpotifyの内部指標です。<br />
+              再生回数・リスナー数・成長速度などから算出され、<span className="text-green-400 font-medium">0〜100の数値</span>で表されます。
             </p>
           </div>
         </header>
