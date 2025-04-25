@@ -71,18 +71,11 @@ export default function Home() {
     <main className="min-h-screen bg-black text-white px-6 py-14 font-sans">
       <div className="max-w-3xl mx-auto space-y-12">
         <header className="text-center mb-12">
-          {/* Spotify風のロゴとタイトル */}
-          <div className="flex flex-col items-center justify-center mb-6">
-            <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mb-4">
-              <svg className="w-10 h-10" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2Z" fill="black"/>
-                <path d="M16.7999 17.2C16.7999 17.3 16.6999 17.4 16.5999 17.4C14.2999 18.7 11.4999 18.9 8.99992 18.1C8.79992 18.1 8.69992 17.9 8.69992 17.8C8.69992 17.7 8.79992 17.5 8.99992 17.5C11.2999 18.2 13.8999 18 15.9999 16.8C16.0999 16.7 16.2999 16.8 16.2999 16.9C16.7999 17 16.7999 17.1 16.7999 17.2ZM17.7999 14.7C17.7999 14.8 17.6999 14.9 17.5999 15C14.7999 16.5 10.9999 16.8 8.09992 15.8C7.89992 15.7 7.79992 15.6 7.79992 15.4C7.79992 15.2 7.99992 15.1 8.09992 15C11.0999 16 14.6999 15.7 17.2999 14.3C17.4999 14.2 17.6999 14.3 17.6999 14.5C17.7999 14.5 17.7999 14.6 17.7999 14.7ZM17.9999 12.1C17.9999 12.3 17.8999 12.4 17.6999 12.5C14.4999 14.2 9.79992 14.4 7.09992 13.2C6.89992 13.1 6.69992 12.9 6.69992 12.7C6.69992 12.5 6.89992 12.3 7.09992 12.2C9.99992 13.4 14.8999 13.2 18.2999 11.4C18.4999 11.3 18.6999 11.4 18.6999 11.6C18.9999 11.8 18.9999 11.9 17.9999 12.1Z" fill="currentColor"/>
-              </svg>
-            </div>
-            <h1 className="text-green-500 text-5xl font-extrabold tracking-tight">Spotify 人気度バトル</h1>
-          </div>
-          <div className="bg-zinc-800 text-zinc-300 text-sm rounded-md p-4 text-left max-w-xl mx-auto">
-            人気度（popularity）はSpotifyの内部指標で、主に再生回数・リスナー数・成長速度などから算出されるスコア（0〜100）です。
+          <h1 className="text-green-500 text-5xl font-extrabold tracking-tight mb-6">Spotify 人気度バトル</h1>
+          <div className="bg-zinc-800 text-white p-5 rounded-lg shadow-lg max-w-xl mx-auto">
+            <p className="text-base leading-relaxed">
+              <span className="text-green-400 font-medium">人気度（popularity）</span>はSpotifyの内部指標です。再生回数・リスナー数・成長速度などから算出され、<span className="text-green-400 font-medium">0〜100の数値</span>で表されます。
+            </p>
           </div>
         </header>
 
@@ -194,10 +187,6 @@ export default function Home() {
             )}
           </section>
         )}
-        
-        <footer className="text-center text-xs text-zinc-600 mt-10">
-          <p>DIGLE MAGAZINE</p>
-        </footer>
       </div>
     </main>
   )
