@@ -94,14 +94,14 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-black text-white px-6 py-14 font-sans">
       <div className="max-w-3xl mx-auto space-y-12">
-      <header className="text-center mb-12">
+      <header className="text-left mb-12">
         <h1 className={`${colors.green.primary} text-5xl font-extrabold tracking-tight mb-10`}>
           Spotify 人気度バトル
         </h1>
 
         <div className={`${colors.zinc.bg.medium} ${colors.zinc.text.light} p-5 rounded-lg shadow-lg max-w-xl mx-auto text-sm leading-relaxed`}>
           <p className="mb-3">
-            本ゲームでは、Spotifyの <span className={`${colors.green.secondary} font-medium`}>人気度（公式算出）</span> を使い、
+            本ゲームでは、Spotifyの <span className={`${colors.green.secondary} font-medium`}>人気度</span>（公式算出）を使い、
             <br className="sm:hidden" />
             お題アーティストの人気度に最も近いアーティストを予想したプレイヤーが勝者となります。
           </p>
