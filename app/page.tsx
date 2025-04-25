@@ -96,12 +96,12 @@ export default function Home() {
       <div className="max-w-3xl mx-auto space-y-12">
       <header className="mb-12">
         <h1 className={`${colors.green.primary} text-5xl font-extrabold tracking-tight mb-10 text-center`}>
-          Spotify 人気度バトル
+          SPOT THE POP
         </h1>
 
         <div className="bg-zinc-800 text-zinc-300 p-5 rounded-lg text-left space-y-2 text-sm leading-relaxed">
           <p className="text-white text-base font-medium">
-            本ゲームでは、Spotifyが独自に算出する<span className={`${colors.green.secondary} font-medium`}>「人気度（0〜100）」</span>をもとに、お題となるアーティストに人気度が最も近いアーティストを予想します。
+            Spotifyが独自に算出する<span className={`${colors.green.secondary} font-medium`}>「人気度（0〜100）」</span>をもとに、お題となるアーティストに人気度が最も近いアーティストを予想するゲームです。
           </p>
           <p className="text-zinc-400 text-sm">
             ※ 人気度は直近1ヶ月の再生回数・リスナー数などを総合的に反映した内部指標であり、スコアは日々変動します。
