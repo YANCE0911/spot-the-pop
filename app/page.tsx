@@ -94,19 +94,25 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-black text-white px-6 py-14 font-sans">
       <div className="max-w-3xl mx-auto space-y-12">
-        <header className="text-center mb-12">
-          <h1 className={`${colors.green.primary} text-5xl font-extrabold tracking-tight mb-6`}>Spotify 人気度バトル</h1>
+      <header className="text-center mb-12">
+        <h1 className={`${colors.green.primary} text-5xl font-extrabold tracking-tight mb-10`}>
+          Spotify 人気度バトル
+        </h1>
 
-          <p className="text-base text-white max-w-xl mx-auto mb-4">
-            Spotifyの「人気度（公式算出）」を使い、お題アーティストの人気度に最も近いアーティストを予想したプレイヤーが勝者となります。
+        <div className={`${colors.zinc.bg.medium} ${colors.zinc.text.light} p-5 rounded-lg shadow-lg max-w-xl mx-auto text-sm leading-relaxed`}>
+          <p className="mb-3">
+            本ゲームでは、Spotifyの <span className={`${colors.green.secondary} font-medium`}>人気度（公式算出）</span> を使い、
+            <br className="sm:hidden" />
+            お題アーティストの人気度に最も近いアーティストを予想したプレイヤーが勝者となります。
           </p>
+          <p>
+            <span className={`${colors.green.secondary} font-medium`}>人気度</span> はSpotifyの内部指標であり、
+            再生回数・リスナー数・成長速度などから算出され、
+            <span className={`${colors.green.secondary} font-medium`}>0〜100の数値</span> で表されます。
+          </p>
+        </div>
+      </header>
 
-          <div className={`${colors.zinc.bg.medium} ${colors.zinc.text.light} p-5 rounded-lg shadow-lg max-w-xl mx-auto`}>
-            <p className="text-sm leading-relaxed">
-              <span className={`${colors.green.secondary} font-medium`}>人気度</span>はSpotifyの内部指標です。再生回数・リスナー数・成長速度などから算出され、<span className={`${colors.green.secondary} font-medium`}>0〜100の数値</span>で表されます。
-            </p>
-          </div>
-        </header>
 
         <form onSubmit={handleResult} className={`space-y-8 ${colors.zinc.bg.dark} p-6 rounded-xl shadow-lg ring-1 ring-${colors.zinc.border}`}>
           <div>
