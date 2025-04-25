@@ -99,20 +99,17 @@ export default function Home() {
           Spotify 人気度バトル
         </h1>
 
-        <div className={`${colors.zinc.bg.medium} ${colors.zinc.text.light} p-6 rounded-lg shadow-lg max-w-2xl mx-auto space-y-4 text-left`}>
-          <p className="text-base leading-relaxed">
-            本ゲームはSpotifyの
-            <span className={`${colors.green.secondary} font-medium`}>「人気度（公式指標）」</span>
-            を用いて、お題アーティストに最も近い人気度のアーティストを予想するゲームです。
+        <div className="bg-zinc-800 text-zinc-300 p-5 rounded-lg text-left space-y-2 text-sm">
+          <p className="text-base text-white font-medium">
+            本ゲームでは、Spotifyが独自に算出する「人気度（0〜100）」をもとに、<br />
+            お題となるアーティストに人気度が最も近いアーティストを予想します。
           </p>
-          <p className="text-sm leading-relaxed text-zinc-300">
-            人気度は再生回数・リスナー数・成長速度などから算出された
-            <span className={`${colors.green.secondary} font-medium`}> 0〜100の内部スコア</span>
-            に基づきます。
+          <p className="text-sm text-zinc-400">
+            ※ 人気度は、直近約1ヶ月の再生回数・リスナー数・成長速度などを総合的に<br />
+            反映した内部指標であり、スコアは日々変動します。
           </p>
         </div>
       </header>
-
 
 
         <form onSubmit={handleResult} className={`space-y-8 ${colors.zinc.bg.dark} p-6 rounded-xl shadow-lg ring-1 ring-${colors.zinc.border}`}>
