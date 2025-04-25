@@ -70,11 +70,11 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-black text-white px-6 py-14 font-sans">
       <div className="max-w-3xl mx-auto space-y-12">
-        <header className="text-center">
-          <h1 className="text-green-500 text-5xl font-extrabold tracking-tight">Spotify 人気度バトル</h1>
-          <p className="text-zinc-400 mt-2 text-sm max-w-xl mx-auto">
-            Spotifyの人気度（popularity）は、再生回数やシェア数、プレイリスト追加数などをもとに0〜100で算出されるスコアです。最近の活動が重視されます。
-          </p>
+        <header className="text-center mb-12">
+          <h1 className="text-green-500 text-5xl font-extrabold tracking-tight mb-6">Spotify 人気度バトル</h1>
+          <div className="bg-zinc-800 text-zinc-300 text-sm rounded-md p-4 text-left max-w-xl mx-auto">
+            人気度（popularity）はSpotifyの内部指標で、主に再生回数・リスナー数・成長速度などから算出されるスコア（0〜100）です。
+          </div>
         </header>
 
         <form onSubmit={handleResult} className="space-y-8 bg-zinc-900 p-6 rounded-xl shadow-lg ring-1 ring-zinc-800">
