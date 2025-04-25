@@ -72,7 +72,9 @@ export default function Home() {
       <div className="max-w-3xl mx-auto space-y-12">
         <header className="text-center">
           <h1 className="text-green-500 text-5xl font-extrabold tracking-tight">Spotify 人気度バトル</h1>
-          <p className="text-zinc-400 mt-2">推しの人気度、競ってみよう</p>
+          <p className="text-zinc-400 mt-2 text-sm max-w-xl mx-auto">
+            Spotifyの人気度（popularity）は、再生回数やシェア数、プレイリスト追加数などをもとに0〜100で算出されるスコアです。最近の活動が重視されます。
+          </p>
         </header>
 
         <form onSubmit={handleResult} className="space-y-8 bg-zinc-900 p-6 rounded-xl shadow-lg ring-1 ring-zinc-800">
