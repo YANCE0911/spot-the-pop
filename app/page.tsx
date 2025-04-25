@@ -17,7 +17,7 @@ type FetchedArtist = {
 
 export default function Home() {
   const [baseArtist, setBaseArtist] = useState('')
-  const [players, setPlayers] = useState<string[]>(['', '', '', '', ''])
+  const [players, setPlayers] = useState<string[]>(['', '', '', ''])
   const [result, setResult] = useState<{
     baseName: string
     basePop: number
@@ -101,7 +101,7 @@ export default function Home() {
 
         <div className="bg-zinc-800 text-zinc-300 p-5 rounded-lg text-left space-y-2 text-sm leading-relaxed">
           <p className="text-white text-base font-medium">
-            本ゲームでは、Spotifyが独自に算出する「人気度（0〜100）」をもとに、お題となるアーティストに人気度が最も近いアーティストを予想します。
+            本ゲームでは、Spotifyが独自に算出する<span className={`${colors.green.secondary} font-medium`}>「人気度（0〜100）」</span>をもとに、お題となるアーティストに人気度が最も近いアーティストを予想します。
           </p>
           <p className="text-zinc-400 text-sm">
             ※ 人気度は直近1ヶ月の再生回数・リスナー数などを総合的に反映した内部指標であり、スコアは日々変動します。
