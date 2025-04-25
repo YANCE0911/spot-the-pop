@@ -98,7 +98,7 @@ export default function Home() {
           <h1 className={`${colors.green.primary} text-5xl font-extrabold tracking-tight mb-10`}>Spotify 人気度バトル</h1>
           <div className={`${colors.zinc.bg.medium} ${colors.zinc.text.light} p-5 rounded-lg shadow-lg max-w-xl mx-auto`}>
             <p className="text-base leading-relaxed">
-              <span className={`${colors.green.secondary} font-medium`}>人気度（popularity）</span>はSpotifyの内部指標です。再生回数・リスナー数・成長速度などから算出され、<span className={`${colors.green.secondary} font-medium`}>0〜100の数値</span>で表されます。
+              <span className={`${colors.green.secondary} font-medium`}>人気度</span>はSpotifyの内部指標です。再生回数・リスナー数・成長速度などから算出され、<span className={`${colors.green.secondary} font-medium`}>0〜100の数値</span>で表されます。
             </p>
           </div>
         </header>
