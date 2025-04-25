@@ -99,14 +99,16 @@ export default function Home() {
           Spotify 人気度バトル
         </h1>
 
-        <div className={`${colors.zinc.bg.medium} ${colors.zinc.text.light} p-5 rounded-lg shadow-lg max-w-xl mx-auto`}>
-          <p className="text-base sm:text-lg font-medium mb-3 leading-relaxed">
-            本ゲームでは、Spotifyの <span className={`${colors.green.secondary} font-medium`}>人気度（公式算出）</span> を使い、<br className="sm:hidden" />
+        <div className={`${colors.zinc.bg.medium} ${colors.zinc.text.light} p-5 rounded-lg shadow-lg max-w-xl mx-auto text-sm leading-relaxed`}>
+          <p className="mb-3">
+            本ゲームでは、Spotifyの <span className={`${colors.green.secondary} font-medium`}>人気度（公式算出）</span> を使い、
+            <br className="sm:hidden" />
             お題アーティストの人気度に最も近いアーティストを予想したプレイヤーが勝者となります。
           </p>
-          <p className="text-sm leading-snug text-zinc-300">
-            <span className={`${colors.green.secondary} font-medium`}>人気度</span> はSpotifyの内部指標であり、再生回数・リスナー数・成長速度などから算出され、
-            <span className={`${colors.green.secondary} font-medium`}> 0〜100の数値</span> で表されます。
+          <p>
+            <span className={`${colors.green.secondary} font-medium`}>人気度</span> はSpotifyの内部指標であり、
+            再生回数・リスナー数・成長速度などから算出され、
+            <span className={`${colors.green.secondary} font-medium`}>0〜100の数値</span> で表されます。
           </p>
         </div>
       </header>
