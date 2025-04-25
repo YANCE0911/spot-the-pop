@@ -94,13 +94,13 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-black text-white px-6 py-14 font-sans">
       <div className="max-w-3xl mx-auto space-y-12">
-      <header className="text-center mb-12">
-        <h1 className={`${colors.green.primary} text-5xl font-extrabold tracking-tight mb-10`}>
+      <header className="mb-12">
+        <h1 className={`${colors.green.primary} text-5xl font-extrabold tracking-tight mb-10 text-center`}>
           Spotify 人気度バトル
         </h1>
 
-        <div className={`${colors.zinc.bg.medium} ${colors.zinc.text.light} p-6 rounded-lg shadow-lg max-w-2xl mx-auto space-y-4`}>
-          <p className="text-lg leading-relaxed">
+        <div className={`${colors.zinc.bg.medium} ${colors.zinc.text.light} p-6 rounded-lg shadow-lg max-w-2xl mx-auto space-y-4 text-left`}>
+          <p className="text-base leading-relaxed">
             本ゲームはSpotifyの
             <span className={`${colors.green.secondary} font-medium`}>「人気度（公式指標）」</span>
             を用いて、お題アーティストに最も近い人気度のアーティストを予想するゲームです。
@@ -112,6 +112,7 @@ export default function Home() {
           </p>
         </div>
       </header>
+
 
 
         <form onSubmit={handleResult} className={`space-y-8 ${colors.zinc.bg.dark} p-6 rounded-xl shadow-lg ring-1 ring-${colors.zinc.border}`}>
