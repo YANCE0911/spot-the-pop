@@ -6,7 +6,13 @@ import { getTopRankings } from '@/lib/ranking'
 
 export default function Home() {
   const router = useRouter()
-  const [rankings, setRankings] = useState<any[]>([])
+  type Ranking = {
+    name: string
+    score: number
+  }
+  
+  const [ranking, setRanking] = useState<Ranking[]>([])
+  
 
   const colors = {
     green: {
@@ -73,7 +79,7 @@ export default function Home() {
             チャレンジ開始
           </button>
         </div>
-        
+
         <section className={`${colors.zinc.bg.medium} p-6 rounded-lg shadow-lg`}>
           <h2 className="text-2xl font-bold text-green-500 mb-4 text-center">🏆 ランキング TOP10</h2>
           {rankings.length > 0 ? (
