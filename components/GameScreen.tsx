@@ -2,16 +2,29 @@
 
 import { useState } from 'react'
 
+type Artist = {
+  id: string
+  name: string
+  popularity: number
+}
+
+type Props = {
+  currentRound: number
+  totalRounds: number
+  themeArtist: Artist
+  onSubmitAnswer: (artistName: string) => Promise<void>
+}
+
 export default function GameScreen({ 
   currentRound, 
   totalRounds, 
   themeArtist, 
   onSubmitAnswer 
-}) {
+}: Props) {
   const [answer, setAnswer] = useState('')
   const [loading, setLoading] = useState(false)
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     if (!answer.trim()) return
     
@@ -21,7 +34,6 @@ export default function GameScreen({
     setLoading(false)
   }
 
-  // スタイル定義
   const colors = {
     green: {
       primary: "text-green-500",
@@ -41,11 +53,12 @@ export default function GameScreen({
     }
   }
 
-  // themeArtist が存在するかチェック
   if (!themeArtist) {
-    return <div className="min-h-screen bg-black text-white flex items-center justify-center">
-      <div className="animate-spin h-10 w-10 border-4 border-green-500 rounded-full border-t-transparent"></div>
-    </div>
+    return (
+      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+        <div className="animate-spin h-10 w-10 border-4 border-green-500 rounded-full border-t-transparent"></div>
+      </div>
+    )
   }
 
   return (

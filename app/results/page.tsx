@@ -4,14 +4,25 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { saveRanking } from '@/lib/ranking'
 
+// 👇 ここ追加！
+type ResultItem = {
+  theme: string
+  themePopularity: number
+  answer: string
+  answerPopularity: number
+  diff: number
+}
+
 export default function Results() {
   const router = useRouter()
   const [score, setScore] = useState(0)
-  const [results, setResults] = useState([])
+
+  // 👇 ここ型指定追加！
+  const [results, setResults] = useState<ResultItem[]>([])
+
   const [loading, setLoading] = useState(true)
   const [playerName, setPlayerName] = useState('')
   const [submitted, setSubmitted] = useState(false)
-
   useEffect(() => {
     if (typeof window !== 'undefined') {
       try {

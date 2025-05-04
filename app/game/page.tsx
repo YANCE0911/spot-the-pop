@@ -10,13 +10,21 @@ type Artist = {
   popularity: number
 }
 
+type Result = {
+  theme: string
+  themePopularity: number
+  answer: string
+  answerPopularity: number
+  diff: number
+}
+
 export default function Game() {
   const router = useRouter()
-  const [currentRound, setCurrentRound] = useState(1)
+  const [currentRound, setCurrentRound] = useState<number>(1)
   const [questions, setQuestions] = useState<Artist[]>([])
-  const [loading, setLoading] = useState(true)
-  const [results, setResults] = useState<any[]>([])
-  const [totalScore, setTotalScore] = useState(0)
+  const [loading, setLoading] = useState<boolean>(true)
+  const [results, setResults] = useState<Result[]>([])
+  const [totalScore, setTotalScore] = useState<number>(0)
 
   useEffect(() => {
     const fetchRandomArtists = async () => {
@@ -59,8 +67,8 @@ export default function Game() {
         return
       }
 
-      const answerId = data.id
-      const answerPopularity = data.popularity
+      const answerId: string = data.id
+      const answerPopularity: number = data.popularity
 
       if (answerId === themeArtist.id) {
         alert('お題と同じアーティストは回答できません！')
@@ -69,7 +77,7 @@ export default function Game() {
 
       const diff = Math.abs(answerPopularity - themeArtist.popularity)
 
-      const newResult = {
+      const newResult: Result = {
         theme: themeArtist.name,
         themePopularity: themeArtist.popularity,
         answer: artistName,
