@@ -13,7 +13,7 @@ for (const a of LARGE_JAPANESE_ARTISTS) {
     popularity: a.popularity,
     followers: a.followers,
     genres: a.genres ? [...a.genres] : [],
-    imageUrl: a.imageUrl,
+    imageUrl: (a as unknown as { imageUrl?: string }).imageUrl,
     nameJa: (a as unknown as { nameJa?: string }).nameJa,
   }
   artistPoolById.set(a.id, artist)
