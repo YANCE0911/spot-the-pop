@@ -12,16 +12,14 @@ type Props = {
   lang?: 'en' | 'ja'
 }
 
-// Per-question score is 0–20
-function scoreToBlock(diff: number): string {
-  if (diff >= 17) return '🟩'
-  if (diff >= 12) return '🟨'
-  if (diff >= 6) return '🟧'
-  return '🟥'
+// Per-question score is 0–20, shown as bar ▓▓▓▓░░░░░░
+function scoreToBar(diff: number): string {
+  const filled = Math.round((diff / 20) * 10)
+  return '▓'.repeat(filled) + '░'.repeat(10 - filled)
 }
 
 function generateScorePattern(results: GameResult[]): string {
-  return results.map(r => scoreToBlock(r.diff)).join('')
+  return results.map((r, i) => `${i + 1} ${scoreToBar(r.diff)}`).join('\n')
 }
 
 // Total score out of 100
@@ -86,7 +84,7 @@ export default function ShareButton({ score, results = [], challengeUrl, lang = 
             {grade.label}
           </span>
 
-          <p className="text-lg tracking-[0.15em]">{pattern}</p>
+          <pre className="text-xs font-mono text-zinc-400 whitespace-pre text-left inline-block">{pattern}</pre>
         </div>
       )}
 

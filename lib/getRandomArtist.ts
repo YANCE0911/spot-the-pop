@@ -18,13 +18,30 @@ function isJapaneseArtist(a: { nameJa?: string; genres?: readonly string[] }): b
 }
 
 const MIN_FOLLOWERS = 100_000
-// TODO: 難易度モード実装時に分ける
-// Normal: 100_000+ / Hard: 30_000+ (全体)
 
-// Soft-delete: international artists are kept in the list but excluded from questions
-// TODO: re-enable when international mode is implemented
+// Exclude VTubers, proseka units, game characters, soundtrack composers
+const EXCLUDED_IDS = new Set([
+  '726WiFmWkohzodUxK3XjHX', // Hoshimachi Suisei
+  '1VMXuPyhNldYomz8ojLKP7', // 25時、ナイトコードで。
+  '6mEgpqXA4yzhhncW4cBHlh', // Vivid BAD SQUAD
+  '1PhE6rv0146ZTQosoPDjk8', // Mori Calliope
+  '5XaBNKQo65yYcjNA8wQPOk', // 宝鐘マリン
+  '2GR0oaCTOgws9PfuheMw0k', // 白上フブキ
+  '68609MOnEU86kVyMf26JnM', // 角巻わため
+  '2YLI1Exc3ujaC7w7oWAqqy', // 沙花叉クロヱ
+  '3sTxby2WaF9fXznsLp42IS', // 鷹嶺ルイ
+  '6wzg6ZJ9dBUoOuk0hs2Ert', // 博衣こより
+  '43FPwU0RdUqvTa3VaOAHnF', // 風真いろは
+  '7C0PO4A4azl0xFMrE1EVDp', // 桐生一馬(黒田崇矢)
+  '0YC192cP3KPCRWx8zr8MfZ', // Hans Zimmer
+])
+
 const japaneseArtists = (LARGE_JAPANESE_ARTISTS as unknown as Artist[])
-  .filter(a => isJapaneseArtist(a as { nameJa?: string; genres?: readonly string[] }) && (a.followers ?? 0) >= MIN_FOLLOWERS)
+  .filter(a =>
+    isJapaneseArtist(a as { nameJa?: string; genres?: readonly string[] })
+    && (a.followers ?? 0) >= MIN_FOLLOWERS
+    && !EXCLUDED_IDS.has(a.id)
+  )
 
 export async function getRandomArtist(
   count = 5,

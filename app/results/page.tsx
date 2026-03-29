@@ -77,6 +77,8 @@ export default function Results() {
 
         <ScoreRank score={displayScore} lang={lang} />
 
+        <ShareButton score={score} mode="Classic" metric={metric} results={results} challengeUrl={challengeUrl} lang={lang} />
+
         {!submitted ? (
           <div className="bg-zinc-900 p-4 rounded-xl space-y-3 animate-[fadeInUp_0.5s_ease-out]">
             <h2 className="text-brand font-bold">{t('registerRanking', lang)}</h2>
@@ -90,10 +92,7 @@ export default function Results() {
             </button>
           </div>
         ) : (
-          <div className="space-y-3">
-            <p className="text-brand text-center font-semibold">{t('registered', lang)}</p>
-            <ShareButton score={score} mode="Classic" metric={metric} results={results} challengeUrl={challengeUrl} lang={lang} />
-          </div>
+          <p className="text-brand text-center font-semibold">{t('registered', lang)}</p>
         )}
 
         {/* Round results */}
