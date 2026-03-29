@@ -54,7 +54,7 @@ function GameContent() {
 
     const themeVal = themeArtist.followers ?? 0
     const answerVal = answerArtist.followers ?? 0
-    const diff = calculateScore(themeVal, answerVal, metric)
+    const diff = calculateScore(themeVal, answerVal)
 
     const result: GameResult = { theme: themeArtist.name, themeArtist, answer: answerArtist.name, answerArtist, diff, metric }
     const newResults = [...results, result]

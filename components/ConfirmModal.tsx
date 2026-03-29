@@ -1,7 +1,6 @@
 'use client'
 
 import type { Artist } from '@/types'
-import { formatMetricValue } from '@/lib/metrics'
 
 type Props = {
   artist: Artist | null

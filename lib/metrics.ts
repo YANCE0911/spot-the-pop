@@ -45,7 +45,7 @@ export function formatMetricValue(value: number, metric: MetricMode): string {
  * Log-ratio: score = max(0, 20 - K * |log10(theme) - log10(answer)|)
  * Same = 20, 2x diff ≈ 17, 10x = 10, 100x diff = 0
  */
-export function calculateScore(themeValue: number, answerValue: number, _metric: MetricMode): number {
+export function calculateScore(themeValue: number, answerValue: number): number {
   const safeTheme = Math.max(1, themeValue)
   const safeAnswer = Math.max(1, answerValue)
   const logDiff = Math.abs(Math.log10(safeTheme) - Math.log10(safeAnswer))

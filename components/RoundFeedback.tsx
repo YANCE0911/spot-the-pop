@@ -11,7 +11,7 @@ type Props = {
 }
 
 // Score per question is 0–20. Simple words everyone knows:
-function getGrade(score: number, _lang: string): { label: string; color: string; emoji: string } {
+function getGrade(score: number): { label: string; color: string; emoji: string } {
   if (score >= 19.5) return { label: 'PERFECT', color: 'text-yellow-400', emoji: '!!!' }
   if (score >= 17) return { label: 'SUPER', color: 'text-green-400', emoji: '!!' }
   if (score >= 14) return { label: 'GOOD', color: 'text-brand', emoji: '!' }
@@ -24,7 +24,7 @@ function getGrade(score: number, _lang: string): { label: string; color: string;
 export default function RoundFeedback({ result, onDismiss, lang = 'en' }: Props) {
   if (!result) return null
 
-  const grade = getGrade(result.diff, lang)
+  const grade = getGrade(result.diff)
   const themeVal = result.metric === 'followers'
     ? (result.themeArtist.followers ?? 0) : result.themeArtist.popularity
   const answerVal = result.metric === 'followers'

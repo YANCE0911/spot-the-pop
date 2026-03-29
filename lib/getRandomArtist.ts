@@ -24,7 +24,7 @@ const MIN_FOLLOWERS = 100_000
 // Soft-delete: international artists are kept in the list but excluded from questions
 // TODO: re-enable when international mode is implemented
 const japaneseArtists = (LARGE_JAPANESE_ARTISTS as unknown as Artist[])
-  .filter(a => isJapaneseArtist(a as any) && (a.followers ?? 0) >= MIN_FOLLOWERS)
+  .filter(a => isJapaneseArtist(a as { nameJa?: string; genres?: readonly string[] }) && (a.followers ?? 0) >= MIN_FOLLOWERS)
 
 export async function getRandomArtist(
   count = 5,
