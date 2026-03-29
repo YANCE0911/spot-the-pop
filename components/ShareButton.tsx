@@ -12,16 +12,6 @@ type Props = {
   lang?: 'en' | 'ja'
 }
 
-// Per-question score is 0–20, shown as bar ▓▓▓▓░░░░░░
-function scoreToBar(diff: number): string {
-  const filled = Math.round((diff / 20) * 10)
-  return '▓'.repeat(filled) + '░'.repeat(10 - filled)
-}
-
-function generateScorePattern(results: GameResult[]): string {
-  return results.map((r, i) => `${i + 1} ${scoreToBar(r.diff)}`).join('\n')
-}
-
 // Total score out of 100
 function getScoreGrade(total: number): { label: string; color: string } {
   if (total >= 95) return { label: 'S', color: 'text-brand' }
@@ -35,28 +25,19 @@ export default function ShareButton({ score, results = [], challengeUrl, lang = 
   const [copied, setCopied] = useState(false)
 
   const displayScore = Math.round(score * 100) / 100
-  const pattern = results.length > 0 ? generateScorePattern(results) : ''
   const grade = getScoreGrade(displayScore)
+
+  const shareUrl = challengeUrl
+    ? `${typeof window !== 'undefined' ? window.location.origin : ''}${challengeUrl}`
+    : `${typeof window !== 'undefined' ? window.location.origin : ''}/share?score=${displayScore.toFixed(2)}`
 
   const shareText = [
     'SPOT THE POP',
     `Score: ${displayScore.toFixed(2)}/100 (${grade.label})`,
-    pattern,
-    '',
-  ].filter(Boolean).join('\n')
+  ].join('\n')
 
-  const handleShare = async () => {
-    const url = challengeUrl ? `${window.location.origin}${challengeUrl}` : window.location.origin
-    const text = `${shareText}\n${url}`
-
-    if (navigator.share) {
-      try {
-        await navigator.share({ title: 'SPOT THE POP', text, url })
-        return
-      } catch { /* cancelled */ }
-    }
-
-    await navigator.clipboard.writeText(text)
+  const handleCopy = async () => {
+    await navigator.clipboard.writeText(`${shareText}\n${shareUrl}`)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }
@@ -83,17 +64,33 @@ export default function ShareButton({ score, results = [], challengeUrl, lang = 
           <span className={`inline-block text-2xl font-black ${grade.color}`}>
             {grade.label}
           </span>
-
-          <pre className="text-xs font-mono text-zinc-400 whitespace-pre text-left inline-block">{pattern}</pre>
         </div>
       )}
 
-      <button
-        onClick={handleShare}
-        className="w-full bg-brand text-black py-3 px-6 rounded-xl font-bold hover:bg-brand-light transition-all active:scale-[0.98]"
-      >
-        {lang === 'ja' ? 'Share' : 'Share Result'}
-      </button>
+      <div className="flex gap-2">
+        <a
+          href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex-1 bg-black border border-zinc-700 text-white py-3 px-4 rounded-xl font-bold hover:bg-zinc-900 transition-all active:scale-[0.98] text-center"
+        >
+          X
+        </a>
+        <a
+          href={`https://line.me/R/msg/text/?${encodeURIComponent(`${shareText}\n${shareUrl}`)}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex-1 bg-[#06C755] text-white py-3 px-4 rounded-xl font-bold hover:bg-[#05b34c] transition-all active:scale-[0.98] text-center"
+        >
+          LINE
+        </a>
+        <button
+          onClick={handleCopy}
+          className="flex-1 bg-brand text-black py-3 px-4 rounded-xl font-bold hover:bg-brand-light transition-all active:scale-[0.98]"
+        >
+          {copied ? 'Copied!' : 'Copy'}
+        </button>
+      </div>
 
       {challengeUrl && (
         <button
@@ -104,11 +101,6 @@ export default function ShareButton({ score, results = [], challengeUrl, lang = 
         </button>
       )}
 
-      {copied && (
-        <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-brand text-black px-3 py-1 rounded text-sm font-medium animate-[fadeInUp_0.2s_ease-out]">
-          {lang === 'ja' ? 'Copied!' : 'Copied!'}
-        </div>
-      )}
     </div>
   )
 }
