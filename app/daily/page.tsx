@@ -1,20 +1,17 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
-import { Suspense } from 'react'
+import { useRouter } from 'next/navigation'
 import GameScreen from '@/components/GameScreen'
 import RoundFeedback from '@/components/RoundFeedback'
 import ConfirmModal from '@/components/ConfirmModal'
-import type { Artist, MetricMode, GenreCategory, GameResult } from '@/types'
+import type { Artist, MetricMode, GameResult } from '@/types'
 import { calculateScore } from '@/lib/metrics'
 import { detectLang, type Lang } from '@/lib/i18n'
 
-function GameContent() {
+function DailyContent() {
   const router = useRouter()
-  const params = useSearchParams()
   const metric: MetricMode = 'followers'
-  const genre = (params?.get('genre') as GenreCategory) || 'all'
 
   const [currentRound, setCurrentRound] = useState(1)
   const [questions, setQuestions] = useState<Artist[]>([])
@@ -23,26 +20,28 @@ function GameContent() {
   const [totalScore, setTotalScore] = useState(0)
   const [lang] = useState<Lang>(() => detectLang())
   const [feedback, setFeedback] = useState<GameResult | null>(null)
-  const [pendingAdvance, setPendingAdvance] = useState(false)
+  const [pendingFinish, setPendingFinish] = useState<{ results: GameResult[]; score: number } | null>(null)
   const [pendingConfirm, setPendingConfirm] = useState<Artist | null>(null)
 
   useEffect(() => {
-    localStorage.removeItem('rankingSubmitted')
-    const fetchQuestions = async () => {
-      try {
-        const url = `/api/randomArtist?count=5${genre !== 'all' ? `&genre=${genre}` : ''}`
-        const res = await fetch(url)
-        const data = await res.json()
-        if (res.ok && data.artists) {
-          setQuestions(data.artists)
-        }
-      } catch (err) {
-        console.error('Error fetching artists:', err)
-      }
-      setLoading(false)
-    }
-    fetchQuestions()
-  }, [genre])
+    fetch('/api/daily/questions')
+      .then(r => r.json())
+      .then(data => {
+        if (data.questions) setQuestions(data.questions)
+      })
+      .catch(console.error)
+      .finally(() => setLoading(false))
+  }, [])
+
+  const finishGame = (finalResults: GameResult[], finalScore: number) => {
+    localStorage.setItem('gameResults', JSON.stringify({
+      score: finalScore,
+      results: finalResults,
+      mode: 'daily',
+      metric,
+    }))
+    router.push('/daily/results')
+  }
 
   const processAnswer = (answerArtist: Artist) => {
     const themeArtist = questions[currentRound - 1]
@@ -63,44 +62,23 @@ function GameContent() {
     setTotalScore(newScore)
 
     setFeedback(result)
-    setPendingAdvance(true)
-  }
-
-  const advanceRound = (newResults: GameResult[], newScore: number) => {
-    if (currentRound < 5) {
-      setCurrentRound(prev => prev + 1)
-    } else {
-      localStorage.setItem('gameResults', JSON.stringify({
-        score: newScore,
-        results: newResults,
-        mode: genre !== 'all' ? 'genre' : 'classic',
-        metric,
-        genre,
-      }))
-      router.push('/results')
+    if (currentRound >= 5) {
+      setPendingFinish({ results: newResults, score: newScore })
     }
   }
 
   const handleAnswer = async (artistName: string, artistId?: string) => {
     if (!artistName.trim() || !questions[currentRound - 1]) return
 
-    let data
-    if (artistId) {
-      // Selected from dropdown — fetch by ID for accuracy
-      const res = await fetch(`/api/popularity?id=${encodeURIComponent(artistId)}`)
-      data = await res.json()
-      if (!res.ok || !data.id) {
-        alert(lang === 'ja' ? 'アーティストが見つかりません' : 'Artist not found.')
-        return
-      }
-    } else {
-      // Manual text input — search by name
-      const res = await fetch(`/api/popularity?artist=${encodeURIComponent(artistName)}`)
-      data = await res.json()
-      if (!res.ok || !data.id) {
-        alert(lang === 'ja' ? 'アーティストが見つかりません' : 'Artist not found. Check the spelling.')
-        return
-      }
+    const url = artistId
+      ? `/api/popularity?id=${encodeURIComponent(artistId)}`
+      : `/api/popularity?artist=${encodeURIComponent(artistName)}`
+    const res = await fetch(url)
+    const data = await res.json()
+
+    if (!res.ok || !data.id) {
+      alert(lang === 'ja' ? 'アーティストが見つかりません' : 'Artist not found.')
+      return
     }
 
     const answerArtist: Artist = {
@@ -118,19 +96,38 @@ function GameContent() {
 
   const handleDismissFeedback = () => {
     setFeedback(null)
-    if (pendingAdvance) {
-      setPendingAdvance(false)
-      advanceRound(results, totalScore)
+    if (pendingFinish) {
+      finishGame(pendingFinish.results, pendingFinish.score)
+      setPendingFinish(null)
+    } else {
+      setCurrentRound(prev => prev + 1)
+    }
+  }
+
+  const handleTimeout = () => {
+    if (!questions[currentRound - 1]) return
+    const themeArtist = questions[currentRound - 1]
+    const result: GameResult = {
+      theme: themeArtist.name, themeArtist,
+      answer: '(timeout)', answerArtist: { id: '', name: '(timeout)', popularity: 0 },
+      diff: 0, metric,
+    }
+    const newResults = [...results, result]
+    const newScore = totalScore + 0
+    setResults(newResults)
+    setTotalScore(newScore)
+
+    if (currentRound < 5) {
+      setCurrentRound(prev => prev + 1)
+    } else {
+      finishGame(newResults, newScore)
     }
   }
 
   if (loading || questions.length === 0) {
     return (
       <div className="min-h-screen bg-black text-white flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin h-10 w-10 border-4 border-brand rounded-full border-t-transparent mx-auto mb-4" />
-          <p className="text-zinc-400">Loading...</p>
-        </div>
+        <div className="animate-spin h-10 w-10 border-4 border-brand rounded-full border-t-transparent" />
       </div>
     )
   }
@@ -144,6 +141,8 @@ function GameContent() {
         themeArtist={questions[currentRound - 1]}
         onSubmitAnswer={handleAnswer}
         metric={metric}
+        timer={60}
+        onTimeout={handleTimeout}
         lang={lang}
         totalScore={totalScore}
       />
@@ -162,10 +161,6 @@ function GameContent() {
   )
 }
 
-export default function GamePage() {
-  return (
-    <Suspense fallback={<div className="min-h-screen bg-black" />}>
-      <GameContent />
-    </Suspense>
-  )
+export default function DailyPage() {
+  return <DailyContent />
 }

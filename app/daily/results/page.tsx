@@ -2,63 +2,57 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { saveRanking } from '@/lib/ranking'
 import ShareButton from '@/components/ShareButton'
 import ScoreRank from '@/components/ScoreRank'
-import type { GameResult } from '@/types'
+import type { GameResult, Ranking } from '@/types'
 import { formatMetricValue } from '@/lib/metrics'
 import { detectLang, t, type Lang } from '@/lib/i18n'
 
-export default function Results() {
+export default function DailyResults() {
   const router = useRouter()
   const [score, setScore] = useState(0)
   const [results, setResults] = useState<GameResult[]>([])
   const [metric, setMetric] = useState('popularity')
+  const [rankings, setRankings] = useState<Ranking[]>([])
   const [playerName, setPlayerName] = useState('')
   const [submitted, setSubmitted] = useState(false)
-  const [submitting, setSubmitting] = useState(false)
   const [challengeUrl, setChallengeUrl] = useState<string>()
   const [lang] = useState<Lang>(() => detectLang())
 
   useEffect(() => {
     const saved = localStorage.getItem('gameResults')
     if (!saved) { router.push('/'); return }
-    try {
-      const data = JSON.parse(saved)
-      setScore(data.score)
-      setResults(data.results ?? [])
-      setMetric(data.metric ?? 'popularity')
+    const data = JSON.parse(saved)
+    setScore(data.score)
+    setResults(data.results ?? [])
+    setMetric(data.metric ?? 'popularity')
 
-      if (localStorage.getItem('rankingSubmitted') === 'true') {
-        setSubmitted(true)
-      }
-    } catch {
-      router.push('/')
-    }
+    fetch('/api/daily/ranking')
+      .then(r => r.json())
+      .then(d => setRankings(d.rankings ?? []))
+      .catch(console.error)
   }, [router])
 
   const handleSubmit = async () => {
-    if (!playerName.trim() || submitting || submitted) return
-    setSubmitting(true)
+    if (!playerName.trim()) return
     try {
-      // Save raw decimal score (2dp) for ranking differentiation
-      const displayScore = Math.round(score * 100) / 100
-      await saveRanking(playerName, displayScore)
-      localStorage.setItem('rankingSubmitted', 'true')
+      await fetch('/api/daily/ranking', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: playerName, score: Math.round(score * 100) / 100 }),
+      })
       setSubmitted(true)
 
       const questions = results.map(r => r.themeArtist)
       const res = await fetch('/api/challenge/create', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ questions, metric, creatorName: playerName, creatorScore: displayScore }),
+        body: JSON.stringify({ questions, metric, creatorName: playerName, creatorScore: Math.round(score * 100) / 100 }),
       })
       const data = await res.json()
       if (data.url) setChallengeUrl(data.url)
     } catch (err) {
       console.error(err)
-    } finally {
-      setSubmitting(false)
     }
   }
 
@@ -68,11 +62,11 @@ export default function Results() {
     <main className="min-h-screen bg-black text-white py-8 px-4">
       <div className="max-w-lg mx-auto space-y-6">
         <header className="text-center animate-[fadeInUp_0.4s_ease-out]">
-          <h1 className="text-brand text-2xl font-bold mb-2">{t('results', lang)}</h1>
+          <h1 className="text-brand text-2xl font-bold mb-2">{t('dailyChallenge', lang)}</h1>
           <p className="text-5xl font-black animate-[countUp_0.6s_ease-out_0.2s_both]">
             {displayScore.toFixed(2)}
           </p>
-          <p className="text-zinc-500 text-sm mt-1">{lang === 'ja' ? '/ 100' : '/ 100'}</p>
+          <p className="text-zinc-500 text-sm mt-1">/ 100</p>
         </header>
 
         <ScoreRank score={displayScore} lang={lang} />
@@ -92,7 +86,7 @@ export default function Results() {
         ) : (
           <div className="space-y-3">
             <p className="text-brand text-center font-semibold">{t('registered', lang)}</p>
-            <ShareButton score={score} mode="Classic" metric={metric} results={results} challengeUrl={challengeUrl} lang={lang} />
+            <ShareButton score={score} mode="Daily" metric={metric} results={results} challengeUrl={challengeUrl} lang={lang} />
           </div>
         )}
 
@@ -130,8 +124,23 @@ export default function Results() {
           ))}
         </div>
 
+        {/* Daily leaderboard */}
+        {rankings.length > 0 && (
+          <div>
+            <h2 className="text-brand font-bold mb-2">{t('daily', lang)} {t('rankingTitle', lang)}</h2>
+            <div className="space-y-1">
+              {rankings.map((r, i) => (
+                <div key={i} className="bg-zinc-900 p-2 rounded-lg flex justify-between text-sm">
+                  <span><span className="text-brand mr-2">{i + 1}</span>{r.name}</span>
+                  <span className="text-zinc-400 font-mono">{r.score}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         <div className="flex gap-3">
-          <button onClick={() => router.push('/game')} className="flex-1 bg-brand text-black py-3 rounded-lg font-semibold hover:bg-brand-light">
+          <button onClick={() => router.push('/daily')} className="flex-1 bg-brand text-black py-3 rounded-lg font-semibold hover:bg-brand-light">
             {t('playAgain', lang)}
           </button>
           <button onClick={() => router.push('/')} className="flex-1 bg-zinc-800 text-white py-3 rounded-lg font-semibold hover:bg-zinc-700">

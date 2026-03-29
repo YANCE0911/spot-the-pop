@@ -3,71 +3,94 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { getTopRankings } from '@/lib/ranking'
-import type { Ranking } from '@/types' // 必要ならこの型定義も作ってね
+import type { Ranking } from '@/types'
+import { t, detectLang, type Lang } from '@/lib/i18n'
 
 export default function Home() {
   const router = useRouter()
-  const [rankings, setRankings] = useState<Ranking[]>([]) // ← 追加！
+  const [rankings, setRankings] = useState<Ranking[]>([])
   const [loading, setLoading] = useState(true)
+  const [lang, setLang] = useState<Lang>('en')
 
   useEffect(() => {
-    const fetchRankings = async () => {
-      try {
-        const top = await getTopRankings()
-        setRankings(top)
-      } catch (err) {
-        console.error('🏆 ランキング取得失敗:', err)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchRankings()
+    setLang(detectLang())
+    getTopRankings(5).then(setRankings).catch(console.error).finally(() => setLoading(false))
   }, [])
 
   const startGame = () => {
-    router.push('/game')
+    router.push('/game?metric=followers')
   }
 
   return (
-    <main className="min-h-screen bg-black text-white py-12 px-6 font-sans">
-      <div className="max-w-3xl mx-auto space-y-12">
-        <header className="mb-12">
-          <h1 className="text-green-500 text-5xl font-extrabold text-center mb-10">SPOT THE POP</h1>
-          <div className="bg-zinc-800 p-6 rounded-lg text-white space-y-4">
-            <p>ランダムに出題される10組のアーティストに対して、より近い「人気度」のアーティストを予想するチャレンジです。</p>
-            <p className="text-sm text-zinc-400">
-              ※ 各お題との人気度の差が少ないほど高得点。10問の合計スコアで競います。上位10名はランキングに名前が載ります！
-            </p>
-            <p className="text-sm text-zinc-400">
-              ※ 「人気度」は直近1ヶ月の再生回数・リスナー数などを総合的に反映した公式スコアであり、日々変動します。
-            </p>
-          </div>
-        </header>
-
-        <div className="text-center">
+    <main className="min-h-screen bg-black text-white py-10 px-4 font-sans">
+      <div className="max-w-lg mx-auto space-y-8">
+        {/* Language toggle */}
+        <div className="flex justify-end">
           <button
-            onClick={startGame}
-            className="bg-green-500 text-black py-4 px-8 rounded-lg font-bold text-lg hover:bg-green-400 transition-all"
+            onClick={() => setLang(l => l === 'en' ? 'ja' : 'en')}
+            className="text-xs text-zinc-500 hover:text-white border border-zinc-800 px-2 py-1 rounded transition-colors"
           >
-            チャレンジ開始
+            {lang === 'en' ? 'JA' : 'EN'}
           </button>
         </div>
 
-        <section className="mt-10">
-          <h2 className="text-xl font-bold text-green-500 mb-4">🏆 ランキング TOP10</h2>
+        {/* Header */}
+        <header className="text-center animate-[fadeInUp_0.4s_ease-out]">
+          <h1 className="text-brand text-4xl sm:text-5xl font-black tracking-tight">SPOT THE POP</h1>
+          <p className="text-zinc-400 text-sm mt-2">{t('tagline', lang)}</p>
+        </header>
+
+        {/* Game mode buttons */}
+        <div className="space-y-3 animate-[fadeInUp_0.5s_ease-out_0.1s_both]">
+          <button
+            onClick={startGame}
+            className="w-full bg-brand text-black py-4 px-6 rounded-xl font-bold text-lg hover:bg-brand-light transition-all"
+          >
+            {t('startGame', lang)}
+          </button>
+
+        </div>
+
+        {/* Rules */}
+        <div className="bg-zinc-900 p-4 rounded-xl text-sm text-zinc-400 space-y-1 animate-[fadeInUp_0.5s_ease-out_0.2s_both]">
+          <p>{t('rules', lang)}</p>
+          <p className="text-xs text-zinc-600">
+            {t('rulesFollowers', lang)}
+          </p>
+        </div>
+
+        {/* Rankings */}
+        <section className="animate-[fadeInUp_0.5s_ease-out_0.3s_both]">
+          <h2 className="text-lg font-bold text-brand mb-3">
+            {t('rankingTitle', lang)} <span className="text-xs text-zinc-500 font-normal">SEASON 1</span>
+          </h2>
           {loading ? (
-            <p>ランキングを読み込み中...</p>
+            <p className="text-zinc-500 text-sm">{t('loading', lang)}</p>
+          ) : rankings.length === 0 ? (
+            <p className="text-zinc-600 text-sm">No rankings yet</p>
           ) : (
-            <ul className="space-y-2">
+            <div className="space-y-2">
               {rankings.map((r, i) => (
-                <li key={i} className="bg-zinc-800 p-3 rounded-lg flex justify-between items-center">
-                  <span className="font-semibold">{i + 1}位: {r.name}</span>
-                  <span className="text-zinc-400">{r.score}</span>
-                </li>
+                <div
+                  key={i}
+                  className="bg-zinc-900 p-3 rounded-lg flex justify-between items-center animate-[fadeInLeft_0.3s_ease-out]"
+                  style={{ animationDelay: `${400 + i * 30}ms`, animationFillMode: 'both' }}
+                >
+                  <span className="font-semibold">
+                    <span className="text-brand mr-2">{i + 1}</span>
+                    {r.name}
+                  </span>
+                  <span className="text-zinc-400 font-mono text-sm">{r.score}</span>
+                </div>
               ))}
-            </ul>
+            </div>
           )}
+          <button
+            onClick={() => router.push('/ranking/history')}
+            className="w-full mt-3 text-sm text-zinc-500 hover:text-brand transition-colors"
+          >
+            {lang === 'ja' ? '歴代ランキングを見る →' : 'View Hall of Fame →'}
+          </button>
         </section>
       </div>
     </main>

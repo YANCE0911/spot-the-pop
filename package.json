@@ -6,7 +6,12 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "enrich-artists": "ts-node scripts/enrichArtists.ts",
+    "expand-pool": "ts-node scripts/expandPool.ts",
+    "expand-pool:dry": "ts-node scripts/expandPool.ts --dry-run",
+    "discover-playlists": "ts-node scripts/discoverFromPlaylists.ts",
+    "discover-playlists:dry": "ts-node scripts/discoverFromPlaylists.ts --dry-run"
   },
   "dependencies": {
     "@types/node-fetch": "^2.6.12",
