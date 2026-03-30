@@ -74,11 +74,11 @@ export default function GameScreen({
   const metricLabel = t(metric === 'followers' ? 'followers' : 'popularity', lang)
 
   return (
-    <main className="min-h-screen bg-black text-white py-8 px-4 font-sans">
-      <div className="max-w-lg mx-auto space-y-6">
-        {/* Header */}
-        <header>
-          <div className="flex items-center justify-between mb-3">
+    <main className="min-h-screen bg-black text-white font-sans">
+      {/* Fixed header — always visible even when iOS keyboard opens */}
+      <header className="fixed top-0 left-0 right-0 z-30 bg-black/95 backdrop-blur-sm px-4 pt-4 pb-2">
+        <div className="max-w-lg mx-auto">
+          <div className="flex items-center justify-between mb-2">
             <Logo />
             <div className="flex items-center gap-3">
               {timer && (
@@ -98,12 +98,12 @@ export default function GameScreen({
 
           {/* Score bar (MAX 100) */}
           {totalScore > 0 && (
-            <div className="mt-2">
+            <div>
               <div className="flex justify-between text-xs mb-0.5">
                 <span className="text-brand font-semibold">TOTAL SCORE</span>
                 <span className="text-zinc-400 font-mono">? / 100</span>
               </div>
-              <div className="w-full bg-zinc-800 h-2.5 rounded-full overflow-hidden">
+              <div className="w-full bg-zinc-800 h-2 rounded-full overflow-hidden">
                 <motion.div
                   className="bg-brand/60 h-full rounded-full"
                   animate={{ width: `${Math.min(totalScore, 100)}%` }}
@@ -112,8 +112,13 @@ export default function GameScreen({
               </div>
             </div>
           )}
-        </header>
+        </div>
+      </header>
 
+      {/* Spacer for fixed header */}
+      <div className="h-24" />
+
+      <div className="max-w-lg mx-auto space-y-6 px-4 pb-8">
         {/* Theme artist card */}
         <AnimatePresence mode="wait">
           <motion.div

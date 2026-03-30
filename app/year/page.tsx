@@ -218,11 +218,11 @@ export default function YearGame() {
   }
 
   return (
-    <main className="min-h-screen bg-black text-white py-8 px-4 font-sans">
-      <div className="max-w-lg mx-auto space-y-6">
-        {/* Header */}
-        <header>
-          <div className="flex items-center justify-between mb-3">
+    <main className="min-h-screen bg-black text-white font-sans">
+      {/* Fixed header — always visible even when iOS keyboard opens */}
+      <header className="fixed top-0 left-0 right-0 z-30 bg-black/95 backdrop-blur-sm px-4 pt-4 pb-2">
+        <div className="max-w-lg mx-auto">
+          <div className="flex items-center justify-between mb-2">
             <Logo />
             <div className="text-right">
               <span className="text-xs text-zinc-400">ROUND</span>
@@ -232,26 +232,24 @@ export default function YearGame() {
 
           {/* Score bar */}
           {totalScore > 0 && (
-            <div className="mt-2">
+            <div>
               <div className="flex justify-between text-xs mb-0.5">
                 <span className="text-accent font-semibold">TOTAL SCORE</span>
-              <span className="text-zinc-400 font-mono">? / 100</span>
+                <span className="text-zinc-400 font-mono">? / 100</span>
+              </div>
+              <div className="w-full bg-zinc-800 h-2 rounded-full overflow-hidden">
+                <motion.div
+                  className="bg-accent/60 h-full rounded-full"
+                  animate={{ width: `${Math.min(totalScore, 100)}%` }}
+                  transition={{ duration: 0.6, ease: 'easeOut' }}
+                />
+              </div>
             </div>
-            <div className="w-full bg-zinc-800 h-2.5 rounded-full overflow-hidden">
-              <motion.div
-                className="bg-accent/60 h-full rounded-full"
-                animate={{ width: `${Math.min(totalScore, 100)}%` }}
-                transition={{ duration: 0.6, ease: 'easeOut' }}
-              />
-            </div>
-          </div>
           )}
-        </header>
 
-        {/* Speed bonus indicator — fixed top so it stays visible when iOS keyboard opens */}
-        {currentQ && !feedback && (
-          <div className="fixed top-0 left-0 right-0 z-30 bg-black/90 backdrop-blur-sm py-2 px-4">
-            <div className="max-w-lg mx-auto flex items-center justify-between text-xs h-5">
+          {/* Speed bonus */}
+          {currentQ && !feedback && (
+            <div className="flex items-center justify-between text-xs h-5 mt-1">
               {elapsed <= BONUS_ZONE ? (
                 <>
                   <span className="text-violet-300 font-bold">SPEED BONUS +{currentBonus.toFixed(1)}</span>
@@ -267,9 +265,14 @@ export default function YearGame() {
                 <span className="text-zinc-600 font-bold">SPEED BONUS +0.0</span>
               )}
             </div>
-          </div>
-        )}
+          )}
+        </div>
+      </header>
 
+      {/* Spacer for fixed header */}
+      <div className="h-28" />
+
+      <div className="max-w-lg mx-auto space-y-6 px-4 pb-8">
         {/* Track card / Feedback — shared AnimatePresence to prevent layout shift */}
         <AnimatePresence mode="wait">
         {currentQ && !feedback && (
