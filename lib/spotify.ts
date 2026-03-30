@@ -4,6 +4,42 @@ import type { Artist } from '@/types'
 let cachedToken: string | null = null
 let tokenExpiry = 0
 
+// In-memory cache for API responses (per serverless instance)
+const CACHE_TTL = 60 * 60 * 1000 // 1 hour
+const searchCache = new Map<string, { data: Artist[]; expires: number }>()
+const artistCache = new Map<string, { data: Artist | null; expires: number }>()
+
+function getCachedSearch(key: string): Artist[] | null {
+  const entry = searchCache.get(key)
+  if (entry && Date.now() < entry.expires) return entry.data
+  searchCache.delete(key)
+  return null
+}
+
+function setCachedSearch(key: string, data: Artist[]) {
+  searchCache.set(key, { data, expires: Date.now() + CACHE_TTL })
+  // Evict old entries if cache grows too large
+  if (searchCache.size > 1000) {
+    const oldest = searchCache.keys().next().value
+    if (oldest) searchCache.delete(oldest)
+  }
+}
+
+function getCachedArtist(key: string): Artist | null | undefined {
+  const entry = artistCache.get(key)
+  if (entry && Date.now() < entry.expires) return entry.data
+  artistCache.delete(key)
+  return undefined // undefined = not cached, null = cached as not found
+}
+
+function setCachedArtist(key: string, data: Artist | null) {
+  artistCache.set(key, { data, expires: Date.now() + CACHE_TTL })
+  if (artistCache.size > 2000) {
+    const oldest = artistCache.keys().next().value
+    if (oldest) artistCache.delete(oldest)
+  }
+}
+
 export function forceTokenRefresh() {
   cachedToken = null
   tokenExpiry = 0
@@ -44,6 +80,10 @@ export async function getSpotifyToken(): Promise<string> {
 }
 
 export async function searchArtist(name: string): Promise<Artist | null> {
+  const cacheKey = `search:${name.toLowerCase()}`
+  const cached = getCachedArtist(cacheKey)
+  if (cached !== undefined) return cached
+
   const token = await getSpotifyToken()
   const res = await fetch(
     `https://api.spotify.com/v1/search?q=${encodeURIComponent(name)}&type=artist&limit=5`,
@@ -51,14 +91,17 @@ export async function searchArtist(name: string): Promise<Artist | null> {
   )
   const data = await res.json()
 
-  if (!data.artists?.items?.length) return null
+  if (!data.artists?.items?.length) {
+    setCachedArtist(cacheKey, null)
+    return null
+  }
 
   // Try exact match first, then fall back to first result
   const nameLower = name.toLowerCase()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const exact = data.artists.items.find((a: any) => a.name.toLowerCase() === nameLower)
   const a = exact ?? data.artists.items[0]
-  return {
+  const artist: Artist = {
     id: a.id,
     name: a.name,
     popularity: a.popularity,
@@ -66,16 +109,26 @@ export async function searchArtist(name: string): Promise<Artist | null> {
     genres: a.genres ?? [],
     imageUrl: a.images?.[0]?.url ?? undefined,
   }
+  setCachedArtist(cacheKey, artist)
+  setCachedArtist(`id:${artist.id}`, artist)
+  return artist
 }
 
 export async function getArtistById(id: string): Promise<Artist | null> {
+  const cacheKey = `id:${id}`
+  const cached = getCachedArtist(cacheKey)
+  if (cached !== undefined) return cached
+
   const token = await getSpotifyToken()
   const res = await fetch(`https://api.spotify.com/v1/artists/${id}`, {
     headers: { Authorization: `Bearer ${token}` },
   })
-  if (!res.ok) return null
+  if (!res.ok) {
+    setCachedArtist(cacheKey, null)
+    return null
+  }
   const a = await res.json()
-  return {
+  const artist: Artist = {
     id: a.id,
     name: a.name,
     popularity: a.popularity,
@@ -83,6 +136,8 @@ export async function getArtistById(id: string): Promise<Artist | null> {
     genres: a.genres ?? [],
     imageUrl: a.images?.[0]?.url ?? undefined,
   }
+  setCachedArtist(cacheKey, artist)
+  return artist
 }
 
 export async function getRelatedArtists(id: string): Promise<Artist[]> {

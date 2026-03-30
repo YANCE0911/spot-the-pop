@@ -1,9 +1,10 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { searchArtist, getArtistById } from '@/lib/spotify'
 import { LARGE_JAPANESE_ARTISTS } from '@/lib/JapaneseArtists'
+import { GLOBAL_ARTISTS } from '@/lib/GlobalArtists'
 import type { Artist } from '@/types'
 
-// Build a lookup map from the static artist pool (for symmetric scoring)
+// Build a lookup map from the static artist pool (Japanese + Global)
 const artistPoolById = new Map<string, Artist>()
 const artistPoolByName = new Map<string, Artist>()
 for (const a of LARGE_JAPANESE_ARTISTS) {
@@ -15,6 +16,19 @@ for (const a of LARGE_JAPANESE_ARTISTS) {
     genres: a.genres ? [...a.genres] : [],
     imageUrl: (a as unknown as { imageUrl?: string }).imageUrl,
     nameJa: (a as unknown as { nameJa?: string }).nameJa,
+  }
+  artistPoolById.set(a.id, artist)
+  artistPoolByName.set(a.name.toLowerCase(), artist)
+}
+for (const a of GLOBAL_ARTISTS) {
+  if (artistPoolById.has(a.id)) continue
+  const artist: Artist = {
+    id: a.id,
+    name: a.name,
+    popularity: a.popularity,
+    followers: a.followers,
+    genres: [...a.genres],
+    imageUrl: a.imageUrl ?? undefined,
   }
   artistPoolById.set(a.id, artist)
   artistPoolByName.set(a.name.toLowerCase(), artist)
@@ -31,6 +45,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (!artistId && !artistName) {
     return res.status(400).json({ error: 'Artist name or id is required' })
   }
+
+  // Cache responses at CDN level
+  res.setHeader('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=600')
 
   try {
     // Check static pool first (symmetric with theme artists)
