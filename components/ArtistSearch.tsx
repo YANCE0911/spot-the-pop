@@ -94,7 +94,10 @@ export default function ArtistSearch({ value, onChange, onSelect, placeholder, d
         value={value}
         onChange={e => onChange(e.target.value)}
         onKeyDown={handleKeyDown}
-        onFocus={() => suggestions.length > 0 && setShowDropdown(true)}
+        onFocus={e => {
+          if (suggestions.length > 0) setShowDropdown(true)
+          setTimeout(() => e.target.scrollIntoView({ behavior: 'smooth', block: 'center' }), 300)
+        }}
         placeholder={placeholder}
         disabled={disabled}
         className="w-full bg-zinc-800 text-white p-3 rounded-lg outline-none focus:ring-2 focus:ring-brand transition-all"

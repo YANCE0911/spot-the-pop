@@ -306,6 +306,9 @@ export default function YearGame() {
                     .replace(/[^0-9]/g, '')
                   if (v.length <= 4) setGuessYear(v)
                 }}
+                onFocus={e => {
+                  setTimeout(() => e.target.scrollIntoView({ behavior: 'smooth', block: 'center' }), 300)
+                }}
                 onKeyDown={e => { if (e.key === 'Enter' && guessYear) handleSubmit() }}
                 placeholder="例: 2015"
                 maxLength={4}
