@@ -86,8 +86,8 @@ function GameContent() {
 
     let data
     if (artistId) {
-      // Selected from dropdown — fetch by ID for accuracy
-      const res = await fetch(`/api/popularity?id=${encodeURIComponent(artistId)}`)
+      // Selected from dropdown — fetch by ID for accuracy, include name as fallback
+      const res = await fetch(`/api/popularity?id=${encodeURIComponent(artistId)}&artist=${encodeURIComponent(artistName)}`)
       data = await res.json()
       if (!res.ok || !data.id) {
         alert(lang === 'ja' ? 'アーティストが見つかりません' : 'Artist not found.')
@@ -98,7 +98,7 @@ function GameContent() {
       const res = await fetch(`/api/popularity?artist=${encodeURIComponent(artistName)}`)
       data = await res.json()
       if (!res.ok || !data.id) {
-        alert(lang === 'ja' ? 'アーティストが見つかりません' : 'Artist not found. Check the spelling.')
+        alert(lang === 'ja' ? 'アーティストが見つかりません。候補リストから選んでください' : 'Artist not found. Please select from the suggestions.')
         return
       }
     }

@@ -2,7 +2,7 @@ export type Lang = 'en' | 'ja'
 
 const translations = {
   en: {
-    title: 'SPOT THE POP',
+    title: 'SOUND IQ',
     tagline: 'Guess the artist with the closest score',
     startGame: 'Start Challenge',
     dailyChallenge: 'Daily Challenge',
@@ -12,7 +12,7 @@ const translations = {
     popularity: 'Popularity',
     followers: 'Followers',
     inputLabel: 'Enter an artist with a similar',
-    inputPlaceholder: 'e.g. Radiohead',
+    inputPlaceholder: 'e.g. BTS',
     submit: 'Submit Answer',
     submitting: 'Checking...',
     results: 'Results',
@@ -54,8 +54,8 @@ const translations = {
     dailyRules: '5 questions, same for everyone today. 60 seconds per question. Hints available (with penalty).',
   },
   ja: {
-    title: 'SPOT THE POP',
-    tagline: '近いスコアのアーティストを当てろ',
+    title: 'SOUND IQ',
+    tagline: '近いスコアのアーティストを当てよう！',
     startGame: 'チャレンジ開始',
     dailyChallenge: 'デイリーチャレンジ',
     genreMode: 'ジャンルモード',
@@ -64,7 +64,7 @@ const translations = {
     popularity: '人気度',
     followers: 'フォロワー数',
     inputLabel: '近いスコアのアーティストを入力',
-    inputPlaceholder: '例: ラルク',
+    inputPlaceholder: '例: YOASOBI',
     submit: '回答を送信',
     submitting: '送信中...',
     results: 'ゲーム結果',

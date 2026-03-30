@@ -4,6 +4,11 @@ import type { Artist } from '@/types'
 let cachedToken: string | null = null
 let tokenExpiry = 0
 
+export function forceTokenRefresh() {
+  cachedToken = null
+  tokenExpiry = 0
+}
+
 export async function getSpotifyToken(): Promise<string> {
   if (cachedToken && Date.now() < tokenExpiry) {
     return cachedToken
@@ -41,14 +46,18 @@ export async function getSpotifyToken(): Promise<string> {
 export async function searchArtist(name: string): Promise<Artist | null> {
   const token = await getSpotifyToken()
   const res = await fetch(
-    `https://api.spotify.com/v1/search?q=${encodeURIComponent(name)}&type=artist&limit=1`,
+    `https://api.spotify.com/v1/search?q=${encodeURIComponent(name)}&type=artist&limit=5`,
     { headers: { Authorization: `Bearer ${token}` } }
   )
   const data = await res.json()
 
   if (!data.artists?.items?.length) return null
 
-  const a = data.artists.items[0]
+  // Try exact match first, then fall back to first result
+  const nameLower = name.toLowerCase()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const exact = data.artists.items.find((a: any) => a.name.toLowerCase() === nameLower)
+  const a = exact ?? data.artists.items[0]
   return {
     id: a.id,
     name: a.name,

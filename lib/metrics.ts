@@ -2,7 +2,7 @@
 import type { MetricMode, Artist } from '@/types'
 
 // === Scoring Constants ===
-// 5 questions × 20 pts = 100 max. Display with 2 decimal places.
+// 5 questions × 20 pts = 100 max. No time bonus for VERSUS.
 // Log-ratio: score = max(0, 20 - K * |log10(theme) - log10(answer)|)
 // K=10 → same=20, 2x diff≈17, 5x≈13, 10x=10, 50x≈3, 100x=0
 export const POINTS_PER_QUESTION = 20

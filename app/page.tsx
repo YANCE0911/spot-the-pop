@@ -2,24 +2,15 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { getTopRankings } from '@/lib/ranking'
-import type { Ranking } from '@/types'
-import { t, detectLang, type Lang } from '@/lib/i18n'
+import { detectLang, type Lang } from '@/lib/i18n'
 
 export default function Home() {
   const router = useRouter()
-  const [rankings, setRankings] = useState<Ranking[]>([])
-  const [loading, setLoading] = useState(true)
   const [lang, setLang] = useState<Lang>('en')
 
   useEffect(() => {
     setLang(detectLang())
-    getTopRankings(5).then(setRankings).catch(console.error).finally(() => setLoading(false))
   }, [])
-
-  const startGame = () => {
-    router.push('/game?metric=followers')
-  }
 
   return (
     <main className="min-h-screen bg-black text-white py-10 px-4 font-sans">
@@ -36,62 +27,54 @@ export default function Home() {
 
         {/* Header */}
         <header className="text-center animate-[fadeInUp_0.4s_ease-out]">
-          <h1 className="text-brand text-4xl sm:text-5xl font-black tracking-tight">SPOT THE POP</h1>
-          <p className="text-zinc-400 text-sm mt-2">{t('tagline', lang)}</p>
+          <h1 className="font-display text-4xl sm:text-5xl font-black tracking-tight bg-gradient-to-r from-zinc-300 to-zinc-500 bg-clip-text text-transparent">SOUND IQ</h1>
+          <p className="text-zinc-500 text-sm mt-2 tracking-wide">
+            How deep is your music knowledge?
+          </p>
         </header>
 
-        {/* Game mode buttons */}
-        <div className="space-y-3 animate-[fadeInUp_0.5s_ease-out_0.1s_both]">
+        {/* Game mode cards */}
+        <div className="space-y-4 animate-[fadeInUp_0.5s_ease-out_0.1s_both]">
+          {/* Followers mode */}
           <button
-            onClick={startGame}
-            className="w-full bg-brand text-black py-4 px-6 rounded-xl font-bold text-lg hover:bg-brand-light transition-all"
+            onClick={() => router.push('/game?metric=followers')}
+            className="w-full bg-zinc-900/80 border border-zinc-800 rounded-2xl p-6 text-left hover:border-brand/50 transition-all group card-glow-versus"
           >
-            {t('startGame', lang)}
+            <p className="text-gradient font-black text-2xl tracking-wider mb-2">
+              VERSUS
+            </p>
+            <p className="text-zinc-400 text-sm">
+              {lang === 'ja'
+                ? '同じくらい人気のアーティストを当てよう！'
+                : 'Name an artist with similar popularity'}
+            </p>
           </button>
 
-        </div>
-
-        {/* Rules */}
-        <div className="bg-zinc-900 p-4 rounded-xl text-sm text-zinc-400 space-y-1 animate-[fadeInUp_0.5s_ease-out_0.2s_both]">
-          <p>{t('rules', lang)}</p>
-          <p className="text-xs text-zinc-600">
-            {t('rulesFollowers', lang)}
-          </p>
-        </div>
-
-        {/* Rankings */}
-        <section className="animate-[fadeInUp_0.5s_ease-out_0.3s_both]">
-          <h2 className="text-lg font-bold text-brand mb-3">
-            {t('rankingTitle', lang)} <span className="text-xs text-zinc-500 font-normal">SEASON 1</span>
-          </h2>
-          {loading ? (
-            <p className="text-zinc-500 text-sm">{t('loading', lang)}</p>
-          ) : rankings.length === 0 ? (
-            <p className="text-zinc-600 text-sm">No rankings yet</p>
-          ) : (
-            <div className="space-y-2">
-              {rankings.map((r, i) => (
-                <div
-                  key={i}
-                  className="bg-zinc-900 p-3 rounded-lg flex justify-between items-center animate-[fadeInLeft_0.3s_ease-out]"
-                  style={{ animationDelay: `${400 + i * 30}ms`, animationFillMode: 'both' }}
-                >
-                  <span className="font-semibold">
-                    <span className="text-brand mr-2">{i + 1}</span>
-                    {r.name}
-                  </span>
-                  <span className="text-zinc-400 font-mono text-sm">{r.score}</span>
-                </div>
-              ))}
-            </div>
-          )}
+          {/* Year mode */}
           <button
-            onClick={() => router.push('/ranking/history')}
-            className="w-full mt-3 text-sm text-zinc-500 hover:text-brand transition-colors"
+            onClick={() => router.push('/year')}
+            className="w-full bg-zinc-900/80 border border-zinc-800 rounded-2xl p-6 text-left hover:border-accent/50 transition-all group card-glow-timeline"
           >
-            {lang === 'ja' ? '歴代ランキングを見る →' : 'View Hall of Fame →'}
+            <p className="text-gradient-warm font-black text-2xl tracking-wider mb-2">
+              TIMELINE
+            </p>
+            <p className="text-zinc-400 text-sm">
+              {lang === 'ja'
+                ? 'あの曲、何年にリリースされた？'
+                : 'When was that track released?'}
+            </p>
           </button>
-        </section>
+        </div>
+
+        {/* Ranking link */}
+        <div className="text-center animate-[fadeInUp_0.5s_ease-out_0.2s_both]">
+          <button
+            onClick={() => router.push('/ranking')}
+            className="text-zinc-500 hover:text-white text-sm border border-zinc-800 px-4 py-2 rounded-lg transition-colors"
+          >
+            {lang === 'ja' ? 'ランキングを見る' : 'View Rankings'}
+          </button>
+        </div>
       </div>
     </main>
   )

@@ -7,8 +7,8 @@ const nextPWA = require('next-pwa')({
 
 const nextConfig = {
   env: {
-    SPOTIFY_CLIENT_ID: process.env.SPOTIPY_CLIENT_ID,
-    SPOTIFY_CLIENT_SECRET: process.env.SPOTIPY_CLIENT_SECRET,
+    SPOTIFY_CLIENT_ID: process.env.SPOTIFY_CLIENT_ID || process.env.SPOTIPY_CLIENT_ID,
+    SPOTIFY_CLIENT_SECRET: process.env.SPOTIFY_CLIENT_SECRET || process.env.SPOTIPY_CLIENT_SECRET,
   },
   webpack: (config, { isServer }) => {
     if (isServer) {

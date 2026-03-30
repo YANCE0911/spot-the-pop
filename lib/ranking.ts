@@ -21,7 +21,7 @@ const DAILY_RANKING_COLLECTION = 'daily_rankings'
 const SEASON1_START = Timestamp.fromDate(new Date('2026-03-28T15:00:00Z'))
 
 // Current season (Season 1) rankings
-export async function getTopRankings(count = 10): Promise<Ranking[]> {
+export async function getTopRankings(count = 10, gameType?: 'versus' | 'timeline'): Promise<Ranking[]> {
   try {
     const q = query(
       collection(db, RANKING_COLLECTION),
@@ -30,23 +30,34 @@ export async function getTopRankings(count = 10): Promise<Ranking[]> {
       limit(200)
     )
     const snapshot = await getDocs(q)
-    const all = snapshot.docs.map(doc => doc.data() as Ranking)
+    let all = snapshot.docs.map(doc => doc.data() as Ranking)
+    if (gameType === 'timeline') {
+      all = all.filter(r => r.gameType === 'timeline')
+    } else if (gameType === 'versus') {
+      all = all.filter(r => !r.gameType || r.gameType === 'versus')
+    }
     return all.sort((a, b) => b.score - a.score).slice(0, count)
   } catch {
-    // Fallback if composite index doesn't exist yet
     const q = query(collection(db, RANKING_COLLECTION), orderBy('score', 'desc'), limit(count))
     const snapshot = await getDocs(q)
-    return snapshot.docs.map(doc => doc.data() as Ranking)
+    let all = snapshot.docs.map(doc => doc.data() as Ranking)
+    if (gameType === 'timeline') {
+      all = all.filter(r => r.gameType === 'timeline')
+    } else if (gameType === 'versus') {
+      all = all.filter(r => !r.gameType || r.gameType === 'versus')
+    }
+    return all.slice(0, count)
   }
 }
 
-export async function saveRanking(name: string, score: number, mode?: string, metric?: string, genre?: string) {
+export async function saveRanking(name: string, score: number, mode?: string, metric?: string, genre?: string, gameType?: 'versus' | 'timeline') {
   await addDoc(collection(db, RANKING_COLLECTION), {
     name,
     score,
     mode: mode ?? 'classic',
     metric: metric ?? 'popularity',
     genre: genre ?? null,
+    gameType: gameType ?? 'versus',
     createdAt: Timestamp.now(),
   })
 }

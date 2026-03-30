@@ -19,8 +19,12 @@ export async function GET(req: NextRequest) {
 
   const { searchParams } = req.nextUrl
   const score = searchParams.get('score') ?? '0'
+  const mode = searchParams.get('mode') ?? 'versus'
   const numScore = parseFloat(score)
   const grade = getGrade(numScore)
+  const isTimeline = mode === 'timeline'
+  const accentColor = isTimeline ? '#a855f7' : '#1DB954'
+  const modeLabel = isTimeline ? 'TIMELINE' : 'VERSUS'
 
   return new ImageResponse(
     (
@@ -64,14 +68,14 @@ export async function GET(req: NextRequest) {
         >
           <p
             style={{
-              color: '#1DB954',
+              color: accentColor,
               fontSize: '28px',
               fontWeight: 700,
               letterSpacing: '0.3em',
               margin: 0,
             }}
           >
-            SPOT THE POP
+            SOUND IQ — {modeLabel}
           </p>
 
           <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', margin: '12px 0' }}>

@@ -8,6 +8,7 @@ import ScoreRank from '@/components/ScoreRank'
 import type { GameResult } from '@/types'
 import { formatMetricValue } from '@/lib/metrics'
 import { detectLang, t, type Lang } from '@/lib/i18n'
+import Logo from '@/components/Logo'
 
 export default function Results() {
   const router = useRouter()
@@ -67,8 +68,9 @@ export default function Results() {
   return (
     <main className="min-h-screen bg-black text-white py-8 px-4">
       <div className="max-w-lg mx-auto space-y-6">
-        <header className="text-center animate-[fadeInUp_0.4s_ease-out]">
-          <h1 className="text-brand text-2xl font-bold mb-2">{t('results', lang)}</h1>
+        <header className="animate-[fadeInUp_0.4s_ease-out]">
+          <div className="mb-4"><Logo size="sm" /></div>
+          <h2 className="text-brand text-lg font-bold mb-2 text-center">{t('results', lang)}</h2>
           <p className="text-5xl font-black animate-[countUp_0.6s_ease-out_0.2s_both]">
             {displayScore.toFixed(2)}
           </p>
@@ -131,10 +133,10 @@ export default function Results() {
 
         <div className="flex gap-3">
           <button onClick={() => router.push('/game')} className="flex-1 bg-brand text-black py-3 rounded-lg font-semibold hover:bg-brand-light">
-            {t('playAgain', lang)}
+            Play Again
           </button>
           <button onClick={() => router.push('/')} className="flex-1 bg-zinc-800 text-white py-3 rounded-lg font-semibold hover:bg-zinc-700">
-            {t('backToTop', lang)}
+            Top
           </button>
         </div>
       </div>

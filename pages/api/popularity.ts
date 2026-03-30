@@ -42,9 +42,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     // Fall back to Spotify API for artists not in pool
-    const artist = artistId
+    let artist = artistId
       ? await getArtistById(artistId)
       : await searchArtist(artistName)
+
+    // If getArtistById failed (e.g. rate limit), try search by name as fallback
+    if (!artist && artistId && artistName) {
+      artist = await searchArtist(artistName)
+    }
 
     if (!artist) {
       return res.status(404).json({ error: 'Artist not found' })

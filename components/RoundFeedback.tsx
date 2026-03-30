@@ -10,7 +10,7 @@ type Props = {
   lang?: 'en' | 'ja'
 }
 
-// Score per question is 0–20. Simple words everyone knows:
+// Score per question is 0–20:
 function getGrade(score: number): { label: string; color: string; emoji: string } {
   if (score >= 19.5) return { label: 'PERFECT', color: 'text-yellow-400', emoji: '!!!' }
   if (score >= 17) return { label: 'SUPER', color: 'text-green-400', emoji: '!!' }
@@ -59,12 +59,12 @@ export default function RoundFeedback({ result, onDismiss, lang = 'en' }: Props)
           <div className="grid grid-cols-2 gap-3 text-sm">
             <div className="bg-zinc-800 p-3 rounded-lg">
               <p className="text-zinc-500 text-xs mb-1">{lang === 'ja' ? 'お題' : 'Target'}</p>
-              <p className="font-semibold truncate">{result.themeArtist.nameJa || result.themeArtist.name}</p>
+              <p className="font-semibold truncate">{result.themeArtist.name}</p>
               <p className="text-brand font-mono text-xs">{formatMetricValue(themeVal, result.metric)}</p>
             </div>
             <div className="bg-zinc-800 p-3 rounded-lg">
               <p className="text-zinc-500 text-xs mb-1">{lang === 'ja' ? '回答' : 'Answer'}</p>
-              <p className="font-semibold truncate">{result.answerArtist.nameJa || result.answerArtist.name}</p>
+              <p className="font-semibold truncate">{result.answerArtist.name}</p>
               <p className="text-blue-400 font-mono text-xs">{formatMetricValue(answerVal, result.metric)}</p>
             </div>
           </div>

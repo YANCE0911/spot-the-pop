@@ -9,13 +9,19 @@ module.exports = {
     extend: {
       colors: {
         brand: {
-          DEFAULT: '#1ED760',
-          dark: '#1AA34A',
-          light: '#53E87E',
+          DEFAULT: '#1DB954',
+          dark: '#1aa34a',
+          light: '#1ed760',
+        },
+        accent: {
+          DEFAULT: '#a855f7',
+          dark: '#9333ea',
+          light: '#c084fc',
         },
       },
       fontFamily: {
         display: ['Montserrat', 'system-ui', 'sans-serif'],
+        pop: ['Bangers', 'cursive'],
       },
     },
   },

@@ -6,6 +6,7 @@ export type Ranking = {
   metric?: MetricMode
   genre?: string
   date?: string // YYYY-MM-DD for daily
+  gameType?: 'versus' | 'timeline'
 }
 
 export type GameMode = 'classic' | 'daily' | 'genre' | 'challenge'
@@ -28,6 +29,8 @@ export type GameResult = {
   answer: string
   answerArtist: Artist
   diff: number
+  baseScore?: number
+  timeBonus?: number
   metric: MetricMode
   hintUsed?: boolean
 }

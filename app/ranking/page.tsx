@@ -1,86 +1,146 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { motion } from 'framer-motion'
 import { getTopRankings } from '@/lib/ranking'
 import type { Ranking } from '@/types'
-import { detectLang, t, type Lang } from '@/lib/i18n'
+import { detectLang, type Lang } from '@/lib/i18n'
+import Logo from '@/components/Logo'
+
+type Tab = 'versus' | 'timeline'
 
 export default function RankingPage() {
   const router = useRouter()
-  const [rankings, setRankings] = useState<Ranking[]>([])
+  const [tab, setTab] = useState<Tab>('versus')
+  const [versusRankings, setVersusRankings] = useState<Ranking[]>([])
+  const [timelineRankings, setTimelineRankings] = useState<Ranking[]>([])
   const [loading, setLoading] = useState(true)
   const [lang] = useState<Lang>(() => detectLang())
 
   useEffect(() => {
-    getTopRankings()
-      .then(setRankings)
-      .catch(console.error)
+    Promise.all([
+      getTopRankings(20, 'versus'),
+      getTopRankings(20, 'timeline'),
+    ]).then(([v, t]) => {
+      setVersusRankings(v)
+      setTimelineRankings(t)
+    }).catch(console.error)
       .finally(() => setLoading(false))
   }, [])
+
+  const rankings = tab === 'versus' ? versusRankings : timelineRankings
 
   return (
     <main className="min-h-screen bg-black text-white py-8 px-4">
       <div className="max-w-lg mx-auto space-y-6">
-        <header className="text-center animate-[fadeInUp_0.4s_ease-out]">
-          <h1 className="text-brand text-2xl font-bold">{t('rankingTitle', lang)}</h1>
-          <p className="text-zinc-500 text-sm mt-1">
-            {lang === 'ja' ? '平均スコア（100点満点・高いほど上位）' : 'Average score (out of 100, higher is better)'}
-          </p>
+        {/* Header */}
+        <header className="flex items-center justify-between">
+          <div>
+            <Logo size="sm" />
+            <p className="text-zinc-500 text-xs mt-0.5">
+              {lang === 'ja' ? 'ランキング' : 'Leaderboard'}
+            </p>
+          </div>
         </header>
 
+        {/* Tab switcher */}
+        <div className="flex bg-zinc-900 rounded-lg p-1">
+          <button
+            onClick={() => setTab('versus')}
+            className={`flex-1 py-2 rounded-md text-sm font-bold transition-all ${
+              tab === 'versus'
+                ? 'bg-brand text-black'
+                : 'text-zinc-400 hover:text-white'
+            }`}
+          >
+            VERSUS
+          </button>
+          <button
+            onClick={() => setTab('timeline')}
+            className={`flex-1 py-2 rounded-md text-sm font-bold transition-all ${
+              tab === 'timeline'
+                ? 'bg-accent text-black'
+                : 'text-zinc-400 hover:text-white'
+            }`}
+          >
+            TIMELINE
+          </button>
+        </div>
+
+        {/* Rankings list */}
         {loading ? (
-          <div className="flex justify-center py-8">
+          <div className="flex justify-center py-12">
             <div className="animate-spin h-8 w-8 border-4 border-brand rounded-full border-t-transparent" />
           </div>
         ) : rankings.length === 0 ? (
-          <p className="text-zinc-600 text-center py-4">
-            {lang === 'ja' ? 'まだランキングがありません' : 'No rankings yet'}
-          </p>
+          <div className="text-center py-12">
+            <p className="text-zinc-500">
+              {lang === 'ja' ? 'まだランキングがありません' : 'No rankings yet'}
+            </p>
+            <p className="text-zinc-600 text-sm mt-1">
+              {lang === 'ja' ? 'プレイしてランキングに登録しよう！' : 'Play and register your score!'}
+            </p>
+          </div>
         ) : (
           <div className="space-y-2">
             {rankings.map((r, i) => (
-              <div
-                key={i}
-                className={`flex items-center justify-between p-3 rounded-lg animate-[fadeInLeft_0.3s_ease-out] ${
-                  i < 3 ? 'bg-zinc-900 border border-zinc-700' : 'bg-zinc-900/60'
+              <motion.div
+                key={`${r.name}-${r.score}-${i}`}
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: i * 0.03 }}
+                className={`flex items-center gap-3 p-3 rounded-lg ${
+                  i < 3 ? 'bg-zinc-900 border border-zinc-800' : 'bg-zinc-900/50'
                 }`}
-                style={{ animationDelay: `${i * 60}ms`, animationFillMode: 'both' }}
               >
-                <div className="flex items-center gap-3">
-                  <span className={`w-8 text-center font-bold ${
-                    i < 3 ? 'text-brand text-lg' : 'text-zinc-500 text-sm'
-                  }`}>
-                    {i + 1}
-                  </span>
-                  <span className={`font-semibold ${i < 3 ? 'text-white' : 'text-zinc-300'}`}>
-                    {r.name}
-                  </span>
-                </div>
-                <span className={`font-mono font-bold ${
-                  i < 3 ? 'text-brand' : 'text-zinc-400'
+                {/* Rank */}
+                <div className={`w-8 text-center font-black text-lg ${
+                  i === 0 ? 'text-yellow-400' :
+                  i === 1 ? 'text-zinc-300' :
+                  i === 2 ? 'text-amber-600' :
+                  'text-zinc-600'
                 }`}>
-                  {r.score}
-                </span>
-              </div>
+                  {i + 1}
+                </div>
+
+                {/* Name */}
+                <div className="flex-1 min-w-0">
+                  <p className={`font-semibold truncate ${i < 3 ? 'text-white' : 'text-zinc-300'}`}>
+                    {r.name}
+                  </p>
+                </div>
+
+                {/* Score */}
+                <div className="text-right flex-shrink-0">
+                  <p className={`font-mono font-bold ${
+                    i === 0 ? 'text-yellow-400 text-lg' :
+                    i < 3 ? 'text-white' :
+                    'text-zinc-400'
+                  }`}>
+                    {r.score.toFixed(1)}
+                  </p>
+                  <p className="text-zinc-600 text-[10px]">/ 100</p>
+                </div>
+              </motion.div>
             ))}
           </div>
         )}
 
-        <div className="flex gap-3 pt-4">
-          <button
-            onClick={() => router.push('/ranking/history')}
-            className="flex-1 bg-zinc-800 text-zinc-300 py-3 rounded-lg font-semibold hover:bg-zinc-700 transition-colors"
-          >
-            {lang === 'ja' ? '歴代ランキング' : 'Hall of Fame'}
-          </button>
-          <button
-            onClick={() => router.push('/')}
-            className="flex-1 bg-brand text-black py-3 rounded-lg font-semibold hover:bg-brand-light transition-colors"
-          >
-            {t('backToTop', lang)}
-          </button>
-        </div>
+        {/* Play button */}
+        <button
+          onClick={() => router.push(tab === 'versus' ? '/game' : '/year')}
+          className={`w-full py-3 rounded-lg font-semibold transition-all ${
+            tab === 'versus'
+              ? 'bg-brand text-black hover:bg-brand-light'
+              : 'bg-accent text-black hover:brightness-110'
+          }`}
+        >
+          {tab === 'versus'
+            ? (lang === 'ja' ? 'VERSUS をプレイ' : 'Play VERSUS')
+            : (lang === 'ja' ? 'TIMELINE をプレイ' : 'Play TIMELINE')
+          }
+        </button>
       </div>
     </main>
   )

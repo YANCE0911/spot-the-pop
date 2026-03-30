@@ -29,10 +29,10 @@ export default function ShareButton({ score, results = [], challengeUrl, lang = 
 
   const shareUrl = challengeUrl
     ? `${typeof window !== 'undefined' ? window.location.origin : ''}${challengeUrl}`
-    : `${typeof window !== 'undefined' ? window.location.origin : ''}/share?score=${displayScore.toFixed(2)}`
+    : `${typeof window !== 'undefined' ? window.location.origin : ''}/share?score=${displayScore.toFixed(2)}&mode=versus`
 
   const shareText = [
-    'SPOT THE POP',
+    'SOUND IQ',
     `Score: ${displayScore.toFixed(2)}/100 (${grade.label})`,
   ].join('\n')
 
@@ -54,7 +54,7 @@ export default function ShareButton({ score, results = [], challengeUrl, lang = 
     <div className="flex flex-col gap-3 relative">
       {results.length > 0 && (
         <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 text-center space-y-3">
-          <p className="text-brand font-bold text-sm tracking-widest uppercase">SPOT THE POP</p>
+          <p className="text-brand font-bold text-sm tracking-widest uppercase">SOUND IQ</p>
 
           <div className="flex items-baseline justify-center gap-2">
             <span className="text-5xl font-black text-white">{displayScore.toFixed(2)}</span>
@@ -75,14 +75,6 @@ export default function ShareButton({ score, results = [], challengeUrl, lang = 
           className="flex-1 bg-black border border-zinc-700 text-white py-3 px-4 rounded-xl font-bold hover:bg-zinc-900 transition-all active:scale-[0.98] text-center"
         >
           X
-        </a>
-        <a
-          href={`https://line.me/R/msg/text/?${encodeURIComponent(`${shareText}\n${shareUrl}`)}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex-1 bg-[#06C755] text-white py-3 px-4 rounded-xl font-bold hover:bg-[#05b34c] transition-all active:scale-[0.98] text-center"
-        >
-          LINE
         </a>
         <button
           onClick={handleCopy}

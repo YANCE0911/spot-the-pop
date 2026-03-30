@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import Timer from './Timer'
 import HintPanel from './HintPanel'
 import ArtistSearch from './ArtistSearch'
+import Logo from './Logo'
 import type { MetricMode, Artist } from '@/types'
 import { t, type Lang } from '@/lib/i18n'
 import { getHintRange } from '@/lib/metrics'
@@ -78,9 +79,7 @@ export default function GameScreen({
         {/* Header */}
         <header>
           <div className="flex items-center justify-between mb-3">
-            <div>
-              <h1 className="text-brand text-2xl font-bold">SPOT THE POP</h1>
-              </div>
+            <Logo />
             <div className="flex items-center gap-3">
               {timer && (
                 <Timer
@@ -145,7 +144,7 @@ export default function GameScreen({
               )}
               <div className="flex justify-between items-center">
                 <div className="min-w-0">
-                  <h3 className="text-xl font-bold truncate">{themeArtist.nameJa || themeArtist.name}</h3>
+                  <h3 className="text-xl font-bold truncate">{themeArtist.name}</h3>
                 </div>
                 <div className="text-right flex-shrink-0">
                   <div className="text-brand text-xs font-semibold uppercase">{metricLabel}</div>

@@ -2,17 +2,17 @@ import './globals.css'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'SPOT THE POP - Music Popularity Guessing Game',
-  description: 'Guess the artist with the closest Spotify score. Challenge your music knowledge!',
+  title: 'SOUND IQ - Music Quiz Game',
+  description: 'Music quiz games for music lovers. Match artists by popularity or guess the release year!',
   openGraph: {
-    title: 'SPOT THE POP',
-    description: 'Can you guess the artist with the closest Spotify score?',
+    title: 'SOUND IQ',
+    description: 'How deep is your music knowledge?',
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'SPOT THE POP',
-    description: 'Can you guess the artist with the closest Spotify score?',
+    title: 'SOUND IQ',
+    description: 'How deep is your music knowledge?',
   },
 }
 
