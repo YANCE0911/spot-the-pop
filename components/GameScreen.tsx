@@ -9,7 +9,6 @@ import Logo from './Logo'
 import type { MetricMode, Artist } from '@/types'
 import { t, type Lang } from '@/lib/i18n'
 import { getHintRange } from '@/lib/metrics'
-import { useKeyboardFix } from '@/lib/useKeyboardFix'
 
 type Props = {
   currentRound: number
@@ -38,7 +37,6 @@ export default function GameScreen({
   const [selectedId, setSelectedId] = useState<string | undefined>()
   const [loading, setLoading] = useState(false)
   const [usedHints, setUsedHints] = useState<Set<string>>(new Set())
-  const { headerRef, contentRef } = useKeyboardFix()
 
   const handleSubmit = async (e?: React.FormEvent<HTMLFormElement>) => {
     if (e) e.preventDefault()
@@ -76,9 +74,10 @@ export default function GameScreen({
   const metricLabel = t(metric === 'followers' ? 'followers' : 'popularity', lang)
 
   return (
-    <main className="fixed inset-0 bg-black text-white font-sans flex flex-col overflow-hidden">
-      {/* Header — stays visible when iOS keyboard opens via visualViewport fix */}
-      <header ref={headerRef} className="flex-shrink-0 bg-black px-4 pt-4 pb-2 z-10 will-change-transform">
+    <main className="fixed inset-0 bg-black text-white font-sans overflow-hidden">
+      <div className="h-full overflow-y-auto">
+      {/* Sticky header — stays at top of scroll container even when iOS keyboard scrolls */}
+      <header className="sticky top-0 z-30 bg-black px-4 pt-4 pb-2">
         <div className="max-w-lg mx-auto">
           <div className="flex items-center justify-between mb-2">
             <Logo />
@@ -117,9 +116,7 @@ export default function GameScreen({
         </div>
       </header>
 
-      {/* Scrollable content area */}
-      <div ref={contentRef} className="flex-1 overflow-y-auto px-4 pb-8">
-      <div className="max-w-lg mx-auto space-y-6">
+      <div className="max-w-lg mx-auto space-y-6 px-4 pb-8">
         {/* Theme artist card */}
         <AnimatePresence mode="wait">
           <motion.div
