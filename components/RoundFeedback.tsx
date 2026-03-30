@@ -10,21 +10,19 @@ type Props = {
   lang?: 'en' | 'ja'
 }
 
-// Score per question is 0–20:
-function getGrade(score: number): { label: string; color: string; emoji: string } {
-  if (score >= 19.5) return { label: 'PERFECT', color: 'text-yellow-400', emoji: '!!!' }
-  if (score >= 17) return { label: 'SUPER', color: 'text-green-400', emoji: '!!' }
-  if (score >= 14) return { label: 'GOOD', color: 'text-brand', emoji: '!' }
-  if (score >= 10) return { label: 'NICE', color: 'text-blue-400', emoji: '' }
-  if (score >= 6) return { label: 'SO-SO', color: 'text-zinc-300', emoji: '' }
-  if (score >= 2) return { label: 'MISS', color: 'text-orange-400', emoji: '' }
-  return { label: 'BAD', color: 'text-red-400', emoji: '' }
+// Score per question is 0–20. 3-tier reactions matching TIMELINE style.
+// PERFECT: ~2x diff (≥17), GREAT: ~5x diff (≥14), GOOD: ~6x diff (≥12)
+function getReaction(score: number): { label: string; color: string } | null {
+  if (score >= 17) return { label: 'PERFECT!!!', color: 'text-pink-400' }
+  if (score >= 14) return { label: 'GREAT!!', color: 'text-orange-400' }
+  if (score >= 12) return { label: 'GOOD!', color: 'text-yellow-400' }
+  return null
 }
 
 export default function RoundFeedback({ result, onDismiss, lang = 'en' }: Props) {
   if (!result) return null
 
-  const grade = getGrade(result.diff)
+  const reaction = getReaction(result.diff)
   const themeVal = result.metric === 'followers'
     ? (result.themeArtist.followers ?? 0) : result.themeArtist.popularity
   const answerVal = result.metric === 'followers'
@@ -47,14 +45,16 @@ export default function RoundFeedback({ result, onDismiss, lang = 'en' }: Props)
           className="bg-zinc-900 rounded-2xl p-6 max-w-sm w-full text-center space-y-4"
           onClick={e => e.stopPropagation()}
         >
-          <motion.div
-            initial={{ scale: 0.5 }}
-            animate={{ scale: 1 }}
-            transition={{ type: 'spring', dampen: 10, delay: 0.1 }}
-            className={`text-4xl font-black ${grade.color}`}
-          >
-            {grade.label}{grade.emoji}
-          </motion.div>
+          {reaction && (
+            <motion.div
+              initial={{ scale: 0.5 }}
+              animate={{ scale: 1 }}
+              transition={{ type: 'spring', dampen: 10, delay: 0.1 }}
+              className={`text-4xl font-black ${reaction.color}`}
+            >
+              {reaction.label}
+            </motion.div>
+          )}
 
           <div className="grid grid-cols-2 gap-3 text-sm">
             <div className="bg-zinc-800 p-3 rounded-lg">

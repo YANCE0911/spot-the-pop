@@ -248,18 +248,9 @@ export default function YearGame() {
           )}
         </header>
 
-        {/* Track card / Feedback — shared AnimatePresence to prevent layout shift */}
-        <AnimatePresence mode="wait">
+        {/* Speed bonus indicator — sticky so it stays visible when iOS keyboard opens */}
         {currentQ && !feedback && (
-          <motion.div
-            key={`q-${currentRound}`}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="bg-zinc-900 p-5 rounded-xl space-y-4"
-          >
-            {/* Speed bonus indicator — fixed height to prevent layout shift */}
+          <div className="sticky top-0 z-30 bg-black/90 backdrop-blur-sm py-2 -mx-4 px-4">
             <div className="flex items-center justify-between text-xs h-5">
               {elapsed <= BONUS_ZONE ? (
                 <>
@@ -276,7 +267,20 @@ export default function YearGame() {
                 <span className="text-zinc-600 font-bold">SPEED BONUS +0.0</span>
               )}
             </div>
+          </div>
+        )}
 
+        {/* Track card / Feedback — shared AnimatePresence to prevent layout shift */}
+        <AnimatePresence mode="wait">
+        {currentQ && !feedback && (
+          <motion.div
+            key={`q-${currentRound}`}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="bg-zinc-900 p-5 rounded-xl space-y-4"
+          >
             {/* Album art */}
             {currentQ.albumImageUrl && (
               <div className="flex justify-center">
