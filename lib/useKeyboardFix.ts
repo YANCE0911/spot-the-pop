@@ -21,7 +21,7 @@ export function useKeyboardFix() {
     const vv = window.visualViewport
     if (!vv) return
 
-    let initialHeight = vv.height
+    const initialHeight = vv.height
 
     const onResize = () => {
       const heightDiff = initialHeight - vv.height
