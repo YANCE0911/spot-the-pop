@@ -248,10 +248,10 @@ export default function YearGame() {
           )}
         </header>
 
-        {/* Speed bonus indicator — sticky so it stays visible when iOS keyboard opens */}
+        {/* Speed bonus indicator — fixed top so it stays visible when iOS keyboard opens */}
         {currentQ && !feedback && (
-          <div className="sticky top-0 z-30 bg-black/90 backdrop-blur-sm py-2 -mx-4 px-4">
-            <div className="flex items-center justify-between text-xs h-5">
+          <div className="fixed top-0 left-0 right-0 z-30 bg-black/90 backdrop-blur-sm py-2 px-4">
+            <div className="max-w-lg mx-auto flex items-center justify-between text-xs h-5">
               {elapsed <= BONUS_ZONE ? (
                 <>
                   <span className="text-violet-300 font-bold">SPEED BONUS +{currentBonus.toFixed(1)}</span>
