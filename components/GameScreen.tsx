@@ -74,9 +74,9 @@ export default function GameScreen({
   const metricLabel = t(metric === 'followers' ? 'followers' : 'popularity', lang)
 
   return (
-    <main className="min-h-screen bg-black text-white font-sans">
-      {/* Fixed header — always visible even when iOS keyboard opens */}
-      <header className="fixed top-0 left-0 right-0 z-30 bg-black/95 backdrop-blur-sm px-4 pt-4 pb-2">
+    <main className="h-[100dvh] bg-black text-white font-sans flex flex-col">
+      {/* Header — non-scrolling, stays visible when iOS keyboard opens */}
+      <header className="flex-shrink-0 bg-black px-4 pt-4 pb-2">
         <div className="max-w-lg mx-auto">
           <div className="flex items-center justify-between mb-2">
             <Logo />
@@ -115,10 +115,9 @@ export default function GameScreen({
         </div>
       </header>
 
-      {/* Spacer for fixed header */}
-      <div className="h-24" />
-
-      <div className="max-w-lg mx-auto space-y-6 px-4 pb-8">
+      {/* Scrollable content area */}
+      <div className="flex-1 overflow-y-auto px-4 pb-8">
+      <div className="max-w-lg mx-auto space-y-6">
         {/* Theme artist card */}
         <AnimatePresence mode="wait">
           <motion.div
@@ -209,6 +208,7 @@ export default function GameScreen({
             </form>
           </motion.div>
         </AnimatePresence>
+      </div>
       </div>
     </main>
   )
