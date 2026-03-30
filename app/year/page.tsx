@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import Logo from '@/components/Logo'
 import ScoreRank from '@/components/ScoreRank'
 import { saveRanking } from '@/lib/ranking'
+import { getPlayerId } from '@/lib/playerId'
 
 type TrackQuestion = {
   trackName: string
@@ -175,7 +176,7 @@ export default function YearGame() {
     return (
       <main className="min-h-screen bg-black text-white flex items-center justify-center">
         <div className="text-center space-y-4">
-          <div className="animate-spin h-10 w-10 border-4 border-brand rounded-full border-t-transparent mx-auto" />
+          <div className="animate-spin h-10 w-10 border-4 border-accent rounded-full border-t-transparent mx-auto" />
           <p className="text-zinc-500 text-sm">Loading tracks...</p>
         </div>
       </main>
@@ -401,7 +402,8 @@ function TimelineResults({
     if (!playerName.trim() || submitting || submitted) return
     setSubmitting(true)
     try {
-      await saveRanking(playerName, displayScore, 'classic', 'year', undefined, 'timeline')
+      const pid = getPlayerId()
+      await saveRanking(playerName, displayScore, 'classic', 'year', undefined, 'timeline', pid)
       setSubmitted(true)
     } catch (err) {
       console.error(err)

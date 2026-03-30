@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { saveRanking } from '@/lib/ranking'
+import { getPlayerId } from '@/lib/playerId'
 import ShareButton from '@/components/ShareButton'
 import ScoreRank from '@/components/ScoreRank'
 import type { GameResult } from '@/types'
@@ -44,7 +45,8 @@ export default function Results() {
     try {
       // Save raw decimal score (2dp) for ranking differentiation
       const displayScore = Math.round(score * 100) / 100
-      await saveRanking(playerName, displayScore)
+      const pid = getPlayerId()
+      await saveRanking(playerName, displayScore, undefined, undefined, undefined, 'versus', pid)
       localStorage.setItem('rankingSubmitted', 'true')
       setSubmitted(true)
 

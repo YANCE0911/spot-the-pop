@@ -8,6 +8,7 @@ import {
   limit,
   where,
   addDoc,
+  updateDoc,
   doc,
   getDoc,
   Timestamp,
@@ -21,13 +22,13 @@ const DAILY_RANKING_COLLECTION = 'daily_rankings'
 const SEASON1_START = Timestamp.fromDate(new Date('2026-03-28T15:00:00Z'))
 
 // Current season (Season 1) rankings
-export async function getTopRankings(count = 10, gameType?: 'versus' | 'timeline'): Promise<Ranking[]> {
+export async function getTopRankings(count = 50, gameType?: 'versus' | 'timeline'): Promise<Ranking[]> {
   try {
     const q = query(
       collection(db, RANKING_COLLECTION),
       where('createdAt', '>=', SEASON1_START),
       orderBy('createdAt'),
-      limit(200)
+      limit(500)
     )
     const snapshot = await getDocs(q)
     let all = snapshot.docs.map(doc => doc.data() as Ranking)
@@ -50,16 +51,88 @@ export async function getTopRankings(count = 10, gameType?: 'versus' | 'timeline
   }
 }
 
-export async function saveRanking(name: string, score: number, mode?: string, metric?: string, genre?: string, gameType?: 'versus' | 'timeline') {
+// Get player's rank (1-indexed) for a specific game type
+export async function getPlayerRank(playerId: string, gameType: 'versus' | 'timeline'): Promise<{ rank: number; score: number } | null> {
+  if (!playerId) return null
+  try {
+    const q = query(
+      collection(db, RANKING_COLLECTION),
+      where('createdAt', '>=', SEASON1_START),
+      orderBy('createdAt'),
+      limit(500)
+    )
+    const snapshot = await getDocs(q)
+    let all = snapshot.docs.map(doc => doc.data() as Ranking)
+    if (gameType === 'timeline') {
+      all = all.filter(r => r.gameType === 'timeline')
+    } else {
+      all = all.filter(r => !r.gameType || r.gameType === 'versus')
+    }
+    const sorted = all.sort((a, b) => b.score - a.score)
+    const idx = sorted.findIndex(r => r.playerId === playerId)
+    if (idx === -1) return null
+    return { rank: idx + 1, score: sorted[idx].score }
+  } catch {
+    return null
+  }
+}
+
+// Save ranking with best-score-only logic per playerId + gameType
+export async function saveRanking(
+  name: string,
+  score: number,
+  mode?: string,
+  metric?: string,
+  genre?: string,
+  gameType?: 'versus' | 'timeline',
+  playerId?: string
+) {
+  const gt = gameType ?? 'versus'
+
+  // If playerId provided, check for existing entry and only keep best score
+  if (playerId) {
+    try {
+      const q = query(
+        collection(db, RANKING_COLLECTION),
+        where('playerId', '==', playerId),
+        where('gameType', '==', gt),
+        where('createdAt', '>=', SEASON1_START),
+        orderBy('createdAt'),
+        limit(1)
+      )
+      const snapshot = await getDocs(q)
+      if (!snapshot.empty) {
+        const existingDoc = snapshot.docs[0]
+        const existing = existingDoc.data() as Ranking
+        if (score <= existing.score) {
+          // Current score is not higher — don't update
+          return { updated: false, bestScore: existing.score }
+        }
+        // New high score — update existing doc
+        await updateDoc(existingDoc.ref, {
+          name,
+          score,
+          createdAt: Timestamp.now(),
+        })
+        return { updated: true, bestScore: score }
+      }
+    } catch {
+      // Index might not exist yet — fall through to addDoc
+    }
+  }
+
+  // No existing entry or no playerId — create new
   await addDoc(collection(db, RANKING_COLLECTION), {
     name,
     score,
     mode: mode ?? 'classic',
     metric: metric ?? 'popularity',
     genre: genre ?? null,
-    gameType: gameType ?? 'versus',
+    gameType: gt,
+    playerId: playerId ?? null,
     createdAt: Timestamp.now(),
   })
+  return { updated: false, bestScore: score }
 }
 
 // Daily rankings

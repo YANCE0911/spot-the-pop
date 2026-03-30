@@ -7,6 +7,7 @@ export type Ranking = {
   genre?: string
   date?: string // YYYY-MM-DD for daily
   gameType?: 'versus' | 'timeline'
+  playerId?: string
 }
 
 export type GameMode = 'classic' | 'daily' | 'genre' | 'challenge'

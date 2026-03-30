@@ -13,8 +13,12 @@ export default function Home() {
   }, [])
 
   return (
-    <main className="min-h-screen bg-black text-white py-10 px-4 font-sans">
-      <div className="max-w-lg mx-auto space-y-8">
+    <main className="min-h-screen bg-black text-white py-10 px-4 font-sans relative overflow-hidden">
+      {/* Background glow blobs */}
+      <div className="absolute top-32 left-1/2 -translate-x-1/2 w-80 h-80 bg-accent/15 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute top-[28rem] left-1/2 -translate-x-1/2 w-60 h-60 bg-brand/10 rounded-full blur-3xl pointer-events-none" />
+
+      <div className="max-w-lg mx-auto space-y-8 relative z-10">
         {/* Language toggle */}
         <div className="flex justify-end">
           <button
@@ -34,45 +38,50 @@ export default function Home() {
         </header>
 
         {/* Game mode cards */}
+        <p className="text-sm font-semibold text-zinc-400 uppercase tracking-widest text-center animate-[fadeInUp_0.5s_ease-out_0.1s_both]">
+          {lang === 'ja' ? 'ゲームを選ぶ' : 'Select Game'}
+        </p>
         <div className="space-y-4 animate-[fadeInUp_0.5s_ease-out_0.1s_both]">
-          {/* Followers mode */}
-          <button
-            onClick={() => router.push('/game?metric=followers')}
-            className="w-full bg-zinc-900/80 border border-zinc-800 rounded-2xl p-6 text-left hover:border-brand/50 transition-all group card-glow-versus"
-          >
-            <p className="text-gradient font-black text-2xl tracking-wider mb-2">
-              VERSUS
-            </p>
-            <p className="text-zinc-400 text-sm">
-              {lang === 'ja'
-                ? '同じくらい人気のアーティストを当てよう！'
-                : 'Name an artist with similar popularity'}
-            </p>
-          </button>
-
-          {/* Year mode */}
+          {/* TIMELINE — Main mode */}
           <button
             onClick={() => router.push('/year')}
-            className="w-full bg-zinc-900/80 border border-zinc-800 rounded-2xl p-6 text-left hover:border-accent/50 transition-all group card-glow-timeline"
+            className="w-full bg-zinc-900/80 border border-zinc-800 rounded-2xl px-8 py-5 text-left hover:border-accent/50 hover:scale-[1.01] transition-all group card-glow-timeline"
           >
-            <p className="text-gradient-warm font-black text-2xl tracking-wider mb-2">
+            <p className="text-gradient-warm font-black text-3xl tracking-wider mb-3 flex items-center gap-2">
+              <span className="inline-block w-0 h-0 border-t-[8px] border-t-transparent border-b-[8px] border-b-transparent border-l-[12px] border-l-accent" />
               TIMELINE
             </p>
-            <p className="text-zinc-400 text-sm">
+            <p className="text-zinc-400 text-xs">
               {lang === 'ja'
                 ? 'あの曲、何年にリリースされた？'
                 : 'When was that track released?'}
             </p>
           </button>
+
+          {/* VERSUS — Sub mode */}
+          <button
+            onClick={() => router.push('/game?metric=followers')}
+            className="w-full bg-zinc-900/80 border border-zinc-800 rounded-2xl px-8 py-5 text-left hover:border-brand/50 hover:scale-[1.01] transition-all group card-glow-versus"
+          >
+            <p className="text-gradient font-black text-3xl tracking-wider mb-3 flex items-center gap-2">
+              <span className="inline-block w-0 h-0 border-t-[8px] border-t-transparent border-b-[8px] border-b-transparent border-l-[12px] border-l-brand" />
+              VERSUS
+            </p>
+            <p className="text-zinc-400 text-xs">
+              {lang === 'ja'
+                ? '同じくらい人気のアーティストを当てよう！'
+                : 'Name an artist with similar popularity'}
+            </p>
+          </button>
         </div>
 
         {/* Ranking link */}
-        <div className="text-center animate-[fadeInUp_0.5s_ease-out_0.2s_both]">
+        <div className="animate-[fadeInUp_0.5s_ease-out_0.2s_both]">
           <button
             onClick={() => router.push('/ranking')}
-            className="text-zinc-500 hover:text-white text-sm border border-zinc-800 px-4 py-2 rounded-lg transition-colors"
+            className="w-full bg-zinc-800/80 hover:bg-zinc-700 text-zinc-300 hover:text-white text-sm py-3 rounded-xl transition-all"
           >
-            {lang === 'ja' ? 'ランキングを見る' : 'View Rankings'}
+            {lang === 'ja' ? 'ランキング' : 'Rankings'}
           </button>
         </div>
       </div>

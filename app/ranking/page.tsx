@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { getTopRankings } from '@/lib/ranking'
+import { getTopRankings, getPlayerRank } from '@/lib/ranking'
+import { getPlayerId } from '@/lib/playerId'
 import type { Ranking } from '@/types'
 import { detectLang, type Lang } from '@/lib/i18n'
 import Logo from '@/components/Logo'
@@ -17,19 +18,31 @@ export default function RankingPage() {
   const [timelineRankings, setTimelineRankings] = useState<Ranking[]>([])
   const [loading, setLoading] = useState(true)
   const [lang] = useState<Lang>(() => detectLang())
+  const [playerId, setPlayerId] = useState('')
+  const [myVersusRank, setMyVersusRank] = useState<{ rank: number; score: number } | null>(null)
+  const [myTimelineRank, setMyTimelineRank] = useState<{ rank: number; score: number } | null>(null)
 
   useEffect(() => {
+    const pid = getPlayerId()
+    setPlayerId(pid)
+
     Promise.all([
-      getTopRankings(20, 'versus'),
-      getTopRankings(20, 'timeline'),
-    ]).then(([v, t]) => {
+      getTopRankings(50, 'versus'),
+      getTopRankings(50, 'timeline'),
+      getPlayerRank(pid, 'versus'),
+      getPlayerRank(pid, 'timeline'),
+    ]).then(([v, t, myV, myT]) => {
       setVersusRankings(v)
       setTimelineRankings(t)
+      setMyVersusRank(myV)
+      setMyTimelineRank(myT)
     }).catch(console.error)
       .finally(() => setLoading(false))
   }, [])
 
   const rankings = tab === 'versus' ? versusRankings : timelineRankings
+  const myRank = tab === 'versus' ? myVersusRank : myTimelineRank
+  const isInList = myRank ? myRank.rank <= 50 : false
 
   return (
     <main className="min-h-screen bg-black text-white py-8 px-4">
@@ -71,7 +84,9 @@ export default function RankingPage() {
         {/* Rankings list */}
         {loading ? (
           <div className="flex justify-center py-12">
-            <div className="animate-spin h-8 w-8 border-4 border-brand rounded-full border-t-transparent" />
+            <div className={`animate-spin h-8 w-8 border-4 rounded-full border-t-transparent ${
+              tab === 'versus' ? 'border-brand' : 'border-accent'
+            }`} />
           </div>
         ) : rankings.length === 0 ? (
           <div className="text-center py-12">
@@ -84,46 +99,74 @@ export default function RankingPage() {
           </div>
         ) : (
           <div className="space-y-2">
-            {rankings.map((r, i) => (
-              <motion.div
-                key={`${r.name}-${r.score}-${i}`}
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: i * 0.03 }}
-                className={`flex items-center gap-3 p-3 rounded-lg ${
-                  i < 3 ? 'bg-zinc-900 border border-zinc-800' : 'bg-zinc-900/50'
-                }`}
-              >
-                {/* Rank */}
-                <div className={`w-8 text-center font-black text-lg ${
-                  i === 0 ? 'text-yellow-400' :
-                  i === 1 ? 'text-zinc-300' :
-                  i === 2 ? 'text-amber-600' :
-                  'text-zinc-600'
-                }`}>
-                  {i + 1}
-                </div>
-
-                {/* Name */}
-                <div className="flex-1 min-w-0">
-                  <p className={`font-semibold truncate ${i < 3 ? 'text-white' : 'text-zinc-300'}`}>
-                    {r.name}
-                  </p>
-                </div>
-
-                {/* Score */}
-                <div className="text-right flex-shrink-0">
-                  <p className={`font-mono font-bold ${
-                    i === 0 ? 'text-yellow-400 text-lg' :
-                    i < 3 ? 'text-white' :
-                    'text-zinc-400'
+            {rankings.map((r, i) => {
+              const isMe = playerId && r.playerId === playerId
+              return (
+                <motion.div
+                  key={`${r.name}-${r.score}-${i}`}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: i * 0.02 }}
+                  className={`flex items-center gap-3 p-3 rounded-lg ${
+                    isMe
+                      ? `border-2 ${tab === 'versus' ? 'border-brand bg-brand/10' : 'border-accent bg-accent/10'}`
+                      : i < 3 ? 'bg-zinc-900 border border-zinc-800' : 'bg-zinc-900/50'
+                  }`}
+                >
+                  {/* Rank */}
+                  <div className={`w-8 text-center font-black text-lg ${
+                    i === 0 ? 'text-yellow-400' :
+                    i === 1 ? 'text-zinc-300' :
+                    i === 2 ? 'text-amber-600' :
+                    'text-zinc-600'
                   }`}>
-                    {r.score.toFixed(1)}
-                  </p>
-                  <p className="text-zinc-600 text-[10px]">/ 100</p>
-                </div>
-              </motion.div>
-            ))}
+                    {i + 1}
+                  </div>
+
+                  {/* Name */}
+                  <div className="flex-1 min-w-0">
+                    <p className={`font-semibold truncate ${
+                      isMe ? (tab === 'versus' ? 'text-brand' : 'text-accent') :
+                      i < 3 ? 'text-white' : 'text-zinc-300'
+                    }`}>
+                      {r.name}
+                      {isMe && <span className="text-xs ml-1 opacity-60">YOU</span>}
+                    </p>
+                  </div>
+
+                  {/* Score */}
+                  <div className="text-right flex-shrink-0">
+                    <p className={`font-mono font-bold ${
+                      i === 0 ? 'text-yellow-400 text-lg' :
+                      i < 3 ? 'text-white' :
+                      'text-zinc-400'
+                    }`}>
+                      {r.score.toFixed(1)}
+                    </p>
+                    <p className="text-zinc-600 text-[10px]">/ 100</p>
+                  </div>
+                </motion.div>
+              )
+            })}
+          </div>
+        )}
+
+        {/* Your rank (if outside top 50) */}
+        {myRank && !isInList && (
+          <div className={`p-4 rounded-xl border-2 ${
+            tab === 'versus' ? 'border-brand/50 bg-brand/5' : 'border-accent/50 bg-accent/5'
+          }`}>
+            <p className="text-zinc-400 text-xs mb-1">
+              {lang === 'ja' ? 'あなたの順位' : 'Your Rank'}
+            </p>
+            <div className="flex items-center justify-between">
+              <span className={`text-2xl font-black ${tab === 'versus' ? 'text-brand' : 'text-accent'}`}>
+                #{myRank.rank}
+              </span>
+              <span className="text-zinc-400 font-mono">
+                {myRank.score.toFixed(1)} / 100
+              </span>
+            </div>
           </div>
         )}
 
