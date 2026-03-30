@@ -49,18 +49,32 @@ function getBucketIndex(year: number): number {
   return YEAR_BUCKETS.findIndex(b => year >= b.min && year <= b.max)
 }
 
-// Load question bank (cached in memory)
+// Load question banks (cached in memory)
 let questionBank: BankQuestion[] | null = null
 
 function loadQuestionBank(): BankQuestion[] | null {
   if (questionBank) return questionBank
 
-  const bankPath = path.join(process.cwd(), 'data', 'questionBank.json')
-  if (!fs.existsSync(bankPath)) return null
+  const banks: BankQuestion[] = []
 
-  const raw = JSON.parse(fs.readFileSync(bankPath, 'utf-8'))
-  questionBank = raw.questions as BankQuestion[]
-  console.log(`Loaded question bank: ${questionBank.length} questions`)
+  // Load Japanese question bank
+  const bankPath = path.join(process.cwd(), 'data', 'questionBank.json')
+  if (fs.existsSync(bankPath)) {
+    const raw = JSON.parse(fs.readFileSync(bankPath, 'utf-8'))
+    banks.push(...(raw.questions as BankQuestion[]))
+  }
+
+  // Load global question bank
+  const globalPath = path.join(process.cwd(), 'data', 'globalQuestionBank.json')
+  if (fs.existsSync(globalPath)) {
+    const raw = JSON.parse(fs.readFileSync(globalPath, 'utf-8'))
+    banks.push(...(raw.questions as BankQuestion[]))
+  }
+
+  if (banks.length === 0) return null
+
+  questionBank = banks
+  console.log(`Loaded question bank: ${questionBank.length} questions (JP + Global)`)
   return questionBank
 }
 

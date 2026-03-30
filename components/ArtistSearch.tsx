@@ -25,9 +25,16 @@ export default function ArtistSearch({ value, onChange, onSelect, placeholder, d
   const [selectedIndex, setSelectedIndex] = useState(-1)
   const debounceRef = useRef<NodeJS.Timeout>(null)
   const wrapperRef = useRef<HTMLDivElement>(null)
+  const justSelectedRef = useRef(false)
 
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current)
+
+    // Skip search if we just selected from dropdown
+    if (justSelectedRef.current) {
+      justSelectedRef.current = false
+      return
+    }
 
     if (value.length < 2) {
       setSuggestions([])
@@ -75,14 +82,18 @@ export default function ArtistSearch({ value, onChange, onSelect, placeholder, d
     } else if (e.key === 'Enter' && selectedIndex >= 0) {
       e.preventDefault()
       const selected = suggestions[selectedIndex]
+      justSelectedRef.current = true
       onChange(selected.name)
+      setSuggestions([])
       setShowDropdown(false)
       onSelect(selected.name, selected.id)
     }
   }
 
   const handleSelect = (s: Suggestion) => {
+    justSelectedRef.current = true
     onChange(s.name)
+    setSuggestions([])
     setShowDropdown(false)
     onSelect(s.name, s.id)
   }
@@ -95,8 +106,8 @@ export default function ArtistSearch({ value, onChange, onSelect, placeholder, d
         onChange={e => onChange(e.target.value)}
         onKeyDown={handleKeyDown}
         onFocus={e => {
-          if (suggestions.length > 0) setShowDropdown(true)
-          setTimeout(() => e.target.scrollIntoView({ behavior: 'smooth', block: 'center' }), 300)
+          if (suggestions.length > 0 && !justSelectedRef.current) setShowDropdown(true)
+          setTimeout(() => e.target.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 300)
         }}
         placeholder={placeholder}
         disabled={disabled}
@@ -130,9 +141,7 @@ export default function ArtistSearch({ value, onChange, onSelect, placeholder, d
                 <div className="min-w-0 flex-1">
                   <div className="flex items-baseline justify-between gap-2">
                     <span className="text-sm font-medium text-white truncate">{s.name}</span>
-                    {/* followers hidden during game */}
                   </div>
-                  {/* genres hidden to reduce noise */}
                 </div>
               </li>
             ))}
