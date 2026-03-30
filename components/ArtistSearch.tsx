@@ -105,9 +105,8 @@ export default function ArtistSearch({ value, onChange, onSelect, placeholder, d
         value={value}
         onChange={e => onChange(e.target.value)}
         onKeyDown={handleKeyDown}
-        onFocus={e => {
+        onFocus={() => {
           if (suggestions.length > 0 && !justSelectedRef.current) setShowDropdown(true)
-          setTimeout(() => e.target.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 300)
         }}
         placeholder={placeholder}
         disabled={disabled}

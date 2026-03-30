@@ -7,6 +7,7 @@ import Logo from '@/components/Logo'
 import ScoreRank from '@/components/ScoreRank'
 import { saveRanking } from '@/lib/ranking'
 import { getPlayerId } from '@/lib/playerId'
+import { useKeyboardFix } from '@/lib/useKeyboardFix'
 
 type TrackQuestion = {
   trackName: string
@@ -84,6 +85,7 @@ export default function YearGame() {
   const startTimeRef = useRef<number>(0)
   const elapsedTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
+  const { headerRef, contentRef } = useKeyboardFix()
 
   useEffect(() => {
     fetch('/api/year/tracks?count=10')
@@ -218,9 +220,9 @@ export default function YearGame() {
   }
 
   return (
-    <main className="h-[100dvh] bg-black text-white font-sans flex flex-col">
-      {/* Header — non-scrolling, stays visible when iOS keyboard opens */}
-      <header className="flex-shrink-0 bg-black px-4 pt-4 pb-2">
+    <main className="fixed inset-0 bg-black text-white font-sans flex flex-col overflow-hidden">
+      {/* Header — stays visible when iOS keyboard opens via visualViewport fix */}
+      <header ref={headerRef} className="flex-shrink-0 bg-black px-4 pt-4 pb-2 z-10 will-change-transform">
         <div className="max-w-lg mx-auto">
           <div className="flex items-center justify-between mb-2">
             <Logo />
@@ -270,7 +272,7 @@ export default function YearGame() {
       </header>
 
       {/* Scrollable content area */}
-      <div className="flex-1 overflow-y-auto px-4 pb-8">
+      <div ref={contentRef} className="flex-1 overflow-y-auto px-4 pb-8">
       <div className="max-w-lg mx-auto space-y-6">
         {/* Track card / Feedback — shared AnimatePresence to prevent layout shift */}
         <AnimatePresence mode="wait">
@@ -312,9 +314,6 @@ export default function YearGame() {
                     .replace(/[０-９]/g, c => String.fromCharCode(c.charCodeAt(0) - 0xFEE0))
                     .replace(/[^0-9]/g, '')
                   if (v.length <= 4) setGuessYear(v)
-                }}
-                onFocus={e => {
-                  setTimeout(() => e.target.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 300)
                 }}
                 onKeyDown={e => { if (e.key === 'Enter' && guessYear) handleSubmit() }}
                 placeholder="例: 2015"
