@@ -13,7 +13,7 @@ type Tab = 'versus' | 'timeline'
 
 export default function RankingPage() {
   const router = useRouter()
-  const [tab, setTab] = useState<Tab>('versus')
+  const [tab, setTab] = useState<Tab>('timeline')
   const [versusRankings, setVersusRankings] = useState<Ranking[]>([])
   const [timelineRankings, setTimelineRankings] = useState<Ranking[]>([])
   const [loading, setLoading] = useState(true)
@@ -60,16 +60,6 @@ export default function RankingPage() {
         {/* Tab switcher */}
         <div className="flex bg-zinc-900 rounded-lg p-1">
           <button
-            onClick={() => setTab('versus')}
-            className={`flex-1 py-2 rounded-md text-sm font-bold transition-all ${
-              tab === 'versus'
-                ? 'bg-brand text-black'
-                : 'text-zinc-400 hover:text-white'
-            }`}
-          >
-            VERSUS
-          </button>
-          <button
             onClick={() => setTab('timeline')}
             className={`flex-1 py-2 rounded-md text-sm font-bold transition-all ${
               tab === 'timeline'
@@ -78,6 +68,16 @@ export default function RankingPage() {
             }`}
           >
             TIMELINE
+          </button>
+          <button
+            onClick={() => setTab('versus')}
+            className={`flex-1 py-2 rounded-md text-sm font-bold transition-all ${
+              tab === 'versus'
+                ? 'bg-brand text-black'
+                : 'text-zinc-400 hover:text-white'
+            }`}
+          >
+            VERSUS
           </button>
         </div>
 
