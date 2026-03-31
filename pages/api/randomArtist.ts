@@ -10,10 +10,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
     const count = Math.min(Number(req.query.count) || 5, 20)
     const genre = (req.query.genre as GenreCategory) || 'all'
+    const locale = (req.query.locale as string) || 'ja'
+    const region: 'jp' | 'global' = locale.startsWith('ja') ? 'jp' : 'global'
 
     // Use static list values directly (no Spotify API calls)
     // followers/popularity are updated monthly via GitHub Actions
-    const artists = await getRandomArtist(count, genre)
+    const artists = await getRandomArtist(count, genre, region)
 
     return res.status(200).json({ artists })
   } catch (error) {

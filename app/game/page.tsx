@@ -30,7 +30,8 @@ function GameContent() {
     localStorage.removeItem('rankingSubmitted')
     const fetchQuestions = async () => {
       try {
-        const url = `/api/randomArtist?count=5${genre !== 'all' ? `&genre=${genre}` : ''}`
+        const locale = typeof navigator !== 'undefined' ? navigator.language : 'ja'
+        const url = `/api/randomArtist?count=5&locale=${encodeURIComponent(locale)}${genre !== 'all' ? `&genre=${genre}` : ''}`
         const res = await fetch(url)
         const data = await res.json()
         if (res.ok && data.artists) {

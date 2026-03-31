@@ -101,11 +101,17 @@ function loadQuestionBank(): BankQuestion[] | null {
   return questionBank
 }
 
-function questionsFromBank(count: number): TrackQuestion[] {
+function questionsFromBank(count: number, region: 'jp' | 'global' = 'jp'): TrackQuestion[] {
   const bank = loadQuestionBank()
   if (!bank || bank.length === 0) return []
 
-  const eligible = bank.filter(q =>
+  let pool = bank
+  if (region === 'global') {
+    // Global users: only global bank questions (no JP-specific artists)
+    pool = bank.filter(q => !q.artistNameJa)
+  }
+
+  const eligible = pool.filter(q =>
     meetsPopularityThreshold(q) && meetsTrackPopularity(q) && isValidQuestion(q.trackName, q.albumName, q.source === 'single' ? 'single' : 'album')
   )
   const buckets: BankQuestion[][] = YEAR_BUCKETS.map(() => [])
@@ -154,7 +160,7 @@ function questionsFromBank(count: number): TrackQuestion[] {
 }
 
 // Fallback: fetch top tracks from Spotify API directly (parallel)
-async function questionsFromSpotifyAPI(count: number): Promise<TrackQuestion[]> {
+async function questionsFromSpotifyAPI(count: number, market = 'JP'): Promise<TrackQuestion[]> {
   const token = await getSpotifyToken()
   // Pick candidates and fetch in small parallel batches to avoid rate limiting
   const candidates = [...LARGE_JAPANESE_ARTISTS].sort(() => Math.random() - 0.5).slice(0, count * 4)
@@ -166,7 +172,7 @@ async function questionsFromSpotifyAPI(count: number): Promise<TrackQuestion[]> 
     const batchResults = await Promise.allSettled(
       batch.map(async (artist) => {
       const res = await fetch(
-        `https://api.spotify.com/v1/artists/${artist.id}/top-tracks?market=JP`,
+        `https://api.spotify.com/v1/artists/${artist.id}/top-tracks?market=${market}`,
         { headers: { Authorization: `Bearer ${token}` } }
       )
       if (!res.ok) return null
@@ -218,13 +224,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' })
 
   const count = Math.min(parseInt(req.query.count as string) || 10, 15)
+  const locale = (req.query.locale as string) || 'ja'
+  const region: 'jp' | 'global' = locale.startsWith('ja') ? 'jp' : 'global'
 
   try {
     // Try question bank first, fallback to Spotify API
-    let questions = questionsFromBank(count)
+    let questions = questionsFromBank(count, region)
     if (questions.length < count) {
       console.log('Question bank unavailable or insufficient, falling back to Spotify API')
-      questions = await questionsFromSpotifyAPI(count)
+      questions = await questionsFromSpotifyAPI(count, region === 'global' ? 'US' : 'JP')
     }
 
     res.setHeader('Cache-Control', 'no-store')

@@ -7,6 +7,7 @@ import Logo from '@/components/Logo'
 import ScoreRank from '@/components/ScoreRank'
 import { saveRanking } from '@/lib/ranking'
 import { getPlayerId } from '@/lib/playerId'
+import { detectLang, type Lang } from '@/lib/i18n'
 
 type TrackQuestion = {
   trackName: string
@@ -68,6 +69,7 @@ export default function YearGame() {
   const [results, setResults] = useState<RoundResult[]>([])
   const [feedback, setFeedback] = useState<RoundResult | null>(null)
   const [finished, setFinished] = useState(false)
+  const [lang] = useState<Lang>(() => detectLang())
 
   // Elapsed time tracking (no hard limit)
   const [elapsed, setElapsed] = useState(0)
@@ -75,7 +77,8 @@ export default function YearGame() {
   const elapsedTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   useEffect(() => {
-    fetch('/api/year/tracks?count=10')
+    const locale = typeof navigator !== 'undefined' ? navigator.language : 'ja'
+    fetch(`/api/year/tracks?count=10&locale=${encodeURIComponent(locale)}`)
       .then(r => r.json())
       .then(data => {
         if (data.questions?.length > 0) {
@@ -202,6 +205,7 @@ export default function YearGame() {
         displayBonus={displayBonus}
         results={results}
         router={router}
+        lang={lang}
       />
     )
   }
@@ -350,15 +354,15 @@ export default function YearGame() {
               )}
               <div className="space-y-1">
                 <p className="text-zinc-400">
-                  あなたの回答: <span className="text-white font-bold">{feedback.guessedYear}</span>
+                  {lang === 'ja' ? 'あなたの回答' : 'Your guess'}: <span className="text-white font-bold">{feedback.guessedYear}</span>
                 </p>
                 <p className="text-zinc-400">
-                  正解: <span className="text-accent font-bold text-2xl">{feedback.actualYear}</span>
+                  {lang === 'ja' ? '正解' : 'Answer'}: <span className="text-accent font-bold text-2xl">{feedback.actualYear}</span>
                 </p>
                 <p className="text-zinc-500 text-xs">{feedback.singleName}</p>
                 {feedback.guessedYear !== feedback.actualYear && (
                   <p className="text-zinc-500 text-sm">
-                    {Math.abs(feedback.guessedYear - feedback.actualYear)}年ずれ
+                    {Math.abs(feedback.guessedYear - feedback.actualYear)}{lang === 'ja' ? '年ズレ' : (Math.abs(feedback.guessedYear - feedback.actualYear) === 1 ? ' year off' : ' years off')}
                   </p>
                 )}
               </div>
@@ -374,13 +378,15 @@ export default function YearGame() {
                 onClick={handleNext}
                 className="w-full bg-accent text-white py-3 rounded-lg font-semibold hover:brightness-110 transition-all"
               >
-                {currentRound + 1 < TOTAL_ROUNDS ? '次へ' : '結果を見る'}
+                {currentRound + 1 < TOTAL_ROUNDS ? (lang === 'ja' ? '次へ' : 'Next') : (lang === 'ja' ? '結果を見る' : 'See Results')}
               </button>
             </motion.div>
           )}
         </AnimatePresence>
 
-        <p className="text-center text-zinc-700 text-xs">※Spotifyの登録情報に基づく発売年です</p>
+        <p className="text-center text-zinc-700 text-xs">
+          {lang === 'ja' ? '※Spotifyの登録情報に基づく発売年です' : 'Release years based on Spotify data'}
+        </p>
       </div>
     </main>
   )
@@ -393,12 +399,14 @@ function TimelineResults({
   displayBonus,
   results,
   router,
+  lang,
 }: {
   displayScore: number
   displayBase: number
   displayBonus: number
   results: RoundResult[]
   router: ReturnType<typeof useRouter>
+  lang: Lang
 }) {
   const [playerName, setPlayerName] = useState('')
   const [submitted, setSubmitted] = useState(false)
@@ -466,19 +474,19 @@ function TimelineResults({
             onClick={handleShare}
             className="flex-1 bg-accent text-white py-3 px-4 rounded-xl font-bold hover:brightness-110 transition-all active:scale-[0.98]"
           >
-            {copied ? 'コピーしました' : 'コピー'}
+            {copied ? (lang === 'ja' ? 'コピーしました' : 'Copied!') : (lang === 'ja' ? 'コピー' : 'Copy')}
           </button>
         </div>
 
         {/* Name registration */}
         {!submitted ? (
           <div className="bg-zinc-900 p-4 rounded-xl space-y-3 animate-[fadeInUp_0.5s_ease-out]">
-            <h2 className="text-accent font-bold">ランキングに登録</h2>
+            <h2 className="text-accent font-bold">{lang === 'ja' ? 'ランキングに登録' : 'Register Score'}</h2>
             <input
               type="text"
               value={playerName}
               onChange={e => setPlayerName(e.target.value)}
-              placeholder="名前を入力"
+              placeholder={lang === 'ja' ? '名前を入力' : 'Enter your name'}
               className="w-full p-2.5 rounded-lg bg-zinc-800 text-white outline-none focus:ring-2 focus:ring-accent"
             />
             <button
@@ -486,16 +494,16 @@ function TimelineResults({
               disabled={submitting}
               className="w-full bg-accent text-white py-2.5 rounded-lg font-semibold hover:brightness-110"
             >
-              {submitting ? '登録中...' : '登録する'}
+              {submitting ? (lang === 'ja' ? '登録中...' : 'Submitting...') : (lang === 'ja' ? '登録する' : 'Register')}
             </button>
           </div>
         ) : (
-          <p className="text-accent text-center font-semibold">登録しました！</p>
+          <p className="text-accent text-center font-semibold">{lang === 'ja' ? '登録しました！' : 'Registered!'}</p>
         )}
 
         {/* Round results */}
         <div className="space-y-2">
-          <h2 className="text-accent font-bold">ラウンド結果</h2>
+          <h2 className="text-accent font-bold">{lang === 'ja' ? 'ラウンド結果' : 'Round Details'}</h2>
           {results.map((r, i) => (
             <div
               key={i}
@@ -524,14 +532,16 @@ function TimelineResults({
           ))}
         </div>
 
-        <p className="text-center text-zinc-600 text-xs">※Spotifyの登録情報に基づく発売年です</p>
+        <p className="text-center text-zinc-600 text-xs">
+          {lang === 'ja' ? '※Spotifyの登録情報に基づく発売年です' : 'Release years based on Spotify data'}
+        </p>
 
         <div className="flex gap-3">
           <button onClick={() => window.location.reload()} className="flex-1 bg-accent text-white py-3 rounded-lg font-semibold hover:brightness-110">
-            もう一度プレイ
+            {lang === 'ja' ? 'もう一度プレイ' : 'Play Again'}
           </button>
           <button onClick={() => router.push('/')} className="flex-1 bg-zinc-800 text-white py-3 rounded-lg font-semibold hover:bg-zinc-700">
-            トップ
+            {lang === 'ja' ? 'トップ' : 'Home'}
           </button>
         </div>
       </div>

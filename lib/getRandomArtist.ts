@@ -1,5 +1,6 @@
 // lib/getRandomArtist.ts
 import { LARGE_JAPANESE_ARTISTS } from './JapaneseArtists'
+import { GLOBAL_ARTISTS } from './GlobalArtists'
 import { filterByGenre } from './genres'
 import type { Artist, GenreCategory } from '@/types'
 
@@ -43,11 +44,16 @@ const japaneseArtists = (LARGE_JAPANESE_ARTISTS as unknown as Artist[])
     && !EXCLUDED_IDS.has(a.id)
   )
 
+const globalArtists = (GLOBAL_ARTISTS as unknown as Artist[])
+  .filter(a => (a.followers ?? 0) >= MIN_FOLLOWERS && !EXCLUDED_IDS.has(a.id))
+
 export async function getRandomArtist(
   count = 5,
-  genre: GenreCategory = 'all'
+  genre: GenreCategory = 'all',
+  region: 'jp' | 'global' = 'jp'
 ): Promise<Artist[]> {
-  const filtered = filterByGenre(japaneseArtists, genre)
+  const pool = region === 'global' ? globalArtists : japaneseArtists
+  const filtered = filterByGenre(pool, genre)
 
   // Pure random shuffle
   const shuffled = [...filtered].sort(() => Math.random() - 0.5)
