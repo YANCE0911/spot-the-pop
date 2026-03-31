@@ -9,24 +9,71 @@ import {
   where,
   addDoc,
   updateDoc,
-  doc,
-  getDoc,
   Timestamp,
 } from 'firebase/firestore'
 import type { Ranking } from '@/types'
 
 const RANKING_COLLECTION = 'ranking'
-const DAILY_RANKING_COLLECTION = 'daily_rankings'
 
-// Season boundary: Season 1 starts 2026-03-29T00:00:00 JST (2026-03-28T15:00:00 UTC)
-const SEASON1_START = Timestamp.fromDate(new Date('2026-03-28T15:00:00Z'))
+// --- Season helpers ---
+// Season 1 = April 2026, Season 2 = May 2026, ...
+// Everything before April 2026 is "Season 0" (pre-season / old scoring)
+const SEASON_ORIGIN_YEAR = 2026
+const SEASON_ORIGIN_MONTH = 4 // April
 
-// Current season (Season 1) rankings
-export async function getTopRankings(count = 50, gameType?: 'versus' | 'timeline'): Promise<Ranking[]> {
+export function getCurrentSeasonNumber(): number {
+  const now = new Date()
+  // JST = UTC+9
+  const jst = new Date(now.getTime() + 9 * 60 * 60 * 1000)
+  const year = jst.getUTCFullYear()
+  const month = jst.getUTCMonth() + 1 // 1-indexed
+  return (year - SEASON_ORIGIN_YEAR) * 12 + (month - SEASON_ORIGIN_MONTH) + 1
+}
+
+export function getSeasonLabel(seasonNum: number): string {
+  const monthOffset = seasonNum - 1
+  const year = SEASON_ORIGIN_YEAR + Math.floor((SEASON_ORIGIN_MONTH - 1 + monthOffset) / 12)
+  const month = ((SEASON_ORIGIN_MONTH - 1 + monthOffset) % 12) + 1
+  return `${year}年${month}月`
+}
+
+export function getSeasonRange(seasonNum: number): { start: Timestamp; end: Timestamp } {
+  const monthOffset = seasonNum - 1
+  const year = SEASON_ORIGIN_YEAR + Math.floor((SEASON_ORIGIN_MONTH - 1 + monthOffset) / 12)
+  const month = ((SEASON_ORIGIN_MONTH - 1 + monthOffset) % 12) // 0-indexed
+
+  // JST midnight → UTC (subtract 9 hours)
+  const start = new Date(Date.UTC(year, month, 1, -9))
+  const end = new Date(Date.UTC(year, month + 1, 1, -9))
+  return {
+    start: Timestamp.fromDate(start),
+    end: Timestamp.fromDate(end),
+  }
+}
+
+// List all past seasons (Season 1 to current-1)
+export function getPastSeasons(): { num: number; label: string }[] {
+  const current = getCurrentSeasonNumber()
+  const seasons: { num: number; label: string }[] = []
+  for (let i = current - 1; i >= 1; i--) {
+    seasons.push({ num: i, label: getSeasonLabel(i) })
+  }
+  return seasons
+}
+
+// --- Rankings ---
+
+async function getRankingsForRange(
+  start: Timestamp,
+  end: Timestamp,
+  count: number,
+  gameType?: 'versus' | 'timeline'
+): Promise<Ranking[]> {
   try {
     const q = query(
       collection(db, RANKING_COLLECTION),
-      where('createdAt', '>=', SEASON1_START),
+      where('createdAt', '>=', start),
+      where('createdAt', '<', end),
       orderBy('createdAt'),
       limit(500)
     )
@@ -39,25 +86,31 @@ export async function getTopRankings(count = 50, gameType?: 'versus' | 'timeline
     }
     return all.sort((a, b) => b.score - a.score).slice(0, count)
   } catch {
-    const q = query(collection(db, RANKING_COLLECTION), orderBy('score', 'desc'), limit(count))
-    const snapshot = await getDocs(q)
-    let all = snapshot.docs.map(doc => doc.data() as Ranking)
-    if (gameType === 'timeline') {
-      all = all.filter(r => r.gameType === 'timeline')
-    } else if (gameType === 'versus') {
-      all = all.filter(r => !r.gameType || r.gameType === 'versus')
-    }
-    return all.slice(0, count)
+    return []
   }
 }
 
-// Get player's rank (1-indexed) for a specific game type
+// Current season rankings
+export async function getTopRankings(count = 50, gameType?: 'versus' | 'timeline'): Promise<Ranking[]> {
+  const { start, end } = getSeasonRange(getCurrentSeasonNumber())
+  return getRankingsForRange(start, end, count, gameType)
+}
+
+// Specific season rankings
+export async function getSeasonRankings(seasonNum: number, count = 50, gameType?: 'versus' | 'timeline'): Promise<Ranking[]> {
+  const { start, end } = getSeasonRange(seasonNum)
+  return getRankingsForRange(start, end, count, gameType)
+}
+
+// Get player's rank (1-indexed) for current season
 export async function getPlayerRank(playerId: string, gameType: 'versus' | 'timeline'): Promise<{ rank: number; score: number } | null> {
   if (!playerId) return null
   try {
+    const { start, end } = getSeasonRange(getCurrentSeasonNumber())
     const q = query(
       collection(db, RANKING_COLLECTION),
-      where('createdAt', '>=', SEASON1_START),
+      where('createdAt', '>=', start),
+      where('createdAt', '<', end),
       orderBy('createdAt'),
       limit(500)
     )
@@ -77,7 +130,7 @@ export async function getPlayerRank(playerId: string, gameType: 'versus' | 'time
   }
 }
 
-// Save ranking with best-score-only logic per playerId + gameType
+// Save ranking with best-score-only logic per playerId + gameType + season
 export async function saveRanking(
   name: string,
   score: number,
@@ -88,15 +141,16 @@ export async function saveRanking(
   playerId?: string
 ) {
   const gt = gameType ?? 'versus'
+  const { start } = getSeasonRange(getCurrentSeasonNumber())
 
-  // If playerId provided, check for existing entry and only keep best score
+  // If playerId provided, check for existing entry in current season
   if (playerId) {
     try {
       const q = query(
         collection(db, RANKING_COLLECTION),
         where('playerId', '==', playerId),
         where('gameType', '==', gt),
-        where('createdAt', '>=', SEASON1_START),
+        where('createdAt', '>=', start),
         orderBy('createdAt'),
         limit(1)
       )
@@ -105,10 +159,8 @@ export async function saveRanking(
         const existingDoc = snapshot.docs[0]
         const existing = existingDoc.data() as Ranking
         if (score <= existing.score) {
-          // Current score is not higher — don't update
           return { updated: false, bestScore: existing.score }
         }
-        // New high score — update existing doc
         await updateDoc(existingDoc.ref, {
           name,
           score,
@@ -121,7 +173,6 @@ export async function saveRanking(
     }
   }
 
-  // No existing entry or no playerId — create new
   await addDoc(collection(db, RANKING_COLLECTION), {
     name,
     score,
@@ -135,7 +186,29 @@ export async function saveRanking(
   return { updated: false, bestScore: score }
 }
 
-// Daily rankings
+// --- Legacy / Daily ---
+
+const DAILY_RANKING_COLLECTION = 'daily_rankings'
+
+// Season 0 (pre-season, old scoring: lower is better, before April 2026)
+const SEASON0_END = Timestamp.fromDate(new Date('2026-03-31T15:00:00Z')) // April 1 JST
+
+export async function getSeason0Rankings(count = 10): Promise<Ranking[]> {
+  try {
+    const q = query(
+      collection(db, RANKING_COLLECTION),
+      where('createdAt', '<', SEASON0_END),
+      orderBy('createdAt'),
+      limit(200)
+    )
+    const snapshot = await getDocs(q)
+    const all = snapshot.docs.map(doc => doc.data() as Ranking)
+    return all.sort((a, b) => a.score - b.score).slice(0, count)
+  } catch {
+    return []
+  }
+}
+
 export async function getDailyRankings(date: string, count = 20): Promise<Ranking[]> {
   const q = query(
     collection(db, DAILY_RANKING_COLLECTION),
@@ -154,68 +227,4 @@ export async function saveDailyRanking(name: string, score: number, date: string
     date,
     createdAt: Timestamp.now(),
   })
-}
-
-// Season 0 rankings (old scoring: lower is better, data before 2026-03-29)
-export async function getSeason0Rankings(count = 10): Promise<Ranking[]> {
-  try {
-    const q = query(
-      collection(db, RANKING_COLLECTION),
-      where('createdAt', '<', SEASON1_START),
-      orderBy('createdAt'),
-      limit(200)
-    )
-    const snapshot = await getDocs(q)
-    const all = snapshot.docs.map(doc => doc.data() as Ranking)
-    return all.sort((a, b) => a.score - b.score).slice(0, count)
-  } catch {
-    // Fallback
-    const q = query(collection(db, RANKING_COLLECTION), orderBy('score', 'asc'), limit(count))
-    const snapshot = await getDocs(q)
-    return snapshot.docs.map(doc => doc.data() as Ranking)
-  }
-}
-
-// Season archives
-export type SeasonArchive = {
-  name: string
-  rankings: { rank: number; name: string; score: number }[]
-  archivedAt: { seconds: number }
-}
-
-export async function getSeasonArchive(seasonId: string): Promise<SeasonArchive | null> {
-  const snap = await getDoc(doc(db, 'season_archives', seasonId))
-  if (!snap.exists()) return null
-  return snap.data() as SeasonArchive
-}
-
-export async function getAllSeasonArchives(): Promise<SeasonArchive[]> {
-  const q = query(collection(db, 'season_archives'), orderBy('archivedAt', 'desc'))
-  const snapshot = await getDocs(q)
-  return snapshot.docs.map(d => d.data() as SeasonArchive)
-}
-
-// Monthly rankings (current month)
-export async function getMonthlyRankings(yearMonth: string, count = 10): Promise<Ranking[]> {
-  // yearMonth format: "2026-03"
-  const startDate = new Date(`${yearMonth}-01T00:00:00Z`)
-  const endMonth = new Date(startDate)
-  endMonth.setMonth(endMonth.getMonth() + 1)
-
-  const q = query(
-    collection(db, RANKING_COLLECTION),
-    where('createdAt', '>=', Timestamp.fromDate(startDate)),
-    where('createdAt', '<', Timestamp.fromDate(endMonth)),
-    orderBy('createdAt'),
-    limit(100)
-  )
-
-  try {
-    const snapshot = await getDocs(q)
-    const all = snapshot.docs.map(d => d.data() as Ranking)
-    return all.sort((a, b) => b.score - a.score).slice(0, count)
-  } catch {
-    // Fallback if composite index doesn't exist
-    return getTopRankings(count)
-  }
 }

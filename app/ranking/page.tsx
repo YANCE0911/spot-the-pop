@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { getTopRankings, getPlayerRank } from '@/lib/ranking'
+import { getTopRankings, getSeasonRankings, getPlayerRank, getCurrentSeasonNumber, getSeasonLabel, getPastSeasons } from '@/lib/ranking'
 import { getPlayerId } from '@/lib/playerId'
 import type { Ranking } from '@/types'
 import { detectLang, type Lang } from '@/lib/i18n'
@@ -22,23 +22,43 @@ export default function RankingPage() {
   const [myVersusRank, setMyVersusRank] = useState<{ rank: number; score: number } | null>(null)
   const [myTimelineRank, setMyTimelineRank] = useState<{ rank: number; score: number } | null>(null)
 
+  const currentSeason = getCurrentSeasonNumber()
+  const [viewingSeason, setViewingSeason] = useState(currentSeason)
+  const [showPastSeasons, setShowPastSeasons] = useState(false)
+  const pastSeasons = getPastSeasons()
+  const isCurrentSeason = viewingSeason === currentSeason
+
   useEffect(() => {
     const pid = getPlayerId()
     setPlayerId(pid)
+    setLoading(true)
 
-    Promise.all([
-      getTopRankings(50, 'versus'),
-      getTopRankings(50, 'timeline'),
-      getPlayerRank(pid, 'versus'),
-      getPlayerRank(pid, 'timeline'),
-    ]).then(([v, t, myV, myT]) => {
-      setVersusRankings(v)
-      setTimelineRankings(t)
-      setMyVersusRank(myV)
-      setMyTimelineRank(myT)
-    }).catch(console.error)
-      .finally(() => setLoading(false))
-  }, [])
+    if (isCurrentSeason) {
+      Promise.all([
+        getTopRankings(50, 'versus'),
+        getTopRankings(50, 'timeline'),
+        getPlayerRank(pid, 'versus'),
+        getPlayerRank(pid, 'timeline'),
+      ]).then(([v, t, myV, myT]) => {
+        setVersusRankings(v)
+        setTimelineRankings(t)
+        setMyVersusRank(myV)
+        setMyTimelineRank(myT)
+      }).catch(console.error)
+        .finally(() => setLoading(false))
+    } else {
+      Promise.all([
+        getSeasonRankings(viewingSeason, 50, 'versus'),
+        getSeasonRankings(viewingSeason, 50, 'timeline'),
+      ]).then(([v, t]) => {
+        setVersusRankings(v)
+        setTimelineRankings(t)
+        setMyVersusRank(null)
+        setMyTimelineRank(null)
+      }).catch(console.error)
+        .finally(() => setLoading(false))
+    }
+  }, [viewingSeason, isCurrentSeason])
 
   const rankings = tab === 'versus' ? versusRankings : timelineRankings
   const myRank = tab === 'versus' ? myVersusRank : myTimelineRank
@@ -56,6 +76,53 @@ export default function RankingPage() {
             </p>
           </div>
         </header>
+
+        {/* Season selector */}
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-xs text-zinc-500">
+              {isCurrentSeason ? (lang === 'ja' ? '現在のシーズン' : 'Current Season') : (lang === 'ja' ? '過去のシーズン' : 'Past Season')}
+            </p>
+            <p className="text-lg font-bold">
+              Season {viewingSeason}
+              <span className="text-zinc-400 text-sm font-normal ml-2">{getSeasonLabel(viewingSeason)}</span>
+            </p>
+          </div>
+          {pastSeasons.length > 0 && (
+            <button
+              onClick={() => setShowPastSeasons(!showPastSeasons)}
+              className="text-xs text-zinc-400 hover:text-white border border-zinc-800 px-3 py-1.5 rounded-lg transition-colors"
+            >
+              {showPastSeasons ? (lang === 'ja' ? '閉じる' : 'Close') : (lang === 'ja' ? '過去' : 'History')}
+            </button>
+          )}
+        </div>
+
+        {/* Past seasons dropdown */}
+        {showPastSeasons && (
+          <div className="bg-zinc-900 rounded-xl p-3 space-y-1">
+            <button
+              onClick={() => { setViewingSeason(currentSeason); setShowPastSeasons(false) }}
+              className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${
+                isCurrentSeason ? 'bg-zinc-700 text-white' : 'hover:bg-zinc-800 text-zinc-400'
+              }`}
+            >
+              Season {currentSeason} — {getSeasonLabel(currentSeason)}
+              <span className="text-xs text-zinc-500 ml-2">{lang === 'ja' ? '(現在)' : '(current)'}</span>
+            </button>
+            {pastSeasons.map(s => (
+              <button
+                key={s.num}
+                onClick={() => { setViewingSeason(s.num); setShowPastSeasons(false) }}
+                className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${
+                  viewingSeason === s.num ? 'bg-zinc-700 text-white' : 'hover:bg-zinc-800 text-zinc-400'
+                }`}
+              >
+                Season {s.num} — {s.label}
+              </button>
+            ))}
+          </div>
+        )}
 
         {/* Tab switcher */}
         <div className="flex bg-zinc-900 rounded-lg p-1">
@@ -151,8 +218,8 @@ export default function RankingPage() {
           </div>
         )}
 
-        {/* Your rank (if outside top 50) */}
-        {myRank && !isInList && (
+        {/* Your rank (if outside top 50, current season only) */}
+        {isCurrentSeason && myRank && !isInList && (
           <div className={`p-4 rounded-xl border-2 ${
             tab === 'versus' ? 'border-brand/50 bg-brand/5' : 'border-accent/50 bg-accent/5'
           }`}>
@@ -170,20 +237,32 @@ export default function RankingPage() {
           </div>
         )}
 
-        {/* Play button */}
-        <button
-          onClick={() => router.push(tab === 'versus' ? '/game' : '/year')}
-          className={`w-full py-3 rounded-lg font-semibold transition-all ${
-            tab === 'versus'
-              ? 'bg-brand text-black hover:bg-brand-light'
-              : 'bg-accent text-black hover:brightness-110'
-          }`}
-        >
-          {tab === 'versus'
-            ? (lang === 'ja' ? 'VERSUS をプレイ' : 'Play VERSUS')
-            : (lang === 'ja' ? 'TIMELINE をプレイ' : 'Play TIMELINE')
-          }
-        </button>
+        {/* Play button (current season only) */}
+        {isCurrentSeason && (
+          <button
+            onClick={() => router.push(tab === 'versus' ? '/game' : '/year')}
+            className={`w-full py-3 rounded-lg font-semibold transition-all ${
+              tab === 'versus'
+                ? 'bg-brand text-black hover:bg-brand-light'
+                : 'bg-accent text-black hover:brightness-110'
+            }`}
+          >
+            {tab === 'versus'
+              ? (lang === 'ja' ? 'VERSUS をプレイ' : 'Play VERSUS')
+              : (lang === 'ja' ? 'TIMELINE をプレイ' : 'Play TIMELINE')
+            }
+          </button>
+        )}
+
+        {/* Back to current season button (past season view) */}
+        {!isCurrentSeason && (
+          <button
+            onClick={() => setViewingSeason(currentSeason)}
+            className="w-full py-3 rounded-lg font-semibold bg-zinc-800 text-white hover:bg-zinc-700 transition-all"
+          >
+            {lang === 'ja' ? '現在のシーズンに戻る' : 'Back to current season'}
+          </button>
+        )}
       </div>
     </main>
   )
