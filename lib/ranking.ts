@@ -144,19 +144,24 @@ export async function saveRanking(
   const { start } = getSeasonRange(getCurrentSeasonNumber())
 
   // If playerId provided, check for existing entry in current season
+  // Use simple query (playerId + gameType only) to avoid composite index requirement,
+  // then filter by season in JS
   if (playerId) {
     try {
       const q = query(
         collection(db, RANKING_COLLECTION),
         where('playerId', '==', playerId),
         where('gameType', '==', gt),
-        where('createdAt', '>=', start),
-        orderBy('createdAt'),
-        limit(1)
       )
       const snapshot = await getDocs(q)
-      if (!snapshot.empty) {
-        const existingDoc = snapshot.docs[0]
+      // Filter to current season in JS
+      const startMs = start.toMillis()
+      const seasonDocs = snapshot.docs.filter(d => {
+        const created = d.data().createdAt
+        return created && created.toMillis() >= startMs
+      })
+      if (seasonDocs.length > 0) {
+        const existingDoc = seasonDocs[0]
         const existing = existingDoc.data() as Ranking
         if (score <= existing.score) {
           return { updated: false, bestScore: existing.score }
@@ -168,8 +173,8 @@ export async function saveRanking(
         })
         return { updated: true, bestScore: score }
       }
-    } catch {
-      // Index might not exist yet — fall through to addDoc
+    } catch (e) {
+      console.error('saveRanking: existing check failed, creating new entry', e)
     }
   }
 
