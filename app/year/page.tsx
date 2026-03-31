@@ -84,6 +84,7 @@ export default function YearGame() {
   const startTimeRef = useRef<number>(0)
   const elapsedTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
+  const [inputFocused, setInputFocused] = useState(false)
 
   useEffect(() => {
     fetch('/api/year/tracks?count=10')
@@ -218,59 +219,54 @@ export default function YearGame() {
   }
 
   return (
-    <main className="fixed inset-0 bg-black text-white font-sans overflow-hidden">
-      <div className="h-full overflow-y-auto">
-      {/* Sticky header — stays at top of scroll container even when iOS keyboard scrolls */}
-      <header className="sticky top-0 z-30 bg-black px-4 pt-4 pb-2">
-        <div className="max-w-lg mx-auto">
-          <div className="flex items-center justify-between mb-2">
-            <Logo />
-            <div className="text-right">
-              <span className="text-xs text-zinc-400">ROUND</span>
-              <div className="text-xl font-bold">{currentRound + 1}/{Math.min(TOTAL_ROUNDS, questions.length)}</div>
+    <main className="min-h-screen bg-black text-white py-4 px-4 font-sans">
+      <div className="max-w-lg mx-auto space-y-4">
+      <header>
+        <div className="flex items-center justify-between mb-2">
+          <Logo />
+          <div className="text-right">
+            <span className="text-xs text-zinc-400">ROUND</span>
+            <div className="text-xl font-bold">{currentRound + 1}/{Math.min(TOTAL_ROUNDS, questions.length)}</div>
+          </div>
+        </div>
+
+        {/* Score bar */}
+        {totalScore > 0 && (
+          <div>
+            <div className="flex justify-between text-xs mb-0.5">
+              <span className="text-accent font-semibold">TOTAL SCORE</span>
+              <span className="text-zinc-400 font-mono">? / 100</span>
+            </div>
+            <div className="w-full bg-zinc-800 h-2 rounded-full overflow-hidden">
+              <motion.div
+                className="bg-accent/60 h-full rounded-full"
+                animate={{ width: `${Math.min(totalScore, 100)}%` }}
+                transition={{ duration: 0.6, ease: 'easeOut' }}
+              />
             </div>
           </div>
+        )}
 
-          {/* Score bar */}
-          {totalScore > 0 && (
-            <div>
-              <div className="flex justify-between text-xs mb-0.5">
-                <span className="text-accent font-semibold">TOTAL SCORE</span>
-                <span className="text-zinc-400 font-mono">? / 100</span>
-              </div>
-              <div className="w-full bg-zinc-800 h-2 rounded-full overflow-hidden">
-                <motion.div
-                  className="bg-accent/60 h-full rounded-full"
-                  animate={{ width: `${Math.min(totalScore, 100)}%` }}
-                  transition={{ duration: 0.6, ease: 'easeOut' }}
-                />
-              </div>
-            </div>
-          )}
-
-          {/* Speed bonus */}
-          {currentQ && !feedback && (
-            <div className="flex items-center justify-between text-xs h-5 mt-1">
-              {elapsed <= BONUS_ZONE ? (
-                <>
-                  <span className="text-violet-300 font-bold">SPEED BONUS +{currentBonus.toFixed(1)}</span>
-                  <div className="w-24 bg-zinc-800 h-1 rounded-full overflow-hidden">
-                    <motion.div
-                      className="bg-violet-300 h-full rounded-full"
-                      animate={{ width: `${bonusPercent}%` }}
-                      transition={{ duration: 0.1, ease: 'linear' }}
-                    />
-                  </div>
-                </>
-              ) : (
-                <span className="text-zinc-600 font-bold">SPEED BONUS +0.0</span>
-              )}
-            </div>
-          )}
-        </div>
+        {/* Speed bonus */}
+        {currentQ && !feedback && (
+          <div className="flex items-center justify-between text-xs h-5 mt-1">
+            {elapsed <= BONUS_ZONE ? (
+              <>
+                <span className="text-violet-300 font-bold">SPEED BONUS +{currentBonus.toFixed(1)}</span>
+                <div className="w-24 bg-zinc-800 h-1 rounded-full overflow-hidden">
+                  <motion.div
+                    className="bg-violet-300 h-full rounded-full"
+                    animate={{ width: `${bonusPercent}%` }}
+                    transition={{ duration: 0.1, ease: 'linear' }}
+                  />
+                </div>
+              </>
+            ) : (
+              <span className="text-zinc-600 font-bold">SPEED BONUS +0.0</span>
+            )}
+          </div>
+        )}
       </header>
-
-      <div className="max-w-lg mx-auto space-y-6 px-4 pb-8">
         {/* Track card / Feedback — shared AnimatePresence to prevent layout shift */}
         <AnimatePresence mode="wait">
         {currentQ && !feedback && (
@@ -282,8 +278,8 @@ export default function YearGame() {
             transition={{ duration: 0.2 }}
             className="bg-zinc-900 p-5 rounded-xl space-y-4"
           >
-            {/* Album art */}
-            {currentQ.albumImageUrl && (
+            {/* Album art — hidden when keyboard open so header stays visible */}
+            {currentQ.albumImageUrl && !inputFocused && (
               <div className="flex justify-center">
                 <img
                   src={currentQ.albumImageUrl}
@@ -312,6 +308,8 @@ export default function YearGame() {
                     .replace(/[^0-9]/g, '')
                   if (v.length <= 4) setGuessYear(v)
                 }}
+                onFocus={() => setInputFocused(true)}
+                onBlur={() => setInputFocused(false)}
                 onKeyDown={e => { if (e.key === 'Enter' && guessYear) handleSubmit() }}
                 placeholder="例: 2015"
                 maxLength={4}
@@ -376,7 +374,6 @@ export default function YearGame() {
 
         {/* Footer note */}
         <p className="text-center text-zinc-700 text-xs">※Spotifyの登録情報に基づく発売年です</p>
-      </div>
       </div>
     </main>
   )

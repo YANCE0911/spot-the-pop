@@ -37,6 +37,7 @@ export default function GameScreen({
   const [selectedId, setSelectedId] = useState<string | undefined>()
   const [loading, setLoading] = useState(false)
   const [usedHints, setUsedHints] = useState<Set<string>>(new Set())
+  const [inputFocused, setInputFocused] = useState(false)
 
   const handleSubmit = async (e?: React.FormEvent<HTMLFormElement>) => {
     if (e) e.preventDefault()
@@ -74,49 +75,44 @@ export default function GameScreen({
   const metricLabel = t(metric === 'followers' ? 'followers' : 'popularity', lang)
 
   return (
-    <main className="fixed inset-0 bg-black text-white font-sans overflow-hidden">
-      <div className="h-full overflow-y-auto">
-      {/* Sticky header — stays at top of scroll container even when iOS keyboard scrolls */}
-      <header className="sticky top-0 z-30 bg-black px-4 pt-4 pb-2">
-        <div className="max-w-lg mx-auto">
-          <div className="flex items-center justify-between mb-2">
-            <Logo />
-            <div className="flex items-center gap-3">
-              {timer && (
-                <Timer
-                  key={currentRound}
-                  duration={timer}
-                  onTimeout={handleTimeout}
-                  isRunning={!loading}
-                />
-              )}
-              <div className="text-right">
-                <span className="text-xs text-zinc-400">{t('round', lang)}</span>
-                <div className="text-xl font-bold">{currentRound}/{totalRounds}</div>
-              </div>
+    <main className="min-h-screen bg-black text-white py-4 px-4 font-sans">
+      <div className="max-w-lg mx-auto space-y-4">
+      <header>
+        <div className="flex items-center justify-between mb-2">
+          <Logo />
+          <div className="flex items-center gap-3">
+            {timer && (
+              <Timer
+                key={currentRound}
+                duration={timer}
+                onTimeout={handleTimeout}
+                isRunning={!loading}
+              />
+            )}
+            <div className="text-right">
+              <span className="text-xs text-zinc-400">{t('round', lang)}</span>
+              <div className="text-xl font-bold">{currentRound}/{totalRounds}</div>
             </div>
           </div>
-
-          {/* Score bar (MAX 100) */}
-          {totalScore > 0 && (
-            <div>
-              <div className="flex justify-between text-xs mb-0.5">
-                <span className="text-brand font-semibold">TOTAL SCORE</span>
-                <span className="text-zinc-400 font-mono">? / 100</span>
-              </div>
-              <div className="w-full bg-zinc-800 h-2 rounded-full overflow-hidden">
-                <motion.div
-                  className="bg-brand/60 h-full rounded-full"
-                  animate={{ width: `${Math.min(totalScore, 100)}%` }}
-                  transition={{ duration: 0.6, ease: 'easeOut' }}
-                />
-              </div>
-            </div>
-          )}
         </div>
-      </header>
 
-      <div className="max-w-lg mx-auto space-y-6 px-4 pb-8">
+        {/* Score bar (MAX 100) */}
+        {totalScore > 0 && (
+          <div>
+            <div className="flex justify-between text-xs mb-0.5">
+              <span className="text-brand font-semibold">TOTAL SCORE</span>
+              <span className="text-zinc-400 font-mono">? / 100</span>
+            </div>
+            <div className="w-full bg-zinc-800 h-2 rounded-full overflow-hidden">
+              <motion.div
+                className="bg-brand/60 h-full rounded-full"
+                animate={{ width: `${Math.min(totalScore, 100)}%` }}
+                transition={{ duration: 0.6, ease: 'easeOut' }}
+              />
+            </div>
+          </div>
+        )}
+      </header>
         {/* Theme artist card */}
         <AnimatePresence mode="wait">
           <motion.div
@@ -131,7 +127,8 @@ export default function GameScreen({
               <h2 className="text-brand text-xs font-semibold uppercase tracking-wide mb-2">
                 {t('themeArtist', lang)}
               </h2>
-              {themeArtist.imageUrl ? (
+              {/* Artist image — hidden when keyboard open so header stays visible */}
+              {!inputFocused && (themeArtist.imageUrl ? (
                 <div className="flex justify-center mb-3">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
@@ -144,7 +141,7 @@ export default function GameScreen({
                 <div className="flex justify-center mb-3">
                   <div className="w-40 h-40 rounded-full bg-zinc-700 flex items-center justify-center text-4xl text-zinc-500">?</div>
                 </div>
-              )}
+              ))}
               <div className="flex justify-between items-center">
                 <div className="min-w-0">
                   <h3 className="text-xl font-bold truncate">{themeArtist.name}</h3>
@@ -184,6 +181,8 @@ export default function GameScreen({
                   onSelect={handleSelectFromSearch}
                   placeholder={t('inputPlaceholder', lang)}
                   disabled={loading}
+                  onInputFocus={() => setInputFocused(true)}
+                  onInputBlur={() => setInputFocused(false)}
                 />
               </div>
 
@@ -207,7 +206,6 @@ export default function GameScreen({
             </form>
           </motion.div>
         </AnimatePresence>
-      </div>
       </div>
     </main>
   )

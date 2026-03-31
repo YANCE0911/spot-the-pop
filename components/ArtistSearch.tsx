@@ -17,9 +17,11 @@ type Props = {
   onSelect: (name: string, id?: string) => void
   placeholder?: string
   disabled?: boolean
+  onInputFocus?: () => void
+  onInputBlur?: () => void
 }
 
-export default function ArtistSearch({ value, onChange, onSelect, placeholder, disabled }: Props) {
+export default function ArtistSearch({ value, onChange, onSelect, placeholder, disabled, onInputFocus, onInputBlur }: Props) {
   const [suggestions, setSuggestions] = useState<Suggestion[]>([])
   const [showDropdown, setShowDropdown] = useState(false)
   const [selectedIndex, setSelectedIndex] = useState(-1)
@@ -107,6 +109,10 @@ export default function ArtistSearch({ value, onChange, onSelect, placeholder, d
         onKeyDown={handleKeyDown}
         onFocus={() => {
           if (suggestions.length > 0 && !justSelectedRef.current) setShowDropdown(true)
+          onInputFocus?.()
+        }}
+        onBlur={() => {
+          onInputBlur?.()
         }}
         placeholder={placeholder}
         disabled={disabled}
