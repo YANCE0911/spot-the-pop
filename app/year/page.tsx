@@ -86,6 +86,22 @@ export default function YearGame() {
   const inputRef = useRef<HTMLInputElement>(null)
   const [inputFocused, setInputFocused] = useState(false)
 
+  // Lock html/body scroll to prevent iOS keyboard from scrolling the page
+  useEffect(() => {
+    const html = document.documentElement
+    const body = document.body
+    html.style.overflow = 'hidden'
+    html.style.height = '100%'
+    body.style.overflow = 'hidden'
+    body.style.height = '100%'
+    return () => {
+      html.style.overflow = ''
+      html.style.height = ''
+      body.style.overflow = ''
+      body.style.height = ''
+    }
+  }, [])
+
   useEffect(() => {
     fetch('/api/year/tracks?count=10')
       .then(r => r.json())
@@ -219,166 +235,177 @@ export default function YearGame() {
   }
 
   return (
-    <main className="min-h-screen bg-black text-white py-4 px-4 font-sans">
-      <div className="max-w-lg mx-auto space-y-4">
-      <header className="transition-all duration-200">
-        {/* Full header — hidden when keyboard open */}
-        {!inputFocused && (
-          <div className="flex items-center justify-between mb-2">
-            <Logo />
-            <div className="text-right">
-              <span className="text-xs text-zinc-400">ROUND</span>
-              <div className="text-xl font-bold">{currentRound + 1}/{Math.min(TOTAL_ROUNDS, questions.length)}</div>
+    <main className="fixed inset-0 bg-black text-white px-4 pt-2 pb-2 font-sans flex flex-col">
+      <div className="max-w-lg mx-auto w-full flex flex-col flex-1 min-h-0">
+        <header className="flex-shrink-0 transition-all duration-200">
+          {/* Full header — hidden when keyboard open */}
+          {!inputFocused && (
+            <div className="flex items-center justify-between mb-2">
+              <Logo />
+              <div className="text-right">
+                <span className="text-xs text-zinc-400">ROUND</span>
+                <div className="text-xl font-bold">{currentRound + 1}/{Math.min(TOTAL_ROUNDS, questions.length)}</div>
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Score bar — compact when keyboard open */}
-        {!inputFocused && totalScore > 0 && (
-          <div>
-            <div className="flex justify-between text-xs mb-0.5">
-              <span className="text-accent font-semibold">TOTAL SCORE</span>
-              <span className="text-zinc-400 font-mono">? / 100</span>
+          {/* Compact header — shown when keyboard open */}
+          {inputFocused && (
+            <div className="flex items-center justify-between text-xs py-1">
+              <span className="text-zinc-400">ROUND {currentRound + 1}/{Math.min(TOTAL_ROUNDS, questions.length)}</span>
+              {totalScore > 0 && <span className="text-accent font-semibold">SCORE: {Math.round(totalScore)}</span>}
             </div>
-            <div className="w-full bg-zinc-800 h-2 rounded-full overflow-hidden">
-              <motion.div
-                className="bg-accent/60 h-full rounded-full"
-                animate={{ width: `${Math.min(totalScore, 100)}%` }}
-                transition={{ duration: 0.6, ease: 'easeOut' }}
-              />
-            </div>
-          </div>
-        )}
+          )}
 
-        {/* Speed bonus — always visible (most critical info) */}
-        {currentQ && !feedback && (
-          <div className="flex items-center justify-between text-xs h-5">
-            {elapsed <= BONUS_ZONE ? (
-              <>
-                <span className="text-violet-300 font-bold">SPEED BONUS +{currentBonus.toFixed(1)}</span>
-                <div className="w-24 bg-zinc-800 h-1 rounded-full overflow-hidden">
-                  <motion.div
-                    className="bg-violet-300 h-full rounded-full"
-                    animate={{ width: `${bonusPercent}%` }}
-                    transition={{ duration: 0.1, ease: 'linear' }}
-                  />
-                </div>
-              </>
-            ) : (
-              <span className="text-zinc-600 font-bold">SPEED BONUS +0.0</span>
-            )}
-          </div>
-        )}
-      </header>
-        {/* Track card / Feedback — shared AnimatePresence to prevent layout shift */}
-        <AnimatePresence mode="wait">
-        {currentQ && !feedback && (
-          <motion.div
-            key={`q-${currentRound}`}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="bg-zinc-900 p-5 rounded-xl space-y-4"
-          >
-            {/* Album art — shrinks when keyboard open */}
-            {currentQ.albumImageUrl && (
-              <div className="flex justify-center transition-all duration-200">
-                <img
-                  src={currentQ.albumImageUrl}
-                  alt=""
-                  className={`rounded-xl object-cover shadow-lg transition-all duration-200 ${
-                    inputFocused ? 'w-20 h-20' : 'w-48 h-48'
-                  }`}
+          {/* Score bar — hidden when keyboard open */}
+          {!inputFocused && totalScore > 0 && (
+            <div>
+              <div className="flex justify-between text-xs mb-0.5">
+                <span className="text-accent font-semibold">TOTAL SCORE</span>
+                <span className="text-zinc-400 font-mono">? / 100</span>
+              </div>
+              <div className="w-full bg-zinc-800 h-2 rounded-full overflow-hidden">
+                <motion.div
+                  className="bg-accent/60 h-full rounded-full"
+                  animate={{ width: `${Math.min(totalScore, 100)}%` }}
+                  transition={{ duration: 0.6, ease: 'easeOut' }}
                 />
               </div>
-            )}
-
-            <div className="text-center">
-              <p className="font-bold text-lg">{currentQ.singleName}</p>
-              <p className="text-zinc-500 text-sm">{currentQ.artistName}</p>
             </div>
+          )}
 
-            {/* Year input */}
-            <div className="space-y-3">
-              <input
-                ref={inputRef}
-                type="tel"
-                inputMode="numeric"
-                pattern="[0-9]*"
-                value={guessYear}
-                onChange={e => {
-                  const v = e.target.value
-                    .replace(/[０-９]/g, c => String.fromCharCode(c.charCodeAt(0) - 0xFEE0))
-                    .replace(/[^0-9]/g, '')
-                  if (v.length <= 4) setGuessYear(v)
-                }}
-                onFocus={() => setInputFocused(true)}
-                onBlur={() => setInputFocused(false)}
-                onKeyDown={e => { if (e.key === 'Enter' && guessYear) handleSubmit() }}
-                placeholder="例: 2015"
-                maxLength={4}
-                className="w-full p-3 rounded-lg bg-zinc-800 text-white outline-none focus:ring-2 focus:ring-accent transition-all"
-              />
-              <button
-                onClick={handleSubmit}
-                disabled={!guessYear}
-                className={`w-full py-3 rounded-lg font-semibold transition-all ${guessYear ? 'bg-accent text-white hover:brightness-110' : 'bg-zinc-700 text-white opacity-30 cursor-not-allowed'}`}
+          {/* Speed bonus — always visible (most critical info) */}
+          {currentQ && !feedback && (
+            <div className="flex items-center justify-between text-xs h-5">
+              {elapsed <= BONUS_ZONE ? (
+                <>
+                  <span className="text-violet-300 font-bold">SPEED BONUS +{currentBonus.toFixed(1)}</span>
+                  <div className="w-24 bg-zinc-800 h-1 rounded-full overflow-hidden">
+                    <motion.div
+                      className="bg-violet-300 h-full rounded-full"
+                      animate={{ width: `${bonusPercent}%` }}
+                      transition={{ duration: 0.1, ease: 'linear' }}
+                    />
+                  </div>
+                </>
+              ) : (
+                <span className="text-zinc-600 font-bold">SPEED BONUS +0.0</span>
+              )}
+            </div>
+          )}
+        </header>
+
+        {/* Scrollable content area — flex-1 allows it to fill remaining space */}
+        <div className="flex-1 min-h-0 overflow-y-auto py-2">
+          <AnimatePresence mode="wait">
+            {currentQ && !feedback && (
+              <motion.div
+                key={`q-${currentRound}`}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="bg-zinc-900 p-5 rounded-xl space-y-4"
               >
-                Answer
-              </button>
-            </div>
-          </motion.div>
-        )}
+                {/* Album art — shrinks when keyboard open */}
+                {currentQ.albumImageUrl && (
+                  <div className="flex justify-center transition-all duration-200">
+                    <img
+                      src={currentQ.albumImageUrl}
+                      alt=""
+                      className={`rounded-xl object-cover shadow-lg transition-all duration-200 ${
+                        inputFocused ? 'w-20 h-20' : 'w-48 h-48'
+                      }`}
+                    />
+                  </div>
+                )}
 
-        {feedback && (
-          <motion.div
-            key={`fb-${currentRound}`}
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="bg-zinc-900 p-5 rounded-xl space-y-4 text-center"
-          >
-            {getReaction(feedback.baseScore) && (
-              <p className={`text-5xl font-pop tracking-wider ${getReaction(feedback.baseScore)!.color}`}>
-                {getReaction(feedback.baseScore)!.label}
-              </p>
+                <div className="text-center">
+                  <p className="font-bold text-lg">{currentQ.singleName}</p>
+                  <p className="text-zinc-500 text-sm">{currentQ.artistName}</p>
+                </div>
+
+                {/* Year input */}
+                <div className="space-y-3">
+                  <input
+                    ref={inputRef}
+                    type="tel"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    value={guessYear}
+                    onChange={e => {
+                      const v = e.target.value
+                        .replace(/[０-９]/g, c => String.fromCharCode(c.charCodeAt(0) - 0xFEE0))
+                        .replace(/[^0-9]/g, '')
+                      if (v.length <= 4) setGuessYear(v)
+                    }}
+                    onFocus={() => setInputFocused(true)}
+                    onBlur={() => setInputFocused(false)}
+                    onKeyDown={e => { if (e.key === 'Enter' && guessYear) handleSubmit() }}
+                    placeholder="例: 2015"
+                    maxLength={4}
+                    className="w-full p-3 rounded-lg bg-zinc-800 text-white outline-none focus:ring-2 focus:ring-accent transition-all"
+                  />
+                  <button
+                    onClick={handleSubmit}
+                    disabled={!guessYear}
+                    className={`w-full py-3 rounded-lg font-semibold transition-all ${guessYear ? 'bg-accent text-white hover:brightness-110' : 'bg-zinc-700 text-white opacity-30 cursor-not-allowed'}`}
+                  >
+                    Answer
+                  </button>
+                </div>
+              </motion.div>
             )}
-            <div className="space-y-1">
-              <p className="text-zinc-400">
-                Your guess: <span className="text-white font-bold">{feedback.guessedYear}</span>
-              </p>
-              <p className="text-zinc-400">
-                Actual: <span className="text-accent font-bold text-2xl">{feedback.actualYear}</span>
-              </p>
-              <p className="text-zinc-500 text-xs">{feedback.singleName}</p>
-              {feedback.guessedYear !== feedback.actualYear && (
-                <p className="text-zinc-500 text-sm">
-                  {Math.abs(feedback.guessedYear - feedback.actualYear)} year{Math.abs(feedback.guessedYear - feedback.actualYear) > 1 ? 's' : ''} off
-                </p>
-              )}
-            </div>
-            <div className="flex items-baseline justify-center">
-              <span className={`text-4xl font-black font-mono ${feedback.baseScore >= 6.5 ? 'text-accent' : feedback.baseScore < 1 ? 'text-red-400' : 'text-zinc-300'}`}>
-                +{feedback.baseScore.toFixed(1)}
-              </span>
-              {feedback.timeBonus > 0 && (
-                <span className="text-sm font-bold font-mono text-violet-300 ml-1.5">+{feedback.timeBonus.toFixed(1)}</span>
-              )}
-            </div>
-            <button
-              onClick={handleNext}
-              className="w-full bg-accent text-white py-3 rounded-lg font-semibold hover:brightness-110 transition-all"
-            >
-              {currentRound + 1 < TOTAL_ROUNDS ? 'Next' : 'See Results'}
-            </button>
-          </motion.div>
-        )}
-        </AnimatePresence>
+
+            {feedback && (
+              <motion.div
+                key={`fb-${currentRound}`}
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="bg-zinc-900 p-5 rounded-xl space-y-4 text-center"
+              >
+                {getReaction(feedback.baseScore) && (
+                  <p className={`text-5xl font-pop tracking-wider ${getReaction(feedback.baseScore)!.color}`}>
+                    {getReaction(feedback.baseScore)!.label}
+                  </p>
+                )}
+                <div className="space-y-1">
+                  <p className="text-zinc-400">
+                    Your guess: <span className="text-white font-bold">{feedback.guessedYear}</span>
+                  </p>
+                  <p className="text-zinc-400">
+                    Actual: <span className="text-accent font-bold text-2xl">{feedback.actualYear}</span>
+                  </p>
+                  <p className="text-zinc-500 text-xs">{feedback.singleName}</p>
+                  {feedback.guessedYear !== feedback.actualYear && (
+                    <p className="text-zinc-500 text-sm">
+                      {Math.abs(feedback.guessedYear - feedback.actualYear)} year{Math.abs(feedback.guessedYear - feedback.actualYear) > 1 ? 's' : ''} off
+                    </p>
+                  )}
+                </div>
+                <div className="flex items-baseline justify-center">
+                  <span className={`text-4xl font-black font-mono ${feedback.baseScore >= 6.5 ? 'text-accent' : feedback.baseScore < 1 ? 'text-red-400' : 'text-zinc-300'}`}>
+                    +{feedback.baseScore.toFixed(1)}
+                  </span>
+                  {feedback.timeBonus > 0 && (
+                    <span className="text-sm font-bold font-mono text-violet-300 ml-1.5">+{feedback.timeBonus.toFixed(1)}</span>
+                  )}
+                </div>
+                <button
+                  onClick={handleNext}
+                  className="w-full bg-accent text-white py-3 rounded-lg font-semibold hover:brightness-110 transition-all"
+                >
+                  {currentRound + 1 < TOTAL_ROUNDS ? 'Next' : 'See Results'}
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
 
         {/* Footer note */}
-        <p className="text-center text-zinc-700 text-xs">※Spotifyの登録情報に基づく発売年です</p>
+        <p className="flex-shrink-0 text-center text-zinc-700 text-xs py-1">※Spotifyの登録情報に基づく発売年です</p>
       </div>
     </main>
   )
