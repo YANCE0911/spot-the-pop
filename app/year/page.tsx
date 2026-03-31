@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import Logo from '@/components/Logo'
 import ScoreRank from '@/components/ScoreRank'
 import { saveRanking } from '@/lib/ranking'
@@ -273,16 +273,8 @@ function YearGame() {
           )}
         </header>
 
-        <AnimatePresence>
-          {currentQ && !feedback && (
-            <motion.div
-              key={`q-${currentRound}`}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="space-y-3"
-            >
+        {currentQ && !feedback && (
+            <div className="space-y-3">
               {/* Album art + song info — centered, large */}
               <div className="bg-zinc-900 p-4 rounded-xl text-center space-y-2">
                 {currentQ.albumImageUrl && (
@@ -350,18 +342,11 @@ function YearGame() {
                   </button>
                 </div>
               </div>
-            </motion.div>
+            </div>
           )}
 
           {feedback && (
-            <motion.div
-              key={`fb-${currentRound}`}
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="bg-zinc-900 p-5 rounded-xl space-y-4 text-center"
-            >
+            <div className="bg-zinc-900 p-5 rounded-xl space-y-4 text-center animate-[fadeIn_0.15s_ease-out]">
               {getReaction(feedback.baseScore) && (
                 <p className={`text-4xl font-display font-black ${getReaction(feedback.baseScore)!.color}`}>
                   {getReaction(feedback.baseScore)!.label}
@@ -395,9 +380,8 @@ function YearGame() {
               >
                 {currentRound + 1 < TOTAL_ROUNDS ? (lang === 'ja' ? '次へ' : 'Next') : (lang === 'ja' ? '結果を見る' : 'See Results')}
               </button>
-            </motion.div>
+            </div>
           )}
-        </AnimatePresence>
 
         <p className="text-center text-zinc-700 text-xs">
           {lang === 'ja' ? '※Spotifyの登録情報に基づく発売年です' : 'Release years based on Spotify data'}
@@ -429,13 +413,30 @@ function TimelineResults({
   const [submitted, setSubmitted] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [copied, setCopied] = useState(false)
+  const [autoSaveResult, setAutoSaveResult] = useState<{ updated: boolean; bestScore: number } | null>(null)
+
+  // Auto-save for returning users
+  useEffect(() => {
+    const savedName = localStorage.getItem('soundiq_name')
+    if (!savedName) return
+    setPlayerName(savedName)
+    const pid = getPlayerId()
+    saveRanking(savedName, displayScore, 'classic', 'year', undefined, 'timeline', pid, region)
+      .then(result => {
+        setAutoSaveResult(result)
+        setSubmitted(true)
+      })
+      .catch(console.error)
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleRegister = async () => {
     if (!playerName.trim() || submitting || submitted) return
     setSubmitting(true)
     try {
       const pid = getPlayerId()
-      await saveRanking(playerName, displayScore, 'classic', 'year', undefined, 'timeline', pid, region)
+      const result = await saveRanking(playerName, displayScore, 'classic', 'year', undefined, 'timeline', pid, region)
+      localStorage.setItem('soundiq_name', playerName.trim())
+      setAutoSaveResult(result)
       setSubmitted(true)
     } catch (err) {
       console.error(err)
@@ -514,8 +515,23 @@ function TimelineResults({
               {submitting ? (lang === 'ja' ? '登録中...' : 'Submitting...') : (lang === 'ja' ? '登録する' : 'Register')}
             </button>
           </div>
+        ) : autoSaveResult?.updated ? (
+          <div className="text-center space-y-1">
+            <p className="text-accent font-bold text-lg">{lang === 'ja' ? 'ベスト更新!' : 'New Best!'}</p>
+            <p className="text-zinc-400 text-sm">{playerName}</p>
+          </div>
+        ) : autoSaveResult && !autoSaveResult.updated && autoSaveResult.bestScore > displayScore ? (
+          <div className="text-center space-y-1">
+            <p className="text-zinc-400 text-sm">
+              {lang === 'ja' ? `ベスト: ${autoSaveResult.bestScore.toFixed(2)}` : `Best: ${autoSaveResult.bestScore.toFixed(2)}`}
+            </p>
+            <p className="text-zinc-500 text-xs">{playerName}</p>
+          </div>
         ) : (
-          <p className="text-accent text-center font-semibold">{lang === 'ja' ? '登録しました！' : 'Registered!'}</p>
+          <div className="text-center space-y-1">
+            <p className="text-accent font-semibold">{lang === 'ja' ? '登録しました！' : 'Registered!'}</p>
+            <p className="text-zinc-400 text-sm">{playerName}</p>
+          </div>
         )}
 
         {/* Round results */}

@@ -21,6 +21,7 @@ export default function Results() {
   const [submitting, setSubmitting] = useState(false)
   const [challengeUrl, setChallengeUrl] = useState<string>()
   const [lang] = useState<Lang>(() => detectLang())
+  const [autoSaveResult, setAutoSaveResult] = useState<{ updated: boolean; bestScore: number } | null>(null)
 
   useEffect(() => {
     const saved = localStorage.getItem('gameResults')
@@ -31,7 +32,20 @@ export default function Results() {
       setResults(data.results ?? [])
       setMetric(data.metric ?? 'popularity')
 
-      if (localStorage.getItem('rankingSubmitted') === 'true') {
+      // Auto-save for returning users
+      const savedName = localStorage.getItem('soundiq_name')
+      if (savedName) {
+        setPlayerName(savedName)
+        const displayScore = Math.round(data.score * 100) / 100
+        const pid = getPlayerId()
+        const region = localStorage.getItem('soundiq_region') === 'global' ? 'global' : 'jp' as const
+        saveRanking(savedName, displayScore, undefined, undefined, undefined, 'versus', pid, region)
+          .then(result => {
+            setAutoSaveResult(result)
+            setSubmitted(true)
+          })
+          .catch(console.error)
+      } else if (localStorage.getItem('rankingSubmitted') === 'true') {
         setSubmitted(true)
       }
     } catch {
@@ -43,12 +57,13 @@ export default function Results() {
     if (!playerName.trim() || submitting || submitted) return
     setSubmitting(true)
     try {
-      // Save raw decimal score (2dp) for ranking differentiation
       const displayScore = Math.round(score * 100) / 100
       const pid = getPlayerId()
       const region = localStorage.getItem('soundiq_region') === 'global' ? 'global' : 'jp' as const
-      await saveRanking(playerName, displayScore, undefined, undefined, undefined, 'versus', pid, region)
+      const result = await saveRanking(playerName, displayScore, undefined, undefined, undefined, 'versus', pid, region)
+      localStorage.setItem('soundiq_name', playerName.trim())
       localStorage.setItem('rankingSubmitted', 'true')
+      setAutoSaveResult(result)
       setSubmitted(true)
 
       const questions = results.map(r => r.themeArtist)
@@ -96,8 +111,23 @@ export default function Results() {
               {t('register', lang)}
             </button>
           </div>
+        ) : autoSaveResult?.updated ? (
+          <div className="text-center space-y-1">
+            <p className="text-brand font-bold text-lg">{lang === 'ja' ? 'ベスト更新!' : 'New Best!'}</p>
+            <p className="text-zinc-400 text-sm">{playerName}</p>
+          </div>
+        ) : autoSaveResult && !autoSaveResult.updated && autoSaveResult.bestScore > displayScore ? (
+          <div className="text-center space-y-1">
+            <p className="text-zinc-400 text-sm">
+              {lang === 'ja' ? `ベスト: ${autoSaveResult.bestScore.toFixed(2)}` : `Best: ${autoSaveResult.bestScore.toFixed(2)}`}
+            </p>
+            <p className="text-zinc-500 text-xs">{playerName}</p>
+          </div>
         ) : (
-          <p className="text-brand text-center font-semibold">{t('registered', lang)}</p>
+          <div className="text-center space-y-1">
+            <p className="text-brand font-semibold">{t('registered', lang)}</p>
+            <p className="text-zinc-400 text-sm">{playerName}</p>
+          </div>
         )}
 
         {/* Round results */}

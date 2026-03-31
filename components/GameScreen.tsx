@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import Timer from './Timer'
 import HintPanel from './HintPanel'
 import ArtistSearch from './ArtistSearch'
@@ -124,14 +124,7 @@ export default function GameScreen({
         </header>
 
         {/* Theme artist card */}
-        <AnimatePresence>
-          <motion.div
-            key={currentRound}
-            initial={{ opacity: 0, x: 30 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -30 }}
-            className="bg-zinc-900 p-5 rounded-xl"
-          >
+          <div className="bg-zinc-900 p-5 rounded-xl">
             {/* Artist info with image */}
             <div className="mb-4">
               <h2 className="text-brand text-xs font-semibold uppercase tracking-wide mb-2">
@@ -211,8 +204,7 @@ export default function GameScreen({
                 )}
               </button>
             </form>
-          </motion.div>
-        </AnimatePresence>
+          </div>
       </div>
     </main>
   )
