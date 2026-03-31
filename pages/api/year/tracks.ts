@@ -38,8 +38,8 @@ const YEAR_BUCKETS: { min: number; max: number; quota: number }[] = [
 
 // Filter out tracks that would make bad quiz questions
 const TRACK_EXCLUDE_PATTERN = /\((.*?)?(remaster|live|acoustic|remix|edit|mix|version|instrumental|karaoke|demo)\)/i
-const TRACK_EXCLUDE_KEYWORDS = /first\s*take|the\s*first\s*take/i
-const ALBUM_EXCLUDE_PATTERN = /soundtrack|[\bO]ST\b|original\s*soundtrack/i
+const TRACK_EXCLUDE_KEYWORDS = /first\s*take|the\s*first\s*take|\bBGM\b|\binstrumental\b/i
+const ALBUM_EXCLUDE_PATTERN = /soundtrack|[\bO]ST\b|original\s*soundtrack|サウンドトラック/i
 
 function isValidQuestion(trackName: string, albumName: string, albumType?: string): boolean {
   if (TRACK_EXCLUDE_PATTERN.test(trackName)) return false
