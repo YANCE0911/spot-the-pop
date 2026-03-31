@@ -293,6 +293,32 @@ export default function YearGame() {
 
               {/* Year display + Numpad */}
               <div className="bg-zinc-900 p-4 rounded-xl space-y-3">
+                {/* Preset buttons */}
+                <div className="flex justify-center gap-2">
+                  <button
+                    onClick={() => { setGuessYear('19') }}
+                    disabled={guessYear.length > 0}
+                    className={`flex-1 py-1.5 rounded-md text-sm font-bold transition-colors ${
+                      guessYear.length === 0
+                        ? 'bg-zinc-700 text-white active:bg-zinc-500'
+                        : 'bg-zinc-800/50 text-zinc-600 cursor-not-allowed'
+                    }`}
+                  >
+                    19XX
+                  </button>
+                  <button
+                    onClick={() => { setGuessYear('20') }}
+                    disabled={guessYear.length > 0}
+                    className={`flex-1 py-1.5 rounded-md text-sm font-bold transition-colors ${
+                      guessYear.length === 0
+                        ? 'bg-zinc-700 text-white active:bg-zinc-500'
+                        : 'bg-zinc-800/50 text-zinc-600 cursor-not-allowed'
+                    }`}
+                  >
+                    20XX
+                  </button>
+                </div>
+
                 <div className="flex justify-center items-center gap-2">
                   {[0, 1, 2, 3].map(i => (
                     <div
@@ -311,28 +337,28 @@ export default function YearGame() {
                     <button
                       key={d}
                       onClick={() => handleNumpad(d)}
-                      className="bg-zinc-800 text-white text-lg font-bold py-2.5 rounded-lg active:bg-zinc-600 transition-colors"
+                      className="bg-zinc-800 text-white text-lg font-bold py-3 rounded-lg active:bg-zinc-600 transition-colors"
                     >
                       {d}
                     </button>
                   ))}
                   <button
                     onClick={handleBackspace}
-                    className="bg-zinc-800 text-zinc-400 text-base font-bold py-2.5 rounded-lg active:bg-zinc-600 transition-colors"
+                    className="bg-zinc-800 text-zinc-400 text-base font-bold py-3 rounded-lg active:bg-zinc-600 transition-colors"
                   >
                     &#9003;
                   </button>
                   <button
                     onClick={() => handleNumpad('0')}
-                    className="bg-zinc-800 text-white text-lg font-bold py-2.5 rounded-lg active:bg-zinc-600 transition-colors"
+                    className="bg-zinc-800 text-white text-lg font-bold py-3 rounded-lg active:bg-zinc-600 transition-colors"
                   >
                     0
                   </button>
                   <button
                     onClick={handleSubmit}
-                    disabled={guessYear.length !== 4}
-                    className={`text-sm font-bold py-2.5 rounded-lg transition-colors ${
-                      guessYear.length === 4
+                    disabled={guessYear.length !== 4 || parseInt(guessYear) < 1960 || parseInt(guessYear) > 2026}
+                    className={`text-sm font-bold py-3 rounded-lg transition-colors ${
+                      guessYear.length === 4 && parseInt(guessYear) >= 1960 && parseInt(guessYear) <= 2026
                         ? 'bg-accent text-white active:brightness-110'
                         : 'bg-zinc-800 text-zinc-600 cursor-not-allowed'
                     }`}
