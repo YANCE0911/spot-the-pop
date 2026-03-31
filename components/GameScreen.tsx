@@ -77,27 +77,38 @@ export default function GameScreen({
   return (
     <main className="min-h-screen bg-black text-white py-4 px-4 font-sans">
       <div className="max-w-lg mx-auto space-y-4">
-      <header>
-        <div className="flex items-center justify-between mb-2">
-          <Logo />
-          <div className="flex items-center gap-3">
-            {timer && (
-              <Timer
-                key={currentRound}
-                duration={timer}
-                onTimeout={handleTimeout}
-                isRunning={!loading}
-              />
-            )}
-            <div className="text-right">
-              <span className="text-xs text-zinc-400">{t('round', lang)}</span>
-              <div className="text-xl font-bold">{currentRound}/{totalRounds}</div>
+      <header className="transition-all duration-200">
+        {/* Full header — hidden when keyboard open */}
+        {!inputFocused && (
+          <div className="flex items-center justify-between mb-2">
+            <Logo />
+            <div className="flex items-center gap-3">
+              {timer && (
+                <Timer
+                  key={currentRound}
+                  duration={timer}
+                  onTimeout={handleTimeout}
+                  isRunning={!loading}
+                />
+              )}
+              <div className="text-right">
+                <span className="text-xs text-zinc-400">{t('round', lang)}</span>
+                <div className="text-xl font-bold">{currentRound}/{totalRounds}</div>
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
-        {/* Score bar (MAX 100) */}
-        {totalScore > 0 && (
+        {/* Compact header — shown when keyboard open */}
+        {inputFocused && (
+          <div className="flex items-center justify-between text-xs py-1">
+            <span className="text-zinc-400">{t('round', lang)} {currentRound}/{totalRounds}</span>
+            {totalScore > 0 && <span className="text-brand font-semibold">SCORE: {Math.round(totalScore)}</span>}
+          </div>
+        )}
+
+        {/* Score bar — hidden when keyboard open */}
+        {!inputFocused && totalScore > 0 && (
           <div>
             <div className="flex justify-between text-xs mb-0.5">
               <span className="text-brand font-semibold">TOTAL SCORE</span>
@@ -127,21 +138,25 @@ export default function GameScreen({
               <h2 className="text-brand text-xs font-semibold uppercase tracking-wide mb-2">
                 {t('themeArtist', lang)}
               </h2>
-              {/* Artist image — hidden when keyboard open so header stays visible */}
-              {!inputFocused && (themeArtist.imageUrl ? (
-                <div className="flex justify-center mb-3">
+              {/* Artist image — shrinks when keyboard open */}
+              {themeArtist.imageUrl ? (
+                <div className="flex justify-center mb-3 transition-all duration-200">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={themeArtist.imageUrl}
                     alt={themeArtist.name}
-                    className="w-40 h-40 rounded-full object-cover shadow-lg shadow-brand/10"
+                    className={`rounded-full object-cover shadow-lg shadow-brand/10 transition-all duration-200 ${
+                      inputFocused ? 'w-16 h-16' : 'w-40 h-40'
+                    }`}
                   />
                 </div>
               ) : (
                 <div className="flex justify-center mb-3">
-                  <div className="w-40 h-40 rounded-full bg-zinc-700 flex items-center justify-center text-4xl text-zinc-500">?</div>
+                  <div className={`rounded-full bg-zinc-700 flex items-center justify-center text-4xl text-zinc-500 transition-all duration-200 ${
+                    inputFocused ? 'w-16 h-16 text-xl' : 'w-40 h-40'
+                  }`}>?</div>
                 </div>
-              ))}
+              )}
               <div className="flex justify-between items-center">
                 <div className="min-w-0">
                   <h3 className="text-xl font-bold truncate">{themeArtist.name}</h3>

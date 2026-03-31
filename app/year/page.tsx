@@ -221,17 +221,20 @@ export default function YearGame() {
   return (
     <main className="min-h-screen bg-black text-white py-4 px-4 font-sans">
       <div className="max-w-lg mx-auto space-y-4">
-      <header>
-        <div className="flex items-center justify-between mb-2">
-          <Logo />
-          <div className="text-right">
-            <span className="text-xs text-zinc-400">ROUND</span>
-            <div className="text-xl font-bold">{currentRound + 1}/{Math.min(TOTAL_ROUNDS, questions.length)}</div>
+      <header className="transition-all duration-200">
+        {/* Full header — hidden when keyboard open */}
+        {!inputFocused && (
+          <div className="flex items-center justify-between mb-2">
+            <Logo />
+            <div className="text-right">
+              <span className="text-xs text-zinc-400">ROUND</span>
+              <div className="text-xl font-bold">{currentRound + 1}/{Math.min(TOTAL_ROUNDS, questions.length)}</div>
+            </div>
           </div>
-        </div>
+        )}
 
-        {/* Score bar */}
-        {totalScore > 0 && (
+        {/* Score bar — compact when keyboard open */}
+        {!inputFocused && totalScore > 0 && (
           <div>
             <div className="flex justify-between text-xs mb-0.5">
               <span className="text-accent font-semibold">TOTAL SCORE</span>
@@ -247,9 +250,9 @@ export default function YearGame() {
           </div>
         )}
 
-        {/* Speed bonus */}
+        {/* Speed bonus — always visible (most critical info) */}
         {currentQ && !feedback && (
-          <div className="flex items-center justify-between text-xs h-5 mt-1">
+          <div className="flex items-center justify-between text-xs h-5">
             {elapsed <= BONUS_ZONE ? (
               <>
                 <span className="text-violet-300 font-bold">SPEED BONUS +{currentBonus.toFixed(1)}</span>
@@ -278,13 +281,15 @@ export default function YearGame() {
             transition={{ duration: 0.2 }}
             className="bg-zinc-900 p-5 rounded-xl space-y-4"
           >
-            {/* Album art — hidden when keyboard open so header stays visible */}
-            {currentQ.albumImageUrl && !inputFocused && (
-              <div className="flex justify-center">
+            {/* Album art — shrinks when keyboard open */}
+            {currentQ.albumImageUrl && (
+              <div className="flex justify-center transition-all duration-200">
                 <img
                   src={currentQ.albumImageUrl}
                   alt=""
-                  className="w-48 h-48 rounded-xl object-cover shadow-lg"
+                  className={`rounded-xl object-cover shadow-lg transition-all duration-200 ${
+                    inputFocused ? 'w-20 h-20' : 'w-48 h-48'
+                  }`}
                 />
               </div>
             )}
