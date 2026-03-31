@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect, useRef, Suspense } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import Logo from '@/components/Logo'
 import ScoreRank from '@/components/ScoreRank'
@@ -57,8 +57,17 @@ function getReaction(baseScore: number): { label: string; color: string } | null
   return null
 }
 
-export default function YearGame() {
+export default function YearGamePage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-black" />}>
+      <YearGame />
+    </Suspense>
+  )
+}
+
+function YearGame() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [questions, setQuestions] = useState<TrackQuestion[]>([])
   const [loading, setLoading] = useState(true)
   const [currentRound, setCurrentRound] = useState(0)
@@ -77,8 +86,9 @@ export default function YearGame() {
   const elapsedTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   useEffect(() => {
-    const locale = typeof navigator !== 'undefined' ? navigator.language : 'ja'
-    fetch(`/api/year/tracks?count=10&locale=${encodeURIComponent(locale)}`)
+    const region = searchParams?.get('region') || localStorage.getItem('soundiq_region') || (lang === 'ja' ? 'jp' : 'global')
+    const locale = region === 'jp' ? 'ja' : 'en'
+    fetch(`/api/year/tracks?count=10&locale=${locale}`)
       .then(r => r.json())
       .then(data => {
         if (data.questions?.length > 0) {

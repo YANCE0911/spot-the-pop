@@ -4,13 +4,29 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { detectLang, type Lang } from '@/lib/i18n'
 
+type Region = 'jp' | 'global'
+
 export default function Home() {
   const router = useRouter()
   const [lang, setLang] = useState<Lang>('en')
+  const [region, setRegion] = useState<Region>('jp')
 
   useEffect(() => {
-    setLang(detectLang())
+    const detectedLang = detectLang()
+    setLang(detectedLang)
+    // Restore saved region, or default based on language
+    const saved = localStorage.getItem('soundiq_region') as Region | null
+    if (saved === 'jp' || saved === 'global') {
+      setRegion(saved)
+    } else {
+      setRegion(detectedLang === 'ja' ? 'jp' : 'global')
+    }
   }, [])
+
+  const handleRegionChange = (r: Region) => {
+    setRegion(r)
+    localStorage.setItem('soundiq_region', r)
+  }
 
   return (
     <main className="min-h-screen bg-black text-white py-10 px-4 font-sans">
@@ -33,6 +49,32 @@ export default function Home() {
           </p>
         </header>
 
+        {/* Region selector */}
+        <div className="flex justify-center animate-[fadeInUp_0.5s_ease-out_0.05s_both]">
+          <div className="flex bg-zinc-900 rounded-lg p-1 gap-1">
+            <button
+              onClick={() => handleRegionChange('jp')}
+              className={`px-5 py-1.5 rounded-md text-sm font-bold transition-all ${
+                region === 'jp'
+                  ? 'bg-zinc-700 text-white'
+                  : 'text-zinc-500 hover:text-zinc-300'
+              }`}
+            >
+              JP
+            </button>
+            <button
+              onClick={() => handleRegionChange('global')}
+              className={`px-5 py-1.5 rounded-md text-sm font-bold transition-all ${
+                region === 'global'
+                  ? 'bg-zinc-700 text-white'
+                  : 'text-zinc-500 hover:text-zinc-300'
+              }`}
+            >
+              GLOBAL
+            </button>
+          </div>
+        </div>
+
         {/* Game mode cards */}
         <p className="text-sm font-semibold text-zinc-400 uppercase tracking-widest text-center animate-[fadeInUp_0.5s_ease-out_0.1s_both]">
           {lang === 'ja' ? 'ゲームを選ぶ' : 'Select Game'}
@@ -40,7 +82,7 @@ export default function Home() {
         <div className="space-y-4 animate-[fadeInUp_0.5s_ease-out_0.1s_both]">
           {/* TIMELINE — Main mode */}
           <button
-            onClick={() => router.push('/year')}
+            onClick={() => router.push(`/year?region=${region}`)}
             className="w-full bg-zinc-900/80 border border-zinc-800 rounded-2xl px-8 py-5 text-left hover:border-accent/50 hover:scale-[1.01] transition-all group card-glow-timeline"
           >
             <p className="text-gradient-warm font-display font-black text-3xl tracking-wider mb-3 flex items-center gap-2">
@@ -56,7 +98,7 @@ export default function Home() {
 
           {/* VERSUS — Sub mode */}
           <button
-            onClick={() => router.push('/game?metric=followers')}
+            onClick={() => router.push(`/game?metric=followers&region=${region}`)}
             className="w-full bg-zinc-900/80 border border-zinc-800 rounded-2xl px-8 py-5 text-left hover:border-brand/50 hover:scale-[1.01] transition-all group card-glow-versus"
           >
             <p className="text-gradient font-display font-black text-3xl tracking-wider mb-3 flex items-center gap-2">

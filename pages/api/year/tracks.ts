@@ -72,44 +72,36 @@ function getBucketIndex(year: number): number {
   return YEAR_BUCKETS.findIndex(b => year >= b.min && year <= b.max)
 }
 
-// Load question banks (cached in memory)
-let questionBank: BankQuestion[] | null = null
+// Load question banks (cached in memory, separated by region)
+let jpBank: BankQuestion[] | null = null
+let globalBank: BankQuestion[] | null = null
 
-function loadQuestionBank(): BankQuestion[] | null {
-  if (questionBank) return questionBank
+function loadBanks(): void {
+  if (jpBank !== null) return
 
-  const banks: BankQuestion[] = []
-
-  // Load Japanese question bank
   const bankPath = path.join(process.cwd(), 'data', 'questionBank.json')
   if (fs.existsSync(bankPath)) {
     const raw = JSON.parse(fs.readFileSync(bankPath, 'utf-8'))
-    banks.push(...(raw.questions as BankQuestion[]))
+    jpBank = raw.questions as BankQuestion[]
+  } else {
+    jpBank = []
   }
 
-  // Load global question bank
   const globalPath = path.join(process.cwd(), 'data', 'globalQuestionBank.json')
   if (fs.existsSync(globalPath)) {
     const raw = JSON.parse(fs.readFileSync(globalPath, 'utf-8'))
-    banks.push(...(raw.questions as BankQuestion[]))
+    globalBank = raw.questions as BankQuestion[]
+  } else {
+    globalBank = []
   }
 
-  if (banks.length === 0) return null
-
-  questionBank = banks
-  console.log(`Loaded question bank: ${questionBank.length} questions (JP + Global)`)
-  return questionBank
+  console.log(`Loaded question banks: JP=${jpBank.length}, Global=${globalBank!.length}`)
 }
 
 function questionsFromBank(count: number, region: 'jp' | 'global' = 'jp'): TrackQuestion[] {
-  const bank = loadQuestionBank()
-  if (!bank || bank.length === 0) return []
-
-  let pool = bank
-  if (region === 'global') {
-    // Global users: only global bank questions (no JP-specific artists)
-    pool = bank.filter(q => !q.artistNameJa)
-  }
+  loadBanks()
+  const pool = region === 'jp' ? jpBank! : globalBank!
+  if (pool.length === 0) return []
 
   const eligible = pool.filter(q =>
     meetsPopularityThreshold(q) && meetsTrackPopularity(q) && isValidQuestion(q.trackName, q.albumName, q.source === 'single' ? 'single' : 'album')

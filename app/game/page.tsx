@@ -30,8 +30,9 @@ function GameContent() {
     localStorage.removeItem('rankingSubmitted')
     const fetchQuestions = async () => {
       try {
-        const locale = typeof navigator !== 'undefined' ? navigator.language : 'ja'
-        const url = `/api/randomArtist?count=5&locale=${encodeURIComponent(locale)}${genre !== 'all' ? `&genre=${genre}` : ''}`
+        const region = params?.get('region') || localStorage.getItem('soundiq_region') || (detectLang() === 'ja' ? 'jp' : 'global')
+        const locale = region === 'jp' ? 'ja' : 'en'
+        const url = `/api/randomArtist?count=5&locale=${locale}${genre !== 'all' ? `&genre=${genre}` : ''}`
         const res = await fetch(url)
         const data = await res.json()
         if (res.ok && data.artists) {
