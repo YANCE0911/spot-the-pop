@@ -33,37 +33,27 @@ type RoundResult = {
 const TOTAL_ROUNDS = 10
 const BONUS_ZONE = 15 // time bonus available in first 15 seconds
 
-// Stepped decimal scoring by year difference (max 8.5 base + 1.5 bonus = 10/q × 10q = 100)
-const YEAR_SCORE_TABLE: number[] = [
-   8.5, // 0 years off = PERFECT
-   7.0, // 1 year off
-   5.5, // 2 years off
-   4.0, // 3 years off
-   2.5, // 4 years off
-   1.0, // 5 years off
-   0.5, // 6 years off
-]
-// 7+ years off = 0.0
-
+// Base score: smooth power curve. 7.5 × (1 − d/11)^1.13, rounded to 0.1
+// diff=0→7.5, diff=5→3.8, diff=10→0.5, diff=11+→0
 function calculateBaseScore(guessed: number, actual: number): number {
   const diff = Math.abs(guessed - actual)
-  if (diff >= YEAR_SCORE_TABLE.length) return 0
-  return YEAR_SCORE_TABLE[diff]
+  if (diff >= 11) return 0
+  return Math.round(7.5 * Math.pow(1 - diff / 11, 1.13) * 10) / 10
 }
 
-// Time bonus: step-based, within first 15 seconds. No hard time limit.
+// Time bonus: 5-second steps, max 2.5
 function calculateTimeBonus(elapsedSeconds: number): number {
-  if (elapsedSeconds <= 5) return 1.5
-  if (elapsedSeconds <= 10) return 0.75
-  if (elapsedSeconds <= 15) return 0.25
+  if (elapsedSeconds <= 5) return 2.5
+  if (elapsedSeconds <= 10) return 1.5
+  if (elapsedSeconds <= 15) return 0.5
   return 0
 }
 
 function getReaction(baseScore: number): { label: string; color: string } | null {
-  if (baseScore >= 8.5) return { label: 'PERFECT!!!', color: 'text-pink-400' }
-  if (baseScore >= 7) return { label: 'GREAT!!', color: 'text-orange-400' }
-  if (baseScore >= 5.5) return { label: 'GOOD!', color: 'text-yellow-400' }
-  return null // 3+ years off: no label, just show score + year diff
+  if (baseScore >= 7.5) return { label: 'PERFECT!!!', color: 'text-pink-400' }
+  if (baseScore >= 6.7) return { label: 'GREAT!!', color: 'text-orange-400' }
+  if (baseScore >= 6.0) return { label: 'GOOD!', color: 'text-yellow-400' }
+  return null
 }
 
 export default function YearGame() {
@@ -373,7 +363,7 @@ export default function YearGame() {
                 )}
               </div>
               <div className="flex items-baseline justify-center">
-                <span className={`text-4xl font-black font-mono ${feedback.baseScore >= 6.5 ? 'text-accent' : feedback.baseScore < 1 ? 'text-red-400' : 'text-zinc-300'}`}>
+                <span className={`text-4xl font-black font-mono ${feedback.baseScore >= 6.0 ? 'text-accent' : feedback.baseScore < 1 ? 'text-red-400' : 'text-zinc-300'}`}>
                   +{feedback.baseScore.toFixed(1)}
                 </span>
                 {feedback.timeBonus > 0 && (
@@ -521,7 +511,7 @@ function TimelineResults({
                 <div className="text-right flex-shrink-0">
                   <p className="text-xs text-zinc-500">{r.guessedYear} → {r.actualYear}</p>
                   <div className="flex items-center gap-1 justify-end">
-                    <span className={`font-mono font-bold text-sm ${r.baseScore >= 6.5 ? 'text-accent' : r.baseScore < 1 ? 'text-red-400' : 'text-zinc-300'}`}>
+                    <span className={`font-mono font-bold text-sm ${r.baseScore >= 6.0 ? 'text-accent' : r.baseScore < 1 ? 'text-red-400' : 'text-zinc-300'}`}>
                       +{r.baseScore.toFixed(1)}
                     </span>
                     {r.timeBonus > 0 && (
