@@ -36,6 +36,19 @@ const YEAR_BUCKETS: { min: number; max: number; quota: number }[] = [
   { min: 2020, max: 2030, quota: 3 },
 ]
 
+// Filter out tracks that would make bad quiz questions
+const TRACK_EXCLUDE_PATTERN = /\((.*?)?(remaster|live|acoustic|remix|edit|mix|version|instrumental|karaoke|demo)\)/i
+const TRACK_EXCLUDE_KEYWORDS = /first\s*take|the\s*first\s*take/i
+const ALBUM_EXCLUDE_PATTERN = /soundtrack|[\bO]ST\b|original\s*soundtrack/i
+
+function isValidQuestion(trackName: string, albumName: string, albumType?: string): boolean {
+  if (TRACK_EXCLUDE_PATTERN.test(trackName)) return false
+  if (TRACK_EXCLUDE_KEYWORDS.test(trackName)) return false
+  if (ALBUM_EXCLUDE_PATTERN.test(albumName)) return false
+  if (albumType === 'compilation') return false
+  return true
+}
+
 // Year-based artist popularity thresholds
 function meetsPopularityThreshold(q: BankQuestion): boolean {
   const year = q.releaseYear
@@ -82,7 +95,9 @@ function questionsFromBank(count: number): TrackQuestion[] {
   const bank = loadQuestionBank()
   if (!bank || bank.length === 0) return []
 
-  const eligible = bank.filter(meetsPopularityThreshold)
+  const eligible = bank.filter(q =>
+    meetsPopularityThreshold(q) && isValidQuestion(q.trackName, q.albumName, q.source === 'single' ? 'single' : 'album')
+  )
   const buckets: BankQuestion[][] = YEAR_BUCKETS.map(() => [])
   for (const q of eligible) {
     const bi = getBucketIndex(q.releaseYear)
@@ -156,6 +171,7 @@ async function questionsFromSpotifyAPI(count: number): Promise<TrackQuestion[]> 
 
       const year = parseInt((album.release_date ?? '').split('-')[0])
       if (!year || year < 1960) return null
+      if (!isValidQuestion(track.name, album.name, album.album_type)) return null
 
       return {
         trackName: track.name,
