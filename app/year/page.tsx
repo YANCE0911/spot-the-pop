@@ -354,21 +354,21 @@ export default function YearGame() {
               className="bg-zinc-900 p-5 rounded-xl space-y-4 text-center"
             >
               {getReaction(feedback.baseScore) && (
-                <p className={`text-5xl font-pop tracking-wider ${getReaction(feedback.baseScore)!.color}`}>
+                <p className={`text-4xl font-display font-black ${getReaction(feedback.baseScore)!.color}`}>
                   {getReaction(feedback.baseScore)!.label}
                 </p>
               )}
               <div className="space-y-1">
                 <p className="text-zinc-400">
-                  Your guess: <span className="text-white font-bold">{feedback.guessedYear}</span>
+                  あなたの回答: <span className="text-white font-bold">{feedback.guessedYear}</span>
                 </p>
                 <p className="text-zinc-400">
-                  Actual: <span className="text-accent font-bold text-2xl">{feedback.actualYear}</span>
+                  正解: <span className="text-accent font-bold text-2xl">{feedback.actualYear}</span>
                 </p>
                 <p className="text-zinc-500 text-xs">{feedback.singleName}</p>
                 {feedback.guessedYear !== feedback.actualYear && (
                   <p className="text-zinc-500 text-sm">
-                    {Math.abs(feedback.guessedYear - feedback.actualYear)} year{Math.abs(feedback.guessedYear - feedback.actualYear) > 1 ? 's' : ''} off
+                    {Math.abs(feedback.guessedYear - feedback.actualYear)}年ずれ
                   </p>
                 )}
               </div>
@@ -384,7 +384,7 @@ export default function YearGame() {
                 onClick={handleNext}
                 className="w-full bg-accent text-white py-3 rounded-lg font-semibold hover:brightness-110 transition-all"
               >
-                {currentRound + 1 < TOTAL_ROUNDS ? 'Next' : 'See Results'}
+                {currentRound + 1 < TOTAL_ROUNDS ? '次へ' : '結果を見る'}
               </button>
             </motion.div>
           )}
@@ -476,19 +476,19 @@ function TimelineResults({
             onClick={handleShare}
             className="flex-1 bg-accent text-white py-3 px-4 rounded-xl font-bold hover:brightness-110 transition-all active:scale-[0.98]"
           >
-            {copied ? 'Copied!' : 'Copy'}
+            {copied ? 'コピーしました' : 'コピー'}
           </button>
         </div>
 
         {/* Name registration */}
         {!submitted ? (
           <div className="bg-zinc-900 p-4 rounded-xl space-y-3 animate-[fadeInUp_0.5s_ease-out]">
-            <h2 className="text-accent font-bold">Register to Ranking</h2>
+            <h2 className="text-accent font-bold">ランキングに登録</h2>
             <input
               type="text"
               value={playerName}
               onChange={e => setPlayerName(e.target.value)}
-              placeholder="Enter your name"
+              placeholder="名前を入力"
               className="w-full p-2.5 rounded-lg bg-zinc-800 text-white outline-none focus:ring-2 focus:ring-accent"
             />
             <button
@@ -496,16 +496,16 @@ function TimelineResults({
               disabled={submitting}
               className="w-full bg-accent text-white py-2.5 rounded-lg font-semibold hover:brightness-110"
             >
-              {submitting ? 'Registering...' : 'Register'}
+              {submitting ? '登録中...' : '登録する'}
             </button>
           </div>
         ) : (
-          <p className="text-accent text-center font-semibold">Registered!</p>
+          <p className="text-accent text-center font-semibold">登録しました！</p>
         )}
 
         {/* Round results */}
         <div className="space-y-2">
-          <h2 className="text-accent font-bold">Results</h2>
+          <h2 className="text-accent font-bold">ラウンド結果</h2>
           {results.map((r, i) => (
             <div
               key={i}
@@ -538,10 +538,10 @@ function TimelineResults({
 
         <div className="flex gap-3">
           <button onClick={() => window.location.reload()} className="flex-1 bg-accent text-white py-3 rounded-lg font-semibold hover:brightness-110">
-            Play Again
+            もう一度プレイ
           </button>
           <button onClick={() => router.push('/')} className="flex-1 bg-zinc-800 text-white py-3 rounded-lg font-semibold hover:bg-zinc-700">
-            Top
+            トップ
           </button>
         </div>
       </div>

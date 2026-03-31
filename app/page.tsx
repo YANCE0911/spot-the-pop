@@ -13,12 +13,8 @@ export default function Home() {
   }, [])
 
   return (
-    <main className="min-h-screen bg-black text-white py-10 px-4 font-sans relative overflow-hidden">
-      {/* Background glow blobs */}
-      <div className="absolute top-32 left-1/2 -translate-x-1/2 w-80 h-80 bg-accent/15 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute top-[28rem] left-1/2 -translate-x-1/2 w-60 h-60 bg-brand/10 rounded-full blur-3xl pointer-events-none" />
-
-      <div className="max-w-lg mx-auto space-y-8 relative z-10">
+    <main className="min-h-screen bg-black text-white py-10 px-4 font-sans">
+      <div className="max-w-lg mx-auto space-y-8">
         {/* Language toggle */}
         <div className="flex justify-end">
           <button

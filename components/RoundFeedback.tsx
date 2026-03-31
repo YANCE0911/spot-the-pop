@@ -50,7 +50,7 @@ export default function RoundFeedback({ result, onDismiss, lang = 'en' }: Props)
               initial={{ scale: 0.5 }}
               animate={{ scale: 1 }}
               transition={{ type: 'spring', dampen: 10, delay: 0.1 }}
-              className={`text-4xl font-black ${reaction.color}`}
+              className={`text-4xl font-display font-black ${reaction.color}`}
             >
               {reaction.label}
             </motion.div>
