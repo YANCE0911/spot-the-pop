@@ -125,6 +125,7 @@ export default function ArtistSearch({ value, onChange, onSelect, placeholder, d
           {suggestions.map((s, i) => (
             <li
               key={s.id}
+              onMouseDown={e => e.preventDefault()}
               onClick={() => handleSelect(s)}
               className={`flex items-center gap-3 px-3 py-2.5 cursor-pointer transition-colors ${
                 i === selectedIndex ? 'bg-zinc-700' : 'hover:bg-zinc-700/50'
