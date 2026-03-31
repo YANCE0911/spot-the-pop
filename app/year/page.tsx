@@ -273,7 +273,7 @@ function YearGame() {
           )}
         </header>
 
-        <AnimatePresence mode="wait">
+        <AnimatePresence>
           {currentQ && !feedback && (
             <motion.div
               key={`q-${currentRound}`}

@@ -58,9 +58,18 @@ export default function GameScreen({
     setUsedHints(new Set())
   }
 
-  const handleSelectFromSearch = (name: string, id?: string) => {
+  const handleSelectFromSearch = async (name: string, id?: string) => {
     setAnswer(name)
     setSelectedId(id)
+    // Auto-submit when selecting from dropdown (has id)
+    if (id) {
+      setLoading(true)
+      await onSubmitAnswer(name, id)
+      setAnswer('')
+      setSelectedId(undefined)
+      setLoading(false)
+      setUsedHints(new Set())
+    }
   }
 
   if (!themeArtist) {
@@ -115,7 +124,7 @@ export default function GameScreen({
         </header>
 
         {/* Theme artist card */}
-        <AnimatePresence mode="wait">
+        <AnimatePresence>
           <motion.div
             key={currentRound}
             initial={{ opacity: 0, x: 30 }}

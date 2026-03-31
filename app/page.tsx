@@ -18,8 +18,6 @@ export default function Home() {
     const saved = localStorage.getItem('soundiq_region') as Region | null
     if (saved === 'jp' || saved === 'global') {
       setRegion(saved)
-    } else {
-      setRegion(detectedLang === 'ja' ? 'jp' : 'global')
     }
   }, [])
 
