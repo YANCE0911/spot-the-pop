@@ -113,7 +113,15 @@ export default function Home() {
           </button>
         </div>
 
-        {/* Ranking link — hidden for now */}
+        {/* Ranking link */}
+        <div className="animate-[fadeInUp_0.5s_ease-out_0.2s_both]">
+          <button
+            onClick={() => router.push('/ranking')}
+            className="w-full bg-zinc-800/80 hover:bg-zinc-700 text-zinc-300 hover:text-white text-sm py-3 rounded-xl transition-all"
+          >
+            {lang === 'ja' ? 'ランキング' : 'Rankings'}
+          </button>
+        </div>
       </div>
     </main>
   )

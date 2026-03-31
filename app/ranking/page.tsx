@@ -11,9 +11,12 @@ import Logo from '@/components/Logo'
 
 type Tab = 'versus' | 'timeline'
 
+type Region = 'jp' | 'global'
+
 export default function RankingPage() {
   const router = useRouter()
   const [tab, setTab] = useState<Tab>('timeline')
+  const [region, setRegion] = useState<Region>('jp')
   const [versusRankings, setVersusRankings] = useState<Ranking[]>([])
   const [timelineRankings, setTimelineRankings] = useState<Ranking[]>([])
   const [loading, setLoading] = useState(true)
@@ -29,16 +32,21 @@ export default function RankingPage() {
   const isCurrentSeason = viewingSeason === currentSeason
 
   useEffect(() => {
+    const saved = localStorage.getItem('soundiq_region')
+    if (saved === 'global') setRegion('global')
+  }, [])
+
+  useEffect(() => {
     const pid = getPlayerId()
     setPlayerId(pid)
     setLoading(true)
 
     if (isCurrentSeason) {
       Promise.all([
-        getTopRankings(50, 'versus'),
-        getTopRankings(50, 'timeline'),
-        getPlayerRank(pid, 'versus'),
-        getPlayerRank(pid, 'timeline'),
+        getTopRankings(50, 'versus', region),
+        getTopRankings(50, 'timeline', region),
+        getPlayerRank(pid, 'versus', region),
+        getPlayerRank(pid, 'timeline', region),
       ]).then(([v, t, myV, myT]) => {
         setVersusRankings(v)
         setTimelineRankings(t)
@@ -48,8 +56,8 @@ export default function RankingPage() {
         .finally(() => setLoading(false))
     } else {
       Promise.all([
-        getSeasonRankings(viewingSeason, 50, 'versus'),
-        getSeasonRankings(viewingSeason, 50, 'timeline'),
+        getSeasonRankings(viewingSeason, 50, 'versus', region),
+        getSeasonRankings(viewingSeason, 50, 'timeline', region),
       ]).then(([v, t]) => {
         setVersusRankings(v)
         setTimelineRankings(t)
@@ -58,7 +66,7 @@ export default function RankingPage() {
       }).catch(console.error)
         .finally(() => setLoading(false))
     }
-  }, [viewingSeason, isCurrentSeason])
+  }, [viewingSeason, isCurrentSeason, region])
 
   const rankings = tab === 'versus' ? versusRankings : timelineRankings
   const myRank = tab === 'versus' ? myVersusRank : myTimelineRank
@@ -123,6 +131,28 @@ export default function RankingPage() {
             ))}
           </div>
         )}
+
+        {/* Region switcher */}
+        <div className="flex justify-center">
+          <div className="flex bg-zinc-900 rounded-lg p-1">
+            <button
+              onClick={() => setRegion('jp')}
+              className={`flex-1 w-24 py-1.5 rounded-md text-sm font-bold transition-all ${
+                region === 'jp' ? 'bg-zinc-700 text-white' : 'text-zinc-500 hover:text-zinc-300'
+              }`}
+            >
+              JAPAN
+            </button>
+            <button
+              onClick={() => setRegion('global')}
+              className={`flex-1 w-24 py-1.5 rounded-md text-sm font-bold transition-all ${
+                region === 'global' ? 'bg-zinc-700 text-white' : 'text-zinc-500 hover:text-zinc-300'
+              }`}
+            >
+              GLOBAL
+            </button>
+          </div>
+        </div>
 
         {/* Tab switcher */}
         <div className="flex bg-zinc-900 rounded-lg p-1">

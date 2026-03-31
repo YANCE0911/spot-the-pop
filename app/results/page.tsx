@@ -46,7 +46,8 @@ export default function Results() {
       // Save raw decimal score (2dp) for ranking differentiation
       const displayScore = Math.round(score * 100) / 100
       const pid = getPlayerId()
-      await saveRanking(playerName, displayScore, undefined, undefined, undefined, 'versus', pid)
+      const region = localStorage.getItem('soundiq_region') === 'global' ? 'global' : 'jp' as const
+      await saveRanking(playerName, displayScore, undefined, undefined, undefined, 'versus', pid, region)
       localStorage.setItem('rankingSubmitted', 'true')
       setSubmitted(true)
 

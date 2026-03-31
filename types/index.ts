@@ -8,6 +8,7 @@ export type Ranking = {
   date?: string // YYYY-MM-DD for daily
   gameType?: 'versus' | 'timeline'
   playerId?: string
+  region?: 'jp' | 'global'
 }
 
 export type GameMode = 'classic' | 'daily' | 'genre' | 'challenge'

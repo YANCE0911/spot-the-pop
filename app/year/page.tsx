@@ -79,6 +79,10 @@ function YearGame() {
   const [feedback, setFeedback] = useState<RoundResult | null>(null)
   const [finished, setFinished] = useState(false)
   const [lang] = useState<Lang>(() => detectLang())
+  const [gameRegion] = useState<'jp' | 'global'>(() => {
+    const r = searchParams?.get('region') || (typeof localStorage !== 'undefined' ? localStorage.getItem('soundiq_region') : null)
+    return r === 'global' ? 'global' : 'jp'
+  })
 
   // Elapsed time tracking (no hard limit)
   const [elapsed, setElapsed] = useState(0)
@@ -216,6 +220,7 @@ function YearGame() {
         results={results}
         router={router}
         lang={lang}
+        region={gameRegion}
       />
     )
   }
@@ -410,6 +415,7 @@ function TimelineResults({
   results,
   router,
   lang,
+  region,
 }: {
   displayScore: number
   displayBase: number
@@ -417,6 +423,7 @@ function TimelineResults({
   results: RoundResult[]
   router: ReturnType<typeof useRouter>
   lang: Lang
+  region: 'jp' | 'global'
 }) {
   const [playerName, setPlayerName] = useState('')
   const [submitted, setSubmitted] = useState(false)
@@ -428,7 +435,7 @@ function TimelineResults({
     setSubmitting(true)
     try {
       const pid = getPlayerId()
-      await saveRanking(playerName, displayScore, 'classic', 'year', undefined, 'timeline', pid)
+      await saveRanking(playerName, displayScore, 'classic', 'year', undefined, 'timeline', pid, region)
       setSubmitted(true)
     } catch (err) {
       console.error(err)

@@ -67,7 +67,8 @@ async function getRankingsForRange(
   start: Timestamp,
   end: Timestamp,
   count: number,
-  gameType?: 'versus' | 'timeline'
+  gameType?: 'versus' | 'timeline',
+  region?: 'jp' | 'global'
 ): Promise<Ranking[]> {
   try {
     const q = query(
@@ -84,6 +85,10 @@ async function getRankingsForRange(
     } else if (gameType === 'versus') {
       all = all.filter(r => !r.gameType || r.gameType === 'versus')
     }
+    // Filter by region (existing entries without region are treated as 'jp')
+    if (region) {
+      all = all.filter(r => (r.region ?? 'jp') === region)
+    }
     return all.sort((a, b) => b.score - a.score).slice(0, count)
   } catch {
     return []
@@ -91,19 +96,19 @@ async function getRankingsForRange(
 }
 
 // Current season rankings
-export async function getTopRankings(count = 50, gameType?: 'versus' | 'timeline'): Promise<Ranking[]> {
+export async function getTopRankings(count = 50, gameType?: 'versus' | 'timeline', region?: 'jp' | 'global'): Promise<Ranking[]> {
   const { start, end } = getSeasonRange(getCurrentSeasonNumber())
-  return getRankingsForRange(start, end, count, gameType)
+  return getRankingsForRange(start, end, count, gameType, region)
 }
 
 // Specific season rankings
-export async function getSeasonRankings(seasonNum: number, count = 50, gameType?: 'versus' | 'timeline'): Promise<Ranking[]> {
+export async function getSeasonRankings(seasonNum: number, count = 50, gameType?: 'versus' | 'timeline', region?: 'jp' | 'global'): Promise<Ranking[]> {
   const { start, end } = getSeasonRange(seasonNum)
-  return getRankingsForRange(start, end, count, gameType)
+  return getRankingsForRange(start, end, count, gameType, region)
 }
 
 // Get player's rank (1-indexed) for current season
-export async function getPlayerRank(playerId: string, gameType: 'versus' | 'timeline'): Promise<{ rank: number; score: number } | null> {
+export async function getPlayerRank(playerId: string, gameType: 'versus' | 'timeline', region?: 'jp' | 'global'): Promise<{ rank: number; score: number } | null> {
   if (!playerId) return null
   try {
     const { start, end } = getSeasonRange(getCurrentSeasonNumber())
@@ -120,6 +125,9 @@ export async function getPlayerRank(playerId: string, gameType: 'versus' | 'time
       all = all.filter(r => r.gameType === 'timeline')
     } else {
       all = all.filter(r => !r.gameType || r.gameType === 'versus')
+    }
+    if (region) {
+      all = all.filter(r => (r.region ?? 'jp') === region)
     }
     const sorted = all.sort((a, b) => b.score - a.score)
     const idx = sorted.findIndex(r => r.playerId === playerId)
@@ -138,7 +146,8 @@ export async function saveRanking(
   metric?: string,
   genre?: string,
   gameType?: 'versus' | 'timeline',
-  playerId?: string
+  playerId?: string,
+  region?: 'jp' | 'global'
 ) {
   const gt = gameType ?? 'versus'
   const { start } = getSeasonRange(getCurrentSeasonNumber())
@@ -186,6 +195,7 @@ export async function saveRanking(
     genre: genre ?? null,
     gameType: gt,
     playerId: playerId ?? null,
+    region: region ?? 'jp',
     createdAt: Timestamp.now(),
   })
   return { updated: false, bestScore: score }
