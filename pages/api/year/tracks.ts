@@ -58,6 +58,16 @@ function meetsPopularityThreshold(q: BankQuestion): boolean {
   return q.artistPopularity >= 40
 }
 
+// Year-based track popularity thresholds — filters out obscure deep cuts
+// Data is NOT deleted; change thresholds to adjust difficulty (0 = no filter)
+function meetsTrackPopularity(q: BankQuestion): boolean {
+  const year = q.releaseYear
+  if (year <= 2004) return q.trackPopularity >= 15
+  if (year <= 2014) return q.trackPopularity >= 20
+  if (year <= 2019) return q.trackPopularity >= 25
+  return q.trackPopularity >= 30
+}
+
 function getBucketIndex(year: number): number {
   return YEAR_BUCKETS.findIndex(b => year >= b.min && year <= b.max)
 }
@@ -96,7 +106,7 @@ function questionsFromBank(count: number): TrackQuestion[] {
   if (!bank || bank.length === 0) return []
 
   const eligible = bank.filter(q =>
-    meetsPopularityThreshold(q) && isValidQuestion(q.trackName, q.albumName, q.source === 'single' ? 'single' : 'album')
+    meetsPopularityThreshold(q) && meetsTrackPopularity(q) && isValidQuestion(q.trackName, q.albumName, q.source === 'single' ? 'single' : 'album')
   )
   const buckets: BankQuestion[][] = YEAR_BUCKETS.map(() => [])
   for (const q of eligible) {
