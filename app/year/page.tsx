@@ -84,21 +84,28 @@ export default function YearGame() {
   const startTimeRef = useRef<number>(0)
   const elapsedTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
+  const mainRef = useRef<HTMLElement>(null)
   const [inputFocused, setInputFocused] = useState(false)
 
-  // Lock html/body scroll to prevent iOS keyboard from scrolling the page
+  // iOS Safari keyboard fix: use visualViewport to track actual visible area
   useEffect(() => {
-    const html = document.documentElement
-    const body = document.body
-    html.style.overflow = 'hidden'
-    html.style.height = '100%'
-    body.style.overflow = 'hidden'
-    body.style.height = '100%'
+    const vv = window.visualViewport
+    if (!vv) return
+
+    const update = () => {
+      const el = mainRef.current
+      if (!el) return
+      el.style.height = `${vv.height}px`
+      el.style.top = `${vv.offsetTop}px`
+    }
+
+    vv.addEventListener('resize', update)
+    vv.addEventListener('scroll', update)
+    update()
+
     return () => {
-      html.style.overflow = ''
-      html.style.height = ''
-      body.style.overflow = ''
-      body.style.height = ''
+      vv.removeEventListener('resize', update)
+      vv.removeEventListener('scroll', update)
     }
   }, [])
 
@@ -235,7 +242,7 @@ export default function YearGame() {
   }
 
   return (
-    <main className="fixed inset-0 bg-black text-white px-4 pt-2 pb-2 font-sans flex flex-col">
+    <main ref={mainRef} className="fixed left-0 right-0 top-0 bg-black text-white px-4 pt-2 pb-2 font-sans flex flex-col" style={{ height: '100%' }}>
       <div className="max-w-lg mx-auto w-full flex flex-col flex-1 min-h-0">
         <header className="flex-shrink-0 transition-all duration-200">
           {/* Full header — hidden when keyboard open */}
