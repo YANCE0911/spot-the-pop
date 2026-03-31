@@ -293,32 +293,6 @@ export default function YearGame() {
 
               {/* Year display + Numpad */}
               <div className="bg-zinc-900 p-4 rounded-xl space-y-3">
-                {/* Preset buttons */}
-                <div className="flex justify-center gap-2">
-                  <button
-                    onClick={() => { setGuessYear('19') }}
-                    disabled={guessYear.length > 0}
-                    className={`flex-1 py-1.5 rounded-md text-sm font-bold transition-colors ${
-                      guessYear.length === 0
-                        ? 'bg-zinc-700 text-white active:bg-zinc-500'
-                        : 'bg-zinc-800/50 text-zinc-600 cursor-not-allowed'
-                    }`}
-                  >
-                    19XX
-                  </button>
-                  <button
-                    onClick={() => { setGuessYear('20') }}
-                    disabled={guessYear.length > 0}
-                    className={`flex-1 py-1.5 rounded-md text-sm font-bold transition-colors ${
-                      guessYear.length === 0
-                        ? 'bg-zinc-700 text-white active:bg-zinc-500'
-                        : 'bg-zinc-800/50 text-zinc-600 cursor-not-allowed'
-                    }`}
-                  >
-                    20XX
-                  </button>
-                </div>
-
                 <div className="flex justify-center items-center gap-2">
                   {[0, 1, 2, 3].map(i => (
                     <div
