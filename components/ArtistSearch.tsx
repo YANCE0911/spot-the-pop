@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
 
 type Suggestion = {
   id: string
@@ -121,38 +120,31 @@ export default function ArtistSearch({ value, onChange, onSelect, placeholder, d
         autoComplete="off"
       />
 
-      <AnimatePresence>
-        {showDropdown && suggestions.length > 0 && (
-          <motion.ul
-            initial={{ opacity: 0, y: -4 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -4 }}
-            className="absolute z-50 w-full mt-1 bg-zinc-800 rounded-lg overflow-hidden shadow-xl border border-zinc-700"
-          >
-            {suggestions.map((s, i) => (
-              <li
-                key={s.id}
-                onClick={() => handleSelect(s)}
-                className={`flex items-center gap-3 px-3 py-2.5 cursor-pointer transition-colors ${
-                  i === selectedIndex ? 'bg-zinc-700' : 'hover:bg-zinc-700/50'
-                }`}
-              >
-                {s.imageUrl ? (
-                  /* eslint-disable-next-line @next/next/no-img-element */
-                  <img src={s.imageUrl} alt="" className="w-8 h-8 rounded-full object-cover flex-shrink-0" />
-                ) : (
-                  <div className="w-8 h-8 rounded-full bg-zinc-600 flex-shrink-0" />
-                )}
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-baseline justify-between gap-2">
-                    <span className="text-sm font-medium text-white truncate">{s.name}</span>
-                  </div>
+      {showDropdown && suggestions.length > 0 && (
+        <ul className="absolute z-50 w-full mt-1 bg-zinc-800 rounded-lg overflow-hidden shadow-xl border border-zinc-700">
+          {suggestions.map((s, i) => (
+            <li
+              key={s.id}
+              onClick={() => handleSelect(s)}
+              className={`flex items-center gap-3 px-3 py-2.5 cursor-pointer transition-colors ${
+                i === selectedIndex ? 'bg-zinc-700' : 'hover:bg-zinc-700/50'
+              }`}
+            >
+              {s.imageUrl ? (
+                /* eslint-disable-next-line @next/next/no-img-element */
+                <img src={s.imageUrl} alt="" className="w-8 h-8 rounded-full object-cover flex-shrink-0" />
+              ) : (
+                <div className="w-8 h-8 rounded-full bg-zinc-600 flex-shrink-0" />
+              )}
+              <div className="min-w-0 flex-1">
+                <div className="flex items-baseline justify-between gap-2">
+                  <span className="text-sm font-medium text-white truncate">{s.name}</span>
                 </div>
-              </li>
-            ))}
-          </motion.ul>
-        )}
-      </AnimatePresence>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   )
 }
