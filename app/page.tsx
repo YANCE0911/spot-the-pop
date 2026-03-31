@@ -43,7 +43,7 @@ export default function Home() {
             onClick={() => router.push('/year')}
             className="w-full bg-zinc-900/80 border border-zinc-800 rounded-2xl px-8 py-5 text-left hover:border-accent/50 hover:scale-[1.01] transition-all group card-glow-timeline"
           >
-            <p className="text-gradient-warm font-black text-3xl tracking-wider mb-3 flex items-center gap-2">
+            <p className="text-gradient-warm font-display font-black text-3xl tracking-wider mb-3 flex items-center gap-2">
               <span className="inline-block w-0 h-0 border-t-[8px] border-t-transparent border-b-[8px] border-b-transparent border-l-[12px] border-l-accent" />
               TIMELINE
             </p>
@@ -59,7 +59,7 @@ export default function Home() {
             onClick={() => router.push('/game?metric=followers')}
             className="w-full bg-zinc-900/80 border border-zinc-800 rounded-2xl px-8 py-5 text-left hover:border-brand/50 hover:scale-[1.01] transition-all group card-glow-versus"
           >
-            <p className="text-gradient font-black text-3xl tracking-wider mb-3 flex items-center gap-2">
+            <p className="text-gradient font-display font-black text-3xl tracking-wider mb-3 flex items-center gap-2">
               <span className="inline-block w-0 h-0 border-t-[8px] border-t-transparent border-b-[8px] border-b-transparent border-l-[12px] border-l-brand" />
               VERSUS
             </p>
