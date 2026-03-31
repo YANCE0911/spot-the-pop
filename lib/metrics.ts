@@ -4,9 +4,9 @@ import type { MetricMode, Artist } from '@/types'
 // === Scoring Constants ===
 // 5 questions × 20 pts = 100 max. No time bonus for VERSUS.
 // Log-ratio: score = max(0, 20 - K * |log10(theme) - log10(answer)|)
-// K=10 → same=20, 2x diff≈17, 5x≈13, 10x=10, 50x≈3, 100x=0
+// K=20: same=20, 2x=14, 3x=10.5, 5x=6, 10x=0
 export const POINTS_PER_QUESTION = 20
-export const SCORE_K = 10
+export const SCORE_K = 20
 
 export function getMetricValue(artist: Artist, metric: MetricMode): number {
   switch (metric) {

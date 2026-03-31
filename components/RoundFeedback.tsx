@@ -10,13 +10,14 @@ type Props = {
   lang?: 'en' | 'ja'
 }
 
-// Score per question is 0–20. 3-tier reactions matching TIMELINE style.
-// PERFECT: ~2x diff (≥17), GREAT: ~5x diff (≥14), GOOD: ~6x diff (≥12)
-function getReaction(score: number): { label: string; color: string } | null {
-  if (score >= 17) return { label: 'PERFECT!!!', color: 'text-pink-400' }
+// Score per question is 0–20 (K=20). 5-tier reactions.
+// PERFECT: ~1.3x (≥18), GREAT: ~2x (≥14), GOOD: ~3x (≥10), SO SO: ~5x (≥5), MISS: 5x+ (<5)
+function getReaction(score: number): { label: string; color: string } {
+  if (score >= 18) return { label: 'PERFECT!!!', color: 'text-pink-400' }
   if (score >= 14) return { label: 'GREAT!!', color: 'text-orange-400' }
-  if (score >= 12) return { label: 'GOOD!', color: 'text-yellow-400' }
-  return null
+  if (score >= 10) return { label: 'GOOD!', color: 'text-yellow-400' }
+  if (score >= 5) return { label: 'SO SO', color: 'text-emerald-400' }
+  return { label: 'MISS...', color: 'text-blue-400' }
 }
 
 export default function RoundFeedback({ result, onDismiss, lang = 'en' }: Props) {
@@ -45,16 +46,14 @@ export default function RoundFeedback({ result, onDismiss, lang = 'en' }: Props)
           className="bg-zinc-900 rounded-2xl p-6 max-w-sm w-full text-center space-y-4"
           onClick={e => e.stopPropagation()}
         >
-          {reaction && (
-            <motion.div
-              initial={{ scale: 0.5 }}
-              animate={{ scale: 1 }}
-              transition={{ type: 'spring', dampen: 10, delay: 0.1 }}
-              className={`text-4xl font-display font-black ${reaction.color}`}
-            >
-              {reaction.label}
-            </motion.div>
-          )}
+          <motion.div
+            initial={{ scale: 0.5 }}
+            animate={{ scale: 1 }}
+            transition={{ type: 'spring', damping: 10, delay: 0.1 }}
+            className={`text-4xl font-display font-black ${reaction.color}`}
+          >
+            {reaction.label}
+          </motion.div>
 
           <div className="grid grid-cols-2 gap-3 text-sm">
             <div className="bg-zinc-800 p-3 rounded-lg">

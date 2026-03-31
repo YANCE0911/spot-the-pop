@@ -50,11 +50,14 @@ function calculateTimeBonus(elapsedSeconds: number): number {
   return 0
 }
 
-function getReaction(baseScore: number): { label: string; color: string } | null {
+// 5-tier reactions for TIMELINE (baseScore 0–7.5)
+// PERFECT: exact (7.5), GREAT: 1-2yr off (≥6.0), GOOD: 3-5yr (≥4.0), SO SO: 6-8yr (≥2.0), MISS: 9yr+ (<2.0)
+function getReaction(baseScore: number): { label: string; color: string } {
   if (baseScore >= 7.5) return { label: 'PERFECT!!!', color: 'text-pink-400' }
-  if (baseScore >= 6.7) return { label: 'GREAT!!', color: 'text-orange-400' }
-  if (baseScore >= 6.0) return { label: 'GOOD!', color: 'text-yellow-400' }
-  return null
+  if (baseScore >= 6.0) return { label: 'GREAT!!', color: 'text-orange-400' }
+  if (baseScore >= 4.0) return { label: 'GOOD!', color: 'text-yellow-400' }
+  if (baseScore >= 2.0) return { label: 'SO SO', color: 'text-emerald-400' }
+  return { label: 'MISS...', color: 'text-blue-400' }
 }
 
 export default function YearGamePage() {
@@ -347,11 +350,9 @@ function YearGame() {
 
           {feedback && (
             <div className="bg-zinc-900 p-5 rounded-xl space-y-4 text-center animate-[fadeIn_0.15s_ease-out]">
-              {getReaction(feedback.baseScore) && (
-                <p className={`text-4xl font-display font-black ${getReaction(feedback.baseScore)!.color}`}>
-                  {getReaction(feedback.baseScore)!.label}
-                </p>
-              )}
+              <p className={`text-4xl font-display font-black ${getReaction(feedback.baseScore).color}`}>
+                {getReaction(feedback.baseScore).label}
+              </p>
               <div className="space-y-1">
                 <p className="text-zinc-400">
                   {lang === 'ja' ? 'あなたの回答' : 'Your guess'}: <span className="text-white font-bold">{feedback.guessedYear}</span>

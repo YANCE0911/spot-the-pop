@@ -5,12 +5,12 @@ type Props = {
   lang?: 'en' | 'ja'
 }
 
-// Total score out of 100 (5 questions × 20 pts)
+// Total score out of 100. K=20 scoring: S=85+, A=65+, B=45+, C=25+, D=<25
 function getRank(score: number): { rank: string; color: string; description: string; descriptionJa: string } {
-  if (score >= 95) return { rank: 'S', color: 'text-yellow-400', description: 'Legendary!', descriptionJa: '伝説級!' }
-  if (score >= 85) return { rank: 'A', color: 'text-green-400', description: 'Excellent!', descriptionJa: '素晴らしい!' }
-  if (score >= 70) return { rank: 'B', color: 'text-blue-400', description: 'Great job!', descriptionJa: 'いい感じ!' }
-  if (score >= 50) return { rank: 'C', color: 'text-zinc-300', description: 'Not bad', descriptionJa: 'まあまあ' }
+  if (score >= 85) return { rank: 'S', color: 'text-yellow-400', description: 'Legendary!', descriptionJa: '伝説級!' }
+  if (score >= 65) return { rank: 'A', color: 'text-green-400', description: 'Excellent!', descriptionJa: '素晴らしい!' }
+  if (score >= 45) return { rank: 'B', color: 'text-blue-400', description: 'Great job!', descriptionJa: 'いい感じ!' }
+  if (score >= 25) return { rank: 'C', color: 'text-zinc-300', description: 'Not bad', descriptionJa: 'まあまあ' }
   return { rank: 'D', color: 'text-red-400', description: 'Keep trying', descriptionJa: 'もっと聴こう' }
 }
 
