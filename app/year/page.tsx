@@ -272,71 +272,74 @@ export default function YearGame() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
-              className="bg-zinc-900 p-4 rounded-xl space-y-3"
+              className="space-y-3"
             >
-              {/* Album art + song info */}
-              <div className="flex items-center gap-4">
+              {/* Album art + song info — centered, large */}
+              <div className="bg-zinc-900 p-4 rounded-xl text-center space-y-2">
                 {currentQ.albumImageUrl && (
-                  <img
-                    src={currentQ.albumImageUrl}
-                    alt=""
-                    className="w-20 h-20 rounded-xl object-cover shadow-lg flex-shrink-0"
-                  />
+                  <div className="flex justify-center">
+                    <img
+                      src={currentQ.albumImageUrl}
+                      alt=""
+                      className="w-36 h-36 rounded-xl object-cover shadow-lg"
+                    />
+                  </div>
                 )}
-                <div className="min-w-0">
-                  <p className="font-bold text-lg truncate">{currentQ.singleName}</p>
-                  <p className="text-zinc-500 text-sm truncate">{currentQ.artistName}</p>
+                <div>
+                  <p className="font-bold text-lg">{currentQ.singleName}</p>
+                  <p className="text-zinc-500 text-sm">{currentQ.artistName}</p>
                 </div>
               </div>
 
-              {/* Year display */}
-              <div className="flex justify-center items-center gap-2 py-2">
-                {[0, 1, 2, 3].map(i => (
-                  <div
-                    key={i}
-                    className={`w-14 h-14 rounded-lg flex items-center justify-center text-2xl font-bold font-mono ${
-                      guessYear[i] ? 'bg-zinc-700 text-white' : 'bg-zinc-800 text-zinc-600'
+              {/* Year display + Numpad */}
+              <div className="bg-zinc-900 p-4 rounded-xl space-y-3">
+                <div className="flex justify-center items-center gap-2">
+                  {[0, 1, 2, 3].map(i => (
+                    <div
+                      key={i}
+                      className={`w-12 h-12 rounded-lg flex items-center justify-center text-xl font-bold font-mono ${
+                        guessYear[i] ? 'bg-zinc-700 text-white' : 'bg-zinc-800 text-zinc-600'
+                      }`}
+                    >
+                      {guessYear[i] || '_'}
+                    </div>
+                  ))}
+                </div>
+
+                <div className="grid grid-cols-3 gap-1.5">
+                  {['1','2','3','4','5','6','7','8','9'].map(d => (
+                    <button
+                      key={d}
+                      onClick={() => handleNumpad(d)}
+                      className="bg-zinc-800 text-white text-lg font-bold py-2.5 rounded-lg active:bg-zinc-600 transition-colors"
+                    >
+                      {d}
+                    </button>
+                  ))}
+                  <button
+                    onClick={handleBackspace}
+                    className="bg-zinc-800 text-zinc-400 text-base font-bold py-2.5 rounded-lg active:bg-zinc-600 transition-colors"
+                  >
+                    &#9003;
+                  </button>
+                  <button
+                    onClick={() => handleNumpad('0')}
+                    className="bg-zinc-800 text-white text-lg font-bold py-2.5 rounded-lg active:bg-zinc-600 transition-colors"
+                  >
+                    0
+                  </button>
+                  <button
+                    onClick={handleSubmit}
+                    disabled={guessYear.length !== 4}
+                    className={`text-sm font-bold py-2.5 rounded-lg transition-colors ${
+                      guessYear.length === 4
+                        ? 'bg-accent text-white active:brightness-110'
+                        : 'bg-zinc-800 text-zinc-600 cursor-not-allowed'
                     }`}
                   >
-                    {guessYear[i] || '_'}
-                  </div>
-                ))}
-              </div>
-
-              {/* Numpad */}
-              <div className="grid grid-cols-3 gap-2">
-                {['1','2','3','4','5','6','7','8','9'].map(d => (
-                  <button
-                    key={d}
-                    onClick={() => handleNumpad(d)}
-                    className="bg-zinc-800 text-white text-xl font-bold py-3 rounded-lg active:bg-zinc-600 transition-colors"
-                  >
-                    {d}
+                    OK
                   </button>
-                ))}
-                <button
-                  onClick={handleBackspace}
-                  className="bg-zinc-800 text-zinc-400 text-lg font-bold py-3 rounded-lg active:bg-zinc-600 transition-colors"
-                >
-                  &#9003;
-                </button>
-                <button
-                  onClick={() => handleNumpad('0')}
-                  className="bg-zinc-800 text-white text-xl font-bold py-3 rounded-lg active:bg-zinc-600 transition-colors"
-                >
-                  0
-                </button>
-                <button
-                  onClick={handleSubmit}
-                  disabled={guessYear.length !== 4}
-                  className={`text-sm font-bold py-3 rounded-lg transition-colors ${
-                    guessYear.length === 4
-                      ? 'bg-accent text-white active:brightness-110'
-                      : 'bg-zinc-800 text-zinc-600 cursor-not-allowed'
-                  }`}
-                >
-                  OK
-                </button>
+                </div>
               </div>
             </motion.div>
           )}
