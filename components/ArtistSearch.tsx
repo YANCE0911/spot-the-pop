@@ -111,9 +111,21 @@ export default function ArtistSearch({ value, onChange, onSelect, placeholder, d
         onFocus={() => {
           if (suggestions.length > 0 && !justSelectedRef.current) setShowDropdown(true)
           onInputFocus?.()
+          // Lock body scroll while typing on mobile to prevent jank
+          document.body.style.overflow = 'hidden'
+          document.body.style.position = 'fixed'
+          document.body.style.width = '100%'
+          document.body.style.top = `-${window.scrollY}px`
         }}
         onBlur={() => {
           onInputBlur?.()
+          // Restore scroll
+          const scrollY = document.body.style.top
+          document.body.style.overflow = ''
+          document.body.style.position = ''
+          document.body.style.width = ''
+          document.body.style.top = ''
+          window.scrollTo(0, parseInt(scrollY || '0') * -1)
         }}
         placeholder={placeholder}
         disabled={disabled}
