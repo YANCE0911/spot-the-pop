@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import Timer from './Timer'
 import HintPanel from './HintPanel'
@@ -34,6 +35,7 @@ export default function GameScreen({
   lang = 'en',
   totalScore = 0,
 }: Props) {
+  const router = useRouter()
   const [answer, setAnswer] = useState('')
   const [selectedId, setSelectedId] = useState<string | undefined>()
   const [loading, setLoading] = useState(false)
@@ -89,7 +91,10 @@ export default function GameScreen({
         {/* Header */}
         <header>
           <div className="flex items-center justify-between mb-3">
-            <Logo />
+            <div className="flex items-center gap-2">
+              <button onClick={() => router.push('/')} className="text-zinc-400 hover:text-white text-lg transition-colors">←</button>
+              <Logo />
+            </div>
             <div className="flex items-center gap-3">
               <MuteToggle />
               {timer && (
@@ -138,12 +143,12 @@ export default function GameScreen({
                   <img
                     src={themeArtist.imageUrl}
                     alt={themeArtist.name}
-                    className="w-40 h-40 rounded-full object-cover shadow-lg shadow-brand/10"
+                    className="w-24 h-24 sm:w-40 sm:h-40 rounded-full object-cover shadow-lg shadow-brand/10"
                   />
                 </div>
               ) : (
                 <div className="flex justify-center mb-3">
-                  <div className="w-40 h-40 rounded-full bg-zinc-700 flex items-center justify-center text-4xl text-zinc-500">?</div>
+                  <div className="w-24 h-24 sm:w-40 sm:h-40 rounded-full bg-zinc-700 flex items-center justify-center text-4xl text-zinc-500">?</div>
                 </div>
               )}
               <div className="flex justify-between items-center">

@@ -14,8 +14,8 @@ function getGrade(score: number): { label: string; color: string } {
 
 export async function GET(req: NextRequest) {
   const [boldFont, blackFont] = await Promise.all([
-    fetch('https://fonts.gstatic.com/s/inter/v18/UcCo3FwrK3iLTcviYwY.woff2').then(r => r.arrayBuffer()),
-    fetch('https://fonts.gstatic.com/s/inter/v18/UcCo3FwrK3iLTcviYwY.woff2').then(r => r.arrayBuffer()),
+    fetch('https://fonts.gstatic.com/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa1ZL7.woff2').then(r => r.arrayBuffer()),
+    fetch('https://fonts.gstatic.com/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa1ZL7.woff2').then(r => r.arrayBuffer()),
   ])
 
   const { searchParams } = req.nextUrl

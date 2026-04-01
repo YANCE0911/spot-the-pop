@@ -26,6 +26,7 @@ export default function ArtistSearch({ value, onChange, onSelect, placeholder, d
   const [selectedIndex, setSelectedIndex] = useState(-1)
   const debounceRef = useRef<NodeJS.Timeout>(null)
   const wrapperRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
   const justSelectedRef = useRef(false)
   const scrollLockRef = useRef<number | null>(null)
 
@@ -117,6 +118,7 @@ export default function ArtistSearch({ value, onChange, onSelect, placeholder, d
   return (
     <div ref={wrapperRef} className="relative">
       <input
+        ref={inputRef}
         type="text"
         value={value}
         onChange={e => onChange(e.target.value)}
@@ -125,6 +127,15 @@ export default function ArtistSearch({ value, onChange, onSelect, placeholder, d
           scrollLockRef.current = window.scrollY
           if (suggestions.length > 0 && !justSelectedRef.current) setShowDropdown(true)
           onInputFocus?.()
+          // Mobile: scroll input into view above keyboard
+          scrollLockRef.current = null // temporarily disable scroll lock
+          setTimeout(() => {
+            inputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+            // Re-lock at new position after scroll settles
+            setTimeout(() => {
+              scrollLockRef.current = window.scrollY
+            }, 400)
+          }, 300)
         }}
         onBlur={() => {
           scrollLockRef.current = null

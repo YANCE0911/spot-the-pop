@@ -36,6 +36,7 @@ type RoundResult = {
 
 const TOTAL_ROUNDS = 10
 const BONUS_ZONE = 15 // time bonus available in first 15 seconds
+const PROGRESS_KEY = 'soundiq_timeline_progress'
 
 // Base score: smooth power curve. 7.5 × (1 − d/11)^1.13, rounded to 0.1
 // diff=0→7.5, diff=5→3.8, diff=10→0.5, diff=11+→0
@@ -98,6 +99,26 @@ function YearGame() {
   const elapsedTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   useEffect(() => {
+    // Try to restore saved progress
+    try {
+      const saved = localStorage.getItem(PROGRESS_KEY)
+      if (saved) {
+        const progress = JSON.parse(saved)
+        if (progress.gameRegion === gameRegion && progress.questions?.length > 0 && progress.currentRound < progress.questions.length) {
+          setQuestions(progress.questions)
+          setCurrentRound(progress.currentRound)
+          setTotalScore(progress.totalScore)
+          setTotalBaseScore(progress.totalBaseScore)
+          setTotalTimeBonus(progress.totalTimeBonus)
+          setResults(progress.results)
+          setGameStarted(true)
+          setLoading(false)
+          return
+        }
+        localStorage.removeItem(PROGRESS_KEY)
+      }
+    } catch { /* ignore */ }
+
     const region = searchParams?.get('region') || localStorage.getItem('soundiq_region') || (lang === 'ja' ? 'jp' : 'global')
     const locale = region === 'jp' ? 'ja' : 'en'
     fetch(`/api/year/tracks?count=10&locale=${locale}`)
@@ -105,7 +126,6 @@ function YearGame() {
       .then(data => {
         if (data.questions?.length > 0) {
           setQuestions(data.questions)
-          // Start countdown
           setCountdown(3)
         }
       })
@@ -175,6 +195,17 @@ function YearGame() {
     setTotalTimeBonus(prev => prev + timeBonus)
     setFeedback(result)
 
+    // Save progress to localStorage
+    localStorage.setItem(PROGRESS_KEY, JSON.stringify({
+      gameRegion,
+      questions,
+      currentRound: currentRound,
+      totalScore: totalScore + score,
+      totalBaseScore: totalBaseScore + baseScore,
+      totalTimeBonus: totalTimeBonus + timeBonus,
+      results: [...results, result],
+    }))
+
     // Play reaction sound
     if (baseScore >= 7.5) playReaction('perfect')
     else if (baseScore >= 6.0) playReaction('great')
@@ -189,6 +220,7 @@ function YearGame() {
     if (currentRound + 1 < TOTAL_ROUNDS && currentRound + 1 < questions.length) {
       setCurrentRound(prev => prev + 1)
     } else {
+      localStorage.removeItem(PROGRESS_KEY)
       localStorage.setItem('yearGameResults', JSON.stringify({
         score: totalScore,
         baseScore: totalBaseScore,
@@ -277,7 +309,10 @@ function YearGame() {
       <div className="max-w-lg mx-auto space-y-3">
         <header>
           <div className="flex items-center justify-between mb-2">
-            <Logo />
+            <div className="flex items-center gap-2">
+              <button onClick={() => router.push('/')} className="text-zinc-400 hover:text-white text-lg transition-colors">←</button>
+              <Logo />
+            </div>
             <div className="flex items-center gap-3">
               <MuteToggle />
               <div className="text-right">

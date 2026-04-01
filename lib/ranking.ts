@@ -138,6 +138,11 @@ export async function getPlayerRank(playerId: string, gameType: 'versus' | 'time
   }
 }
 
+// --- Fraud prevention ---
+const RATE_LIMIT_WINDOW_MS = 60 * 1000
+const RATE_LIMIT_MAX = 5
+const submitTimestamps = new Map<string, number[]>()
+
 // Save ranking with best-score-only logic per playerId + gameType + season
 export async function saveRanking(
   name: string,
@@ -149,6 +154,21 @@ export async function saveRanking(
   playerId?: string,
   region?: 'jp' | 'global'
 ) {
+  const rejected = { updated: false, bestScore: 0 }
+
+  // Score range validation
+  if (score < 0 || score > 100) return rejected
+
+  // Rate limiting per playerId
+  if (playerId) {
+    const now = Date.now()
+    const timestamps = submitTimestamps.get(playerId) ?? []
+    const recent = timestamps.filter(t => now - t < RATE_LIMIT_WINDOW_MS)
+    if (recent.length >= RATE_LIMIT_MAX) return rejected
+    recent.push(now)
+    submitTimestamps.set(playerId, recent)
+  }
+
   const gt = gameType ?? 'versus'
   const { start } = getSeasonRange(getCurrentSeasonNumber())
 
