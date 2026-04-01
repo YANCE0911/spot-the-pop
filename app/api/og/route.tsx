@@ -30,118 +30,82 @@ export async function GET(req: NextRequest) {
           height: '630px',
           display: 'flex',
           flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          background: 'linear-gradient(145deg, #0a0a0a 0%, #141414 40%, #0a0a0a 100%)',
+          background: '#000',
+          padding: '60px 80px',
           position: 'relative',
-          overflow: 'hidden',
         }}
       >
-        {/* Subtle glow behind score */}
+        {/* SOUND IQ - top left */}
         <div
           style={{
-            position: 'absolute',
-            width: '500px',
-            height: '500px',
-            borderRadius: '50%',
-            background: `radial-gradient(circle, ${grade.color}15 0%, transparent 70%)`,
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            display: 'flex',
+            fontSize: '48px',
+            fontWeight: 900,
+            color: '#a1a1aa',
+            letterSpacing: '-0.02em',
           }}
-        />
+        >
+          SOUND IQ
+        </div>
 
+        {/* Center content */}
         <div
           style={{
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            gap: '8px',
-            position: 'relative',
+            justifyContent: 'center',
+            flex: 1,
+            gap: '16px',
           }}
         >
-          <p
+          {/* MODE RESULTS */}
+          <div
             style={{
-              color: accentColor,
-              fontSize: '28px',
+              fontSize: '32px',
               fontWeight: 700,
-              letterSpacing: '0.3em',
-              margin: 0,
+              color: accentColor,
+              letterSpacing: '0.05em',
             }}
           >
-            SOUND IQ — {modeLabel}
-          </p>
+            {modeLabel} RESULTS
+          </div>
 
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', margin: '12px 0' }}>
+          {/* Score */}
+          <div style={{ display: 'flex', alignItems: 'baseline' }}>
             <span
               style={{
-                color: '#fff',
-                fontSize: '160px',
+                fontSize: '180px',
                 fontWeight: 900,
+                color: '#fff',
                 lineHeight: 1,
-                letterSpacing: '-0.02em',
+                letterSpacing: '-0.03em',
               }}
             >
               {numScore.toFixed(2)}
             </span>
             <span
               style={{
-                color: '#444',
-                fontSize: '48px',
+                fontSize: '56px',
                 fontWeight: 700,
+                color: '#71717a',
+                marginLeft: '8px',
               }}
             >
               /100
             </span>
           </div>
 
+          {/* Grade */}
           <div
             style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '16px',
+              fontSize: '80px',
+              fontWeight: 900,
+              color: grade.color,
+              marginTop: '8px',
             }}
           >
-            <div
-              style={{
-                width: '40px',
-                height: '2px',
-                background: '#333',
-                display: 'flex',
-              }}
-            />
-            <span
-              style={{
-                color: grade.color,
-                fontSize: '64px',
-                fontWeight: 900,
-                letterSpacing: '0.05em',
-              }}
-            >
-              {grade.label}
-            </span>
-            <div
-              style={{
-                width: '40px',
-                height: '2px',
-                background: '#333',
-                display: 'flex',
-              }}
-            />
+            {grade.label}
           </div>
-
-          <p
-            style={{
-              color: '#444',
-              fontSize: '22px',
-              fontWeight: 500,
-              margin: '20px 0 0 0',
-              letterSpacing: '0.05em',
-            }}
-          >
-            Can you beat this score?
-          </p>
         </div>
       </div>
     ),
