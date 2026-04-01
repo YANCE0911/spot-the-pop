@@ -7,7 +7,7 @@ import Logo from '@/components/Logo'
 import MuteToggle from '@/components/MuteToggle'
 import ScoreRank from '@/components/ScoreRank'
 import ShareSection from '@/components/ShareSection'
-import { saveRanking } from '@/lib/ranking'
+import { saveRanking, getPlayerRank } from '@/lib/ranking'
 import { getPlayerId } from '@/lib/playerId'
 import { detectLang, t, type Lang } from '@/lib/i18n'
 import { playTick, playGo, playReaction } from '@/lib/sound'
@@ -461,6 +461,7 @@ function TimelineResults({
   const [submitted, setSubmitted] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [autoSaveResult, setAutoSaveResult] = useState<{ updated: boolean; bestScore: number } | null>(null)
+  const [playerRank, setPlayerRank] = useState<number | null>(null)
 
   // Auto-save for returning users
   useEffect(() => {
@@ -472,6 +473,10 @@ function TimelineResults({
       .then(result => {
         setAutoSaveResult(result)
         setSubmitted(true)
+        return getPlayerRank(pid, 'timeline', region)
+      })
+      .then(rankResult => {
+        if (rankResult) setPlayerRank(rankResult.rank)
       })
       .catch(console.error)
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
@@ -485,6 +490,8 @@ function TimelineResults({
       localStorage.setItem('soundiq_name', playerName.trim())
       setAutoSaveResult(result)
       setSubmitted(true)
+      const rankResult = await getPlayerRank(pid, 'timeline', region)
+      if (rankResult) setPlayerRank(rankResult.rank)
     } catch (err) {
       console.error(err)
     } finally {
@@ -555,6 +562,9 @@ function TimelineResults({
           <div className="text-center space-y-1">
             <p className="text-accent font-bold text-lg">{t('newBest', lang)}</p>
             <p className="text-zinc-400 text-sm">{playerName}</p>
+            {playerRank && (
+              <p className="text-zinc-500 text-xs">{lang === 'ja' ? `現在 ${playerRank}位` : `Rank #${playerRank}`}</p>
+            )}
           </div>
         ) : autoSaveResult && !autoSaveResult.updated && autoSaveResult.bestScore > displayScore ? (
           <div className="text-center space-y-1">
@@ -562,11 +572,17 @@ function TimelineResults({
               {t('bestLabel', lang)}: {autoSaveResult.bestScore.toFixed(2)}
             </p>
             <p className="text-zinc-500 text-xs">{playerName}</p>
+            {playerRank && (
+              <p className="text-zinc-500 text-xs">{lang === 'ja' ? `現在 ${playerRank}位` : `Rank #${playerRank}`}</p>
+            )}
           </div>
         ) : (
           <div className="text-center space-y-1">
             <p className="text-accent font-semibold">{t('registered', lang)}</p>
             <p className="text-zinc-400 text-sm">{playerName}</p>
+            {playerRank && (
+              <p className="text-zinc-500 text-xs">{lang === 'ja' ? `現在 ${playerRank}位` : `Rank #${playerRank}`}</p>
+            )}
           </div>
         )}
 

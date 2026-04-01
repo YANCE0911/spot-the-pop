@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { saveRanking } from '@/lib/ranking'
+import { saveRanking, getPlayerRank } from '@/lib/ranking'
 import { getPlayerId } from '@/lib/playerId'
 import ShareSection from '@/components/ShareSection'
 import ScoreRank from '@/components/ScoreRank'
@@ -22,6 +22,7 @@ export default function Results() {
   const [challengeUrl, setChallengeUrl] = useState<string>()
   const [lang] = useState<Lang>(() => detectLang())
   const [autoSaveResult, setAutoSaveResult] = useState<{ updated: boolean; bestScore: number } | null>(null)
+  const [playerRank, setPlayerRank] = useState<number | null>(null)
 
   useEffect(() => {
     const saved = localStorage.getItem('gameResults')
@@ -43,6 +44,10 @@ export default function Results() {
           .then(result => {
             setAutoSaveResult(result)
             setSubmitted(true)
+            return getPlayerRank(pid, 'versus', region)
+          })
+          .then(rankResult => {
+            if (rankResult) setPlayerRank(rankResult.rank)
           })
           .catch(console.error)
       } else if (localStorage.getItem('rankingSubmitted') === 'true') {
@@ -65,6 +70,8 @@ export default function Results() {
       localStorage.setItem('rankingSubmitted', 'true')
       setAutoSaveResult(result)
       setSubmitted(true)
+      const rankResult = await getPlayerRank(pid, 'versus', region)
+      if (rankResult) setPlayerRank(rankResult.rank)
 
       const questions = results.map(r => r.themeArtist)
       const res = await fetch('/api/challenge/create', {
@@ -140,6 +147,9 @@ export default function Results() {
           <div className="text-center space-y-1">
             <p className="text-brand font-bold text-lg">{t('newBest', lang)}</p>
             <p className="text-zinc-400 text-sm">{playerName}</p>
+            {playerRank && (
+              <p className="text-zinc-500 text-xs">{lang === 'ja' ? `現在 ${playerRank}位` : `Rank #${playerRank}`}</p>
+            )}
           </div>
         ) : autoSaveResult && !autoSaveResult.updated && autoSaveResult.bestScore > displayScore ? (
           <div className="text-center space-y-1">
@@ -147,11 +157,17 @@ export default function Results() {
               {t('bestLabel', lang)}: {autoSaveResult.bestScore.toFixed(2)}
             </p>
             <p className="text-zinc-500 text-xs">{playerName}</p>
+            {playerRank && (
+              <p className="text-zinc-500 text-xs">{lang === 'ja' ? `現在 ${playerRank}位` : `Rank #${playerRank}`}</p>
+            )}
           </div>
         ) : (
           <div className="text-center space-y-1">
             <p className="text-brand font-semibold">{t('registered', lang)}</p>
             <p className="text-zinc-400 text-sm">{playerName}</p>
+            {playerRank && (
+              <p className="text-zinc-500 text-xs">{lang === 'ja' ? `現在 ${playerRank}位` : `Rank #${playerRank}`}</p>
+            )}
           </div>
         )}
 
