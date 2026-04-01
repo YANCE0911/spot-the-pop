@@ -52,7 +52,7 @@ export default function Home() {
           <div className="flex bg-zinc-900 rounded-lg p-1">
             <button
               onClick={() => handleRegionChange('jp')}
-              className={`flex-1 w-24 py-1.5 rounded-md text-sm font-bold transition-all ${
+              className={`flex-1 w-24 py-1 rounded-md text-sm font-bold transition-all ${
                 region === 'jp'
                   ? 'bg-zinc-700 text-white'
                   : 'text-zinc-500 hover:text-zinc-300'
@@ -62,7 +62,7 @@ export default function Home() {
             </button>
             <button
               onClick={() => handleRegionChange('global')}
-              className={`flex-1 w-24 py-1.5 rounded-md text-sm font-bold transition-all ${
+              className={`flex-1 w-24 py-1 rounded-md text-sm font-bold transition-all ${
                 region === 'global'
                   ? 'bg-zinc-700 text-white'
                   : 'text-zinc-500 hover:text-zinc-300'
