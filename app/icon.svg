@@ -1,5 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
   <circle cx="256" cy="256" r="256" fill="#000000"/>
-  <text x="256" y="280" text-anchor="middle" dominant-baseline="central" font-family="system-ui, -apple-system, 'Helvetica Neue', sans-serif" font-size="180" font-weight="700" letter-spacing="-6" fill="#a0a0a0">SIQ</text>
-  <text x="400" y="140" text-anchor="middle" font-size="80" fill="#a0a0a0">&#9835;</text>
+  <!-- Headphone band -->
+  <path d="M130 280 Q130 160 256 140 Q382 160 382 280" stroke="#b0b0b0" stroke-width="28" fill="none" stroke-linecap="round"/>
+  <!-- Left ear cup -->
+  <rect x="102" y="260" width="56" height="90" rx="20" fill="#b0b0b0"/>
+  <!-- Right ear cup -->
+  <rect x="354" y="260" width="56" height="90" rx="20" fill="#b0b0b0"/>
+  <!-- Brain (simplified) -->
+  <path d="M210 240 Q200 200 220 180 Q240 160 256 170 Q272 160 292 180 Q312 200 302 240 Q310 260 290 270 Q270 280 256 270 Q242 280 222 270 Q202 260 210 240Z" fill="#b0b0b0" opacity="0.6"/>
+  <!-- Brain center line -->
+  <line x1="256" y1="170" x2="256" y2="270" stroke="#000000" stroke-width="3" opacity="0.4"/>
 </svg>
