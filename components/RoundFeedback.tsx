@@ -23,19 +23,20 @@ function getReaction(score: number): { label: string; color: string } {
 }
 
 export default function RoundFeedback({ result, onDismiss, lang = 'en' }: Props) {
-  if (!result) return null
-
-  const reaction = getReaction(result.diff)
-
-  // Play sound effect on mount
+  // Play sound effect when result changes
   useEffect(() => {
+    if (!result) return
     const score = result.diff
     if (score >= 18) playReaction('perfect')
     else if (score >= 14) playReaction('great')
     else if (score >= 10) playReaction('good')
     else if (score >= 5) playReaction('soso')
     else playReaction('miss')
-  }, [result.diff])
+  }, [result])
+
+  if (!result) return null
+
+  const reaction = getReaction(result.diff)
   const themeVal = result.metric === 'followers'
     ? (result.themeArtist.followers ?? 0) : result.themeArtist.popularity
   const answerVal = result.metric === 'followers'
