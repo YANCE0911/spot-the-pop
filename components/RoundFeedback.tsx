@@ -1,8 +1,10 @@
 'use client'
 
+import { useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import type { GameResult } from '@/types'
 import { formatMetricValue } from '@/lib/metrics'
+import { playReaction } from '@/lib/sound'
 
 type Props = {
   result: GameResult | null
@@ -24,6 +26,16 @@ export default function RoundFeedback({ result, onDismiss, lang = 'en' }: Props)
   if (!result) return null
 
   const reaction = getReaction(result.diff)
+
+  // Play sound effect on mount
+  useEffect(() => {
+    const score = result.diff
+    if (score >= 18) playReaction('perfect')
+    else if (score >= 14) playReaction('great')
+    else if (score >= 10) playReaction('good')
+    else if (score >= 5) playReaction('soso')
+    else playReaction('miss')
+  }, [result.diff])
   const themeVal = result.metric === 'followers'
     ? (result.themeArtist.followers ?? 0) : result.themeArtist.popularity
   const answerVal = result.metric === 'followers'

@@ -4,11 +4,12 @@ import { NextRequest } from 'next/server'
 export const runtime = 'edge'
 
 function getGrade(score: number): { label: string; color: string } {
-  if (score >= 95) return { label: 'S', color: '#1DB954' }
-  if (score >= 85) return { label: 'A', color: '#34d399' }
-  if (score >= 70) return { label: 'B', color: '#38bdf8' }
-  if (score >= 50) return { label: 'C', color: '#fbbf24' }
-  return { label: 'D', color: '#f87171' }
+  if (score >= 90) return { label: 'S', color: '#facc15' }
+  if (score >= 80) return { label: 'A', color: '#4ade80' }
+  if (score >= 70) return { label: 'B', color: '#60a5fa' }
+  if (score >= 60) return { label: 'C', color: '#d4d4d8' }
+  if (score >= 50) return { label: 'D', color: '#fb923c' }
+  return { label: 'E', color: '#f87171' }
 }
 
 export async function GET(req: NextRequest) {

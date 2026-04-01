@@ -6,6 +6,7 @@ import Timer from './Timer'
 import HintPanel from './HintPanel'
 import ArtistSearch from './ArtistSearch'
 import Logo from './Logo'
+import MuteToggle from './MuteToggle'
 import type { MetricMode, Artist } from '@/types'
 import { t, type Lang } from '@/lib/i18n'
 import { getHintRange } from '@/lib/metrics'
@@ -90,6 +91,7 @@ export default function GameScreen({
           <div className="flex items-center justify-between mb-3">
             <Logo />
             <div className="flex items-center gap-3">
+              <MuteToggle />
               {timer && (
                 <Timer
                   key={currentRound}

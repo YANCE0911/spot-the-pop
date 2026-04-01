@@ -4,11 +4,13 @@ import { useState, useEffect, useRef, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { motion } from 'framer-motion'
 import Logo from '@/components/Logo'
+import MuteToggle from '@/components/MuteToggle'
 import ScoreRank from '@/components/ScoreRank'
 import ShareSection from '@/components/ShareSection'
 import { saveRanking } from '@/lib/ranking'
 import { getPlayerId } from '@/lib/playerId'
 import { detectLang, t, type Lang } from '@/lib/i18n'
+import { playTick, playGo, playReaction } from '@/lib/sound'
 
 type TrackQuestion = {
   trackName: string
@@ -83,6 +85,8 @@ function YearGame() {
   const [feedback, setFeedback] = useState<RoundResult | null>(null)
   const [finished, setFinished] = useState(false)
   const [lang] = useState<Lang>(() => detectLang())
+  const [countdown, setCountdown] = useState<number | null>(null)
+  const [gameStarted, setGameStarted] = useState(false)
   const [gameRegion] = useState<'jp' | 'global'>(() => {
     const r = searchParams?.get('region') || (typeof localStorage !== 'undefined' ? localStorage.getItem('soundiq_region') : null)
     return r === 'global' ? 'global' : 'jp'
@@ -101,17 +105,33 @@ function YearGame() {
       .then(data => {
         if (data.questions?.length > 0) {
           setQuestions(data.questions)
+          // Start countdown
+          setCountdown(3)
         }
       })
       .catch(console.error)
       .finally(() => setLoading(false))
   }, [])
 
+  // Countdown timer
+  useEffect(() => {
+    if (countdown === null) return
+    if (countdown <= 0) {
+      playGo()
+      setGameStarted(true)
+      setCountdown(null)
+      return
+    }
+    playTick()
+    const timer = setTimeout(() => setCountdown(prev => (prev ?? 1) - 1), 800)
+    return () => clearTimeout(timer)
+  }, [countdown])
+
   const currentQ = questions[currentRound]
 
   // Start elapsed timer when question is shown
   useEffect(() => {
-    if (currentQ && !feedback && !loading && questions.length > 0) {
+    if (currentQ && !feedback && !loading && questions.length > 0 && gameStarted) {
       startTimeRef.current = Date.now()
       setElapsed(0)
 
@@ -154,6 +174,13 @@ function YearGame() {
     setTotalBaseScore(prev => prev + baseScore)
     setTotalTimeBonus(prev => prev + timeBonus)
     setFeedback(result)
+
+    // Play reaction sound
+    if (baseScore >= 7.5) playReaction('perfect')
+    else if (baseScore >= 6.0) playReaction('great')
+    else if (baseScore >= 4.0) playReaction('good')
+    else if (baseScore >= 2.0) playReaction('soso')
+    else playReaction('miss')
   }
 
   const handleNext = () => {
@@ -188,6 +215,22 @@ function YearGame() {
         <div className="text-center space-y-4">
           <div className="animate-spin h-10 w-10 border-4 border-accent rounded-full border-t-transparent mx-auto" />
           <p className="text-zinc-500 text-sm">Loading tracks...</p>
+        </div>
+      </main>
+    )
+  }
+
+  if (countdown !== null) {
+    return (
+      <main className="min-h-screen bg-black text-white flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-accent text-sm font-bold tracking-widest mb-4">TIMELINE</p>
+          <p
+            key={countdown}
+            className="text-8xl font-black text-accent animate-[popIn_0.4s_ease-out]"
+          >
+            {countdown > 0 ? countdown : 'GO!'}
+          </p>
         </div>
       </main>
     )
@@ -235,9 +278,12 @@ function YearGame() {
         <header>
           <div className="flex items-center justify-between mb-2">
             <Logo />
-            <div className="text-right">
-              <span className="text-xs text-zinc-400">ROUND</span>
-              <div className="text-xl font-bold">{currentRound + 1}/{Math.min(TOTAL_ROUNDS, questions.length)}</div>
+            <div className="flex items-center gap-3">
+              <MuteToggle />
+              <div className="text-right">
+                <span className="text-xs text-zinc-400">ROUND</span>
+                <div className="text-xl font-bold">{currentRound + 1}/{Math.min(TOTAL_ROUNDS, questions.length)}</div>
+              </div>
             </div>
           </div>
 
@@ -257,7 +303,7 @@ function YearGame() {
             </div>
           )}
 
-          {currentQ && !feedback && (
+          {currentQ && !feedback && gameStarted && (
             <div className="flex items-center justify-between text-xs h-5">
               {elapsed <= BONUS_ZONE ? (
                 <>
@@ -277,7 +323,7 @@ function YearGame() {
           )}
         </header>
 
-        {currentQ && !feedback && (
+        {currentQ && !feedback && gameStarted && (
             <div className="space-y-3">
               {/* Album art + song info — centered, large */}
               <div className="bg-zinc-900 p-4 rounded-xl text-center space-y-2">
