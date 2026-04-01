@@ -37,7 +37,6 @@ export default function GameScreen({
   const [selectedId, setSelectedId] = useState<string | undefined>()
   const [loading, setLoading] = useState(false)
   const [usedHints, setUsedHints] = useState<Set<string>>(new Set())
-  const [inputFocused, setInputFocused] = useState(false)
 
   const handleSubmit = async (e?: React.FormEvent<HTMLFormElement>) => {
     if (e) e.preventDefault()
@@ -132,17 +131,17 @@ export default function GameScreen({
                 {t('themeArtist', lang)}
               </h2>
               {themeArtist.imageUrl ? (
-                <div className={`flex justify-center transition-all duration-200 ${inputFocused ? 'mb-1' : 'mb-3'}`}>
+                <div className="flex justify-center mb-3">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={themeArtist.imageUrl}
                     alt={themeArtist.name}
-                    className={`rounded-full object-cover shadow-lg shadow-brand/10 transition-all duration-200 ${inputFocused ? 'w-20 h-20' : 'w-40 h-40'}`}
+                    className="w-40 h-40 rounded-full object-cover shadow-lg shadow-brand/10"
                   />
                 </div>
               ) : (
-                <div className={`flex justify-center transition-all duration-200 ${inputFocused ? 'mb-1' : 'mb-3'}`}>
-                  <div className={`rounded-full bg-zinc-700 flex items-center justify-center text-zinc-500 transition-all duration-200 ${inputFocused ? 'w-20 h-20 text-2xl' : 'w-40 h-40 text-4xl'}`}>?</div>
+                <div className="flex justify-center mb-3">
+                  <div className="w-40 h-40 rounded-full bg-zinc-700 flex items-center justify-center text-4xl text-zinc-500">?</div>
                 </div>
               )}
               <div className="flex justify-between items-center">
@@ -184,9 +183,7 @@ export default function GameScreen({
                   onSelect={handleSelectFromSearch}
                   placeholder={t('inputPlaceholder', lang)}
                   disabled={loading}
-                  onInputFocus={() => setInputFocused(true)}
-                  onInputBlur={() => setInputFocused(false)}
-                />
+/>
               </div>
 
               <button
