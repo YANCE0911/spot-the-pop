@@ -16,9 +16,10 @@ export default function ShareSection({ score, mode, lang = 'en', challengeUrl }:
   const displayScore = Math.round(score * 100) / 100
   const modeLabel = mode === 'versus' ? 'VERSUS' : 'TIMELINE'
 
+  const origin = typeof window !== 'undefined' ? window.location.origin : ''
   const shareUrl = challengeUrl
-    ? `${typeof window !== 'undefined' ? window.location.origin : ''}${challengeUrl}`
-    : `${typeof window !== 'undefined' ? window.location.origin : ''}/share?score=${displayScore.toFixed(2)}&mode=${mode}`
+    ? `${origin}${challengeUrl}`
+    : `${origin}/share?score=${displayScore.toFixed(2)}&mode=${mode}&v=2`
 
   const shareText = `SOUND IQ - ${modeLabel}\nScore: ${displayScore.toFixed(2)}/100`
   const tweetText = encodeURIComponent(shareText)
