@@ -46,8 +46,8 @@ export default function Home() {
         {/* Header */}
         <header className="text-center animate-[fadeInUp_0.4s_ease-out]">
           <h1 className="font-display text-4xl sm:text-5xl font-black tracking-tight bg-gradient-to-r from-zinc-300 to-zinc-500 bg-clip-text text-transparent">SOUND IQ</h1>
-          <p className="text-zinc-400 text-sm mt-2 tracking-wide">
-            {lang === 'ja' ? '音楽の知識、どこまで深い？' : 'How deep is your music knowledge?'}
+          <p className="text-zinc-400 text-sm mt-2 tracking-wide italic">
+            How deep is your music knowledge?
           </p>
         </header>
 
@@ -87,11 +87,12 @@ export default function Home() {
             <p className="text-gradient-warm font-display font-black text-3xl tracking-wider mb-3 flex items-center gap-2">
               <span className="inline-block w-0 h-0 border-t-[8px] border-t-transparent border-b-[8px] border-b-transparent border-l-[12px] border-l-accent" />
               TIMELINE
+              <span className="text-xs font-normal text-zinc-500 tracking-normal">{lang === 'ja' ? '全10問' : '10 Rounds'}</span>
             </p>
             <p className="text-zinc-400 text-xs">
               {lang === 'ja'
-                ? 'あの曲、何年にリリースされた？'
-                : 'When was that track released?'}
+                ? 'あの曲のリリース年を当てるゲーム'
+                : 'Guess the release year'}
             </p>
           </button>
 
@@ -103,11 +104,12 @@ export default function Home() {
             <p className="text-gradient font-display font-black text-3xl tracking-wider mb-3 flex items-center gap-2">
               <span className="inline-block w-0 h-0 border-t-[8px] border-t-transparent border-b-[8px] border-b-transparent border-l-[12px] border-l-brand" />
               VERSUS
+              <span className="text-xs font-normal text-zinc-500 tracking-normal">{lang === 'ja' ? '全5問' : '5 Rounds'}</span>
             </p>
             <p className="text-zinc-400 text-xs">
               {lang === 'ja'
-                ? '同じくらい人気のアーティストを当てよう！'
-                : 'Name an artist with similar popularity'}
+                ? 'フォロワー数が近いアーティストを当てるゲーム'
+                : 'Match artists by follower count'}
             </p>
           </button>
         </div>

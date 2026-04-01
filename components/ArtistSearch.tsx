@@ -111,10 +111,6 @@ export default function ArtistSearch({ value, onChange, onSelect, placeholder, d
         onFocus={() => {
           if (suggestions.length > 0 && !justSelectedRef.current) setShowDropdown(true)
           onInputFocus?.()
-          // Mobile: ensure input is visible above keyboard
-          setTimeout(() => {
-            inputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
-          }, 300)
         }}
         onBlur={() => {
           onInputBlur?.()
@@ -122,7 +118,6 @@ export default function ArtistSearch({ value, onChange, onSelect, placeholder, d
         placeholder={placeholder}
         disabled={disabled}
         className="w-full bg-zinc-800 text-white p-3 rounded-lg outline-none focus:ring-2 focus:ring-brand transition-all"
-        autoFocus
         autoComplete="off"
       />
 

@@ -12,6 +12,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'SOUND IQ',
     description: 'How deep is your music knowledge?',
+    siteName: 'SOUND IQ',
     type: 'website',
     images: ['https://soundiq.vercel.app/api/og?score=0&mode=versus'],
   },
