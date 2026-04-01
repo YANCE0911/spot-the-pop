@@ -30,8 +30,6 @@ export default function ShareSection({ score, mode, lang = 'en', challengeUrl }:
     setTimeout(() => setCopied(false), 2000)
   }
 
-  const isBrand = mode === 'versus'
-
   return (
     <div className="space-y-2">
       <div className="flex gap-2">
@@ -45,11 +43,7 @@ export default function ShareSection({ score, mode, lang = 'en', challengeUrl }:
         </a>
         <button
           onClick={handleCopy}
-          className={`flex-1 py-3 px-4 rounded-xl font-bold transition-all active:scale-[0.98] ${
-            isBrand
-              ? 'bg-brand text-black hover:bg-brand-light'
-              : 'bg-accent text-white hover:brightness-110'
-          }`}
+          className="flex-1 py-3 px-4 rounded-xl font-bold transition-all active:scale-[0.98] bg-zinc-800 text-white hover:bg-zinc-700"
         >
           {copied ? t('copied', lang) : t('share', lang)}
         </button>
