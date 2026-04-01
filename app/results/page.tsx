@@ -107,24 +107,24 @@ export default function Results() {
 
         <ScoreRank score={displayScore} lang={lang} />
 
-        {/* Play Again / Top */}
-        <div className="flex gap-3">
-          <button
-            onClick={() => router.push('/game')}
-            className="flex-1 bg-brand text-black py-3 rounded-lg font-semibold hover:bg-brand-light transition-all"
-          >
-            {t('playAgain', lang)}
-          </button>
+        {/* Play Again (full width) */}
+        <button
+          onClick={() => router.push('/game')}
+          className="w-full bg-brand text-black py-3 rounded-lg font-semibold hover:bg-brand-light transition-all"
+        >
+          {t('playAgain', lang)}
+        </button>
+
+        {/* X / Copy / Top */}
+        <div className="grid grid-cols-3 gap-2">
+          <ShareSection score={score} mode="versus" lang={lang} challengeUrl={challengeUrl} />
           <button
             onClick={() => router.push('/')}
-            className="flex-1 bg-zinc-800 text-white py-3 rounded-lg font-semibold hover:bg-zinc-700 transition-all"
+            className="bg-zinc-800 text-white py-3 rounded-lg font-semibold hover:bg-zinc-700 transition-all text-sm"
           >
             {t('top', lang)}
           </button>
         </div>
-
-        {/* Share */}
-        <ShareSection score={score} mode="versus" lang={lang} challengeUrl={challengeUrl} />
 
         {/* Name registration */}
         {!submitted ? (

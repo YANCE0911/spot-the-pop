@@ -123,7 +123,7 @@ function YearGame() {
       return
     }
     playTick()
-    const timer = setTimeout(() => setCountdown(prev => (prev ?? 1) - 1), 800)
+    const timer = setTimeout(() => setCountdown(prev => (prev ?? 1) - 1), 1000)
     return () => clearTimeout(timer)
   }, [countdown])
 
@@ -520,24 +520,24 @@ function TimelineResults({
 
         <ScoreRank score={displayScore} lang={lang} />
 
-        {/* Play Again / Top */}
-        <div className="flex gap-3">
-          <button
-            onClick={() => window.location.reload()}
-            className="flex-1 bg-accent text-white py-3 rounded-lg font-semibold hover:brightness-110 transition-all"
-          >
-            {t('playAgain', lang)}
-          </button>
+        {/* Play Again (full width) */}
+        <button
+          onClick={() => window.location.reload()}
+          className="w-full bg-accent text-white py-3 rounded-lg font-semibold hover:brightness-110 transition-all"
+        >
+          {t('playAgain', lang)}
+        </button>
+
+        {/* X / Copy / Top */}
+        <div className="grid grid-cols-3 gap-2">
+          <ShareSection score={displayScore} mode="timeline" lang={lang} />
           <button
             onClick={() => router.push('/')}
-            className="flex-1 bg-zinc-800 text-white py-3 rounded-lg font-semibold hover:bg-zinc-700 transition-all"
+            className="bg-zinc-800 text-white py-3 rounded-lg font-semibold hover:bg-zinc-700 transition-all text-sm"
           >
             {t('top', lang)}
           </button>
         </div>
-
-        {/* Share */}
-        <ShareSection score={displayScore} mode="timeline" lang={lang} />
 
         {/* Name registration */}
         {!submitted ? (

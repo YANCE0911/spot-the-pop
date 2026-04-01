@@ -31,23 +31,21 @@ export default function ShareSection({ score, mode, lang = 'en', challengeUrl }:
   }
 
   return (
-    <div className="space-y-2">
-      <div className="flex gap-2">
-        <a
-          href={`https://twitter.com/intent/tweet?text=${tweetText}&url=${tweetUrl}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex-1 bg-black border border-zinc-700 text-white py-3 px-4 rounded-xl font-bold hover:bg-zinc-900 transition-all active:scale-[0.98] text-center"
-        >
-          X
-        </a>
-        <button
-          onClick={handleCopy}
-          className="flex-1 py-3 px-4 rounded-xl font-bold transition-all active:scale-[0.98] bg-zinc-800 text-white hover:bg-zinc-700"
-        >
-          {copied ? t('copied', lang) : t('share', lang)}
-        </button>
-      </div>
+    <>
+      <a
+        href={`https://twitter.com/intent/tweet?text=${tweetText}&url=${tweetUrl}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="bg-black border border-zinc-700 text-white py-3 px-4 rounded-lg font-bold hover:bg-zinc-900 transition-all active:scale-[0.98] text-center text-sm"
+      >
+        X
+      </a>
+      <button
+        onClick={handleCopy}
+        className="py-3 px-4 rounded-lg font-bold transition-all active:scale-[0.98] bg-zinc-800 text-white hover:bg-zinc-700 text-sm"
+      >
+        {copied ? t('copied', lang) : t('share', lang)}
+      </button>
 
       {challengeUrl && (
         <button
@@ -57,11 +55,11 @@ export default function ShareSection({ score, mode, lang = 'en', challengeUrl }:
             setCopied(true)
             setTimeout(() => setCopied(false), 2000)
           }}
-          className="w-full bg-zinc-800 text-white py-3 px-6 rounded-xl font-bold hover:bg-zinc-700 transition-all active:scale-[0.98]"
+          className="col-span-3 bg-zinc-800 text-white py-3 px-6 rounded-lg font-bold hover:bg-zinc-700 transition-all active:scale-[0.98] text-sm"
         >
           {t('challengeFriend', lang)}
         </button>
       )}
-    </div>
+    </>
   )
 }
