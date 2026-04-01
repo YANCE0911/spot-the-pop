@@ -337,7 +337,7 @@ function YearGame() {
                     disabled={guessYear.length !== 4 || parseInt(guessYear) < 1960 || parseInt(guessYear) > 2026}
                     className={`text-sm font-bold py-3 rounded-lg transition-colors ${
                       guessYear.length === 4 && parseInt(guessYear) >= 1960 && parseInt(guessYear) <= 2026
-                        ? 'bg-accent text-white active:brightness-110'
+                        ? 'bg-accent text-white active:brightness-110 animate-[pulse-glow_1.5s_ease-in-out_infinite]'
                         : 'bg-zinc-800 text-zinc-600 cursor-not-allowed'
                     }`}
                   >

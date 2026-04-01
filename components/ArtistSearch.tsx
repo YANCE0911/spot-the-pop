@@ -37,7 +37,7 @@ export default function ArtistSearch({ value, onChange, onSelect, placeholder, d
       return
     }
 
-    if (value.length < 2) {
+    if (value.length < 1) {
       setSuggestions([])
       setShowDropdown(false)
       return
@@ -54,7 +54,7 @@ export default function ArtistSearch({ value, onChange, onSelect, placeholder, d
       } catch {
         // ignore
       }
-    }, 300)
+    }, 150)
 
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current)
