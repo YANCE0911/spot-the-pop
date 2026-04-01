@@ -13,11 +13,6 @@ function getGrade(score: number): { label: string; color: string } {
 }
 
 export async function GET(req: NextRequest) {
-  const [boldFont, blackFont] = await Promise.all([
-    fetch('https://fonts.gstatic.com/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa1ZL7.woff2').then(r => r.arrayBuffer()),
-    fetch('https://fonts.gstatic.com/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa1ZL7.woff2').then(r => r.arrayBuffer()),
-  ])
-
   const { searchParams } = req.nextUrl
   const score = searchParams.get('score') ?? '0'
   const mode = searchParams.get('mode') ?? 'versus'
@@ -38,7 +33,6 @@ export async function GET(req: NextRequest) {
           alignItems: 'center',
           justifyContent: 'center',
           background: 'linear-gradient(145deg, #0a0a0a 0%, #141414 40%, #0a0a0a 100%)',
-          fontFamily: 'Inter',
           position: 'relative',
           overflow: 'hidden',
         }}
@@ -154,10 +148,6 @@ export async function GET(req: NextRequest) {
     {
       width: 1200,
       height: 630,
-      fonts: [
-        { name: 'Inter', data: boldFont, weight: 700, style: 'normal' },
-        { name: 'Inter', data: blackFont, weight: 900, style: 'normal' },
-      ],
     },
   )
 }
