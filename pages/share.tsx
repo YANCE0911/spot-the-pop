@@ -12,7 +12,8 @@ export const getServerSideProps: GetServerSideProps<Props> = async ({ query }) =
   const score = (query.score as string) || '0'
   const mode = (query.mode as string) || 'versus'
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : 'https://soundiq.vercel.app')
-  const ogUrl = `${baseUrl}/api/og?score=${score}&mode=${mode}`
+  const v = (query.v as string) || '1'
+  const ogUrl = `${baseUrl}/api/og?score=${score}&mode=${mode}&v=${v}`
   return { props: { score, mode, ogUrl } }
 }
 

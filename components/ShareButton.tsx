@@ -30,7 +30,7 @@ export default function ShareButton({ score, results = [], challengeUrl, lang = 
   const origin = typeof window !== 'undefined' ? window.location.origin : ''
   const shareUrl = challengeUrl
     ? `${origin}${challengeUrl}`
-    : `${origin}/share?score=${displayScore.toFixed(2)}&mode=versus&v=2`
+    : `${origin}/share?score=${displayScore.toFixed(2)}&mode=versus&v=3`
 
   const shareText = [
     'SOUND IQ',
