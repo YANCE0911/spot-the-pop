@@ -32,7 +32,11 @@ export default function Home() {
         {/* Language toggle */}
         <div className="flex justify-end">
           <button
-            onClick={() => setLang(l => l === 'en' ? 'ja' : 'en')}
+            onClick={() => setLang(l => {
+              const next = l === 'en' ? 'ja' : 'en'
+              localStorage.setItem('soundiq_lang', next)
+              return next
+            })}
             className="text-xs text-zinc-500 hover:text-white border border-zinc-800 px-2 py-1 rounded transition-colors"
           >
             {lang === 'en' ? 'JA' : 'EN'}
@@ -42,8 +46,8 @@ export default function Home() {
         {/* Header */}
         <header className="text-center animate-[fadeInUp_0.4s_ease-out]">
           <h1 className="font-display text-4xl sm:text-5xl font-black tracking-tight bg-gradient-to-r from-zinc-300 to-zinc-500 bg-clip-text text-transparent">SOUND IQ</h1>
-          <p className="text-zinc-500 text-sm mt-2 tracking-wide">
-            How deep is your music knowledge?
+          <p className="text-zinc-400 text-sm mt-2 tracking-wide">
+            {lang === 'ja' ? '音楽の知識、どこまで深い？' : 'How deep is your music knowledge?'}
           </p>
         </header>
 

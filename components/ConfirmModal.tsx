@@ -25,7 +25,7 @@ export default function ConfirmModal({ artist, onConfirm, onCancel, lang = 'en' 
         <div className="flex items-center gap-3 bg-zinc-800 p-3 rounded-xl">
           {artist.imageUrl ? (
             /* eslint-disable-next-line @next/next/no-img-element */
-            <img src={artist.imageUrl} alt="" className="w-12 h-12 rounded-full object-cover flex-shrink-0" />
+            <img src={artist.imageUrl} alt={artist.name} className="w-12 h-12 rounded-full object-cover flex-shrink-0" />
           ) : (
             <div className="w-12 h-12 rounded-full bg-zinc-700 flex-shrink-0" />
           )}

@@ -100,7 +100,7 @@ export default function Results() {
           <div className="text-center">
             <p className="text-5xl font-black animate-[countUp_0.6s_ease-out_0.2s_both]">
               {displayScore.toFixed(2)}
-              <span className="text-zinc-500 text-lg ml-1">/100</span>
+              <span className="text-zinc-400 text-lg ml-1">/100</span>
             </p>
           </div>
         </header>
@@ -109,7 +109,10 @@ export default function Results() {
 
         {/* Play Again (full width) */}
         <button
-          onClick={() => router.push('/game')}
+          onClick={() => {
+            const region = localStorage.getItem('soundiq_region') || 'jp'
+            router.push(`/game?metric=followers&region=${region}`)
+          }}
           className="w-full bg-brand text-black py-3 rounded-lg font-sans font-semibold hover:bg-brand-light transition-all"
         >
           {t('playAgain', lang)}

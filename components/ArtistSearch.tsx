@@ -150,7 +150,7 @@ export default function ArtistSearch({ value, onChange, onSelect, placeholder, d
             >
               {s.imageUrl ? (
                 /* eslint-disable-next-line @next/next/no-img-element */
-                <img src={s.imageUrl} alt="" className="w-8 h-8 rounded-full object-cover flex-shrink-0" />
+                <img src={s.imageUrl} alt={s.name} className="w-8 h-8 rounded-full object-cover flex-shrink-0" />
               ) : (
                 <div className="w-8 h-8 rounded-full bg-zinc-600 flex-shrink-0" />
               )}

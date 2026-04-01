@@ -187,6 +187,8 @@ export function t(key: TranslationKey, lang: Lang = 'en'): string {
 
 export function detectLang(): Lang {
   if (typeof window === 'undefined') return 'ja'
+  const saved = localStorage.getItem('soundiq_lang')
+  if (saved === 'en' || saved === 'ja') return saved
   const nav = navigator.language
   if (nav.startsWith('ja')) return 'ja'
   return 'en'

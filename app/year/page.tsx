@@ -147,7 +147,7 @@ function YearGame() {
 
   const handleSubmit = () => {
     const year = parseInt(guessYear)
-    if (!year || year < 1960 || year > 2026 || !currentQ) return
+    if (!year || year < 1960 || year > new Date().getFullYear() || !currentQ) return
 
     if (elapsedTimerRef.current) clearInterval(elapsedTimerRef.current)
 
@@ -214,7 +214,7 @@ function YearGame() {
       <main className="min-h-screen bg-black text-white flex items-center justify-center">
         <div className="text-center space-y-4">
           <div className="animate-spin h-10 w-10 border-4 border-accent rounded-full border-t-transparent mx-auto" />
-          <p className="text-zinc-500 text-sm">Loading tracks...</p>
+          <p className="text-zinc-400 text-sm">{lang === 'ja' ? '曲を読み込み中...' : 'Loading tracks...'}</p>
         </div>
       </main>
     )
@@ -240,14 +240,14 @@ function YearGame() {
     return (
       <main className="min-h-screen bg-black text-white flex items-center justify-center">
         <div className="text-center space-y-4">
-          <p className="text-red-400">Could not load tracks.</p>
-          <p className="text-zinc-500 text-sm mt-2">Spotify API rate limit may be active. Try again in a few minutes.</p>
+          <p className="text-red-400">{lang === 'ja' ? '曲の読み込みに失敗しました' : 'Could not load tracks.'}</p>
+          <p className="text-zinc-400 text-sm mt-2">{lang === 'ja' ? 'Spotify APIの制限中かもしれません。数分後にお試しください。' : 'Spotify API rate limit may be active. Try again in a few minutes.'}</p>
           <div className="flex gap-3 mt-4">
             <button onClick={() => window.location.reload()} className="bg-zinc-700 text-white py-2 px-6 rounded-lg font-semibold">
-              Retry
+              {lang === 'ja' ? 'リトライ' : 'Retry'}
             </button>
             <button onClick={() => router.push('/')} className="bg-brand text-black py-2 px-6 rounded-lg font-semibold">
-              Back
+              {lang === 'ja' ? '戻る' : 'Back'}
             </button>
           </div>
         </div>
@@ -317,7 +317,7 @@ function YearGame() {
                   </div>
                 </>
               ) : (
-                <span className="text-zinc-600 font-bold">SPEED BONUS +0.0</span>
+                <span className="text-zinc-500 font-bold">SPEED BONUS +0.0</span>
               )}
             </div>
           )}
@@ -331,14 +331,14 @@ function YearGame() {
                   <div className="flex justify-center">
                     <img
                       src={currentQ.albumImageUrl}
-                      alt=""
+                      alt={currentQ.singleName}
                       className="w-36 h-36 rounded-xl object-cover shadow-lg"
                     />
                   </div>
                 )}
                 <div>
                   <p className="font-bold text-lg">{currentQ.singleName}</p>
-                  <p className="text-zinc-500 text-sm">{currentQ.artistName}</p>
+                  <p className="text-zinc-400 text-sm">{currentQ.artistName}</p>
                 </div>
               </div>
 
@@ -431,7 +431,7 @@ function YearGame() {
             </div>
           )}
 
-        <p className="text-center text-zinc-700 text-xs">
+        <p className="text-center text-zinc-500 text-xs">
           {lang === 'ja' ? '※Spotifyの登録情報に基づく発売年です' : 'Release years based on Spotify data'}
         </p>
       </div>
@@ -509,7 +509,7 @@ function TimelineResults({
           <div className="text-center">
             <p className="text-5xl font-black animate-[countUp_0.6s_ease-out_0.2s_both]">
               {displayScore.toFixed(2)}
-              <span className="text-zinc-500 text-lg ml-1">/100</span>
+              <span className="text-zinc-400 text-lg ml-1">/100</span>
             </p>
             <div className="flex justify-center gap-4 mt-2 text-sm">
               <span className="text-zinc-400">Base: <span className="text-white font-bold">{displayBase.toFixed(1)}</span></span>
@@ -522,7 +522,7 @@ function TimelineResults({
 
         {/* Play Again (full width) */}
         <button
-          onClick={() => window.location.reload()}
+          onClick={() => router.push(`/year?region=${region}`)}
           className="w-full bg-accent text-white py-3 rounded-lg font-sans font-semibold hover:brightness-110 transition-all"
         >
           {t('playAgain', lang)}
@@ -617,7 +617,7 @@ function TimelineResults({
           ))}
         </div>
 
-        <p className="text-center text-zinc-600 text-xs">
+        <p className="text-center text-zinc-500 text-xs">
           {lang === 'ja' ? '※Spotifyの登録情報に基づく発売年です' : 'Release years based on Spotify data'}
         </p>
 
