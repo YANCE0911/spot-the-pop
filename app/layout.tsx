@@ -4,6 +4,7 @@ import Script from 'next/script'
 import { Analytics } from '@vercel/analytics/react'
 
 const GA_ID = 'G-DMXN1N0ZYJ'
+const ADSENSE_ID = 'ca-pub-8025714043604505'
 
 export const metadata: Metadata = {
   title: 'SOUND IQ - Music Quiz Game',
@@ -37,6 +38,11 @@ export default function RootLayout({
             gtag('config', '${GA_ID}');
           `}
         </Script>
+        <Script
+          src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_ID}`}
+          crossOrigin="anonymous"
+          strategy="afterInteractive"
+        />
       </head>
       <body className="min-h-screen bg-black text-white antialiased font-display">
         {children}
