@@ -28,21 +28,6 @@ export default function ArtistSearch({ value, onChange, onSelect, placeholder, d
   const wrapperRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const justSelectedRef = useRef(false)
-  const scrollLockRef = useRef<number | null>(null)
-
-  // Mobile scroll lock: prevent browser from jumping when dropdown appears/disappears
-  useEffect(() => {
-    if (scrollLockRef.current === null) return
-    const locked = scrollLockRef.current
-    const handleScroll = () => {
-      if (scrollLockRef.current !== null && Math.abs(window.scrollY - locked) > 30) {
-        window.scrollTo({ top: locked })
-        scrollLockRef.current = locked
-      }
-    }
-    window.addEventListener('scroll', handleScroll, { passive: false })
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [showDropdown])
 
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current)
@@ -124,21 +109,14 @@ export default function ArtistSearch({ value, onChange, onSelect, placeholder, d
         onChange={e => onChange(e.target.value)}
         onKeyDown={handleKeyDown}
         onFocus={() => {
-          scrollLockRef.current = window.scrollY
           if (suggestions.length > 0 && !justSelectedRef.current) setShowDropdown(true)
           onInputFocus?.()
-          // Mobile: scroll input into view above keyboard
-          scrollLockRef.current = null // temporarily disable scroll lock
+          // Mobile: ensure input is visible above keyboard
           setTimeout(() => {
             inputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
-            // Re-lock at new position after scroll settles
-            setTimeout(() => {
-              scrollLockRef.current = window.scrollY
-            }, 400)
           }, 300)
         }}
         onBlur={() => {
-          scrollLockRef.current = null
           onInputBlur?.()
         }}
         placeholder={placeholder}
