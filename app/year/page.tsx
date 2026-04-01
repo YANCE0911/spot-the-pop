@@ -523,7 +523,7 @@ function TimelineResults({
         {/* Play Again (full width) */}
         <button
           onClick={() => window.location.reload()}
-          className="w-full bg-accent text-white py-3 rounded-lg font-semibold hover:brightness-110 transition-all"
+          className="w-full bg-accent text-white py-3 rounded-lg font-sans font-semibold hover:brightness-110 transition-all"
         >
           {t('playAgain', lang)}
         </button>
@@ -533,7 +533,7 @@ function TimelineResults({
           <ShareSection score={displayScore} mode="timeline" lang={lang} />
           <button
             onClick={() => router.push('/')}
-            className="bg-zinc-800 text-white py-3 rounded-lg font-semibold hover:bg-zinc-700 transition-all text-sm"
+            className="bg-zinc-800 text-white py-3 rounded-lg font-sans font-semibold hover:bg-zinc-700 transition-all text-sm"
           >
             {t('top', lang)}
           </button>

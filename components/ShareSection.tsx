@@ -36,13 +36,13 @@ export default function ShareSection({ score, mode, lang = 'en', challengeUrl }:
         href={`https://twitter.com/intent/tweet?text=${tweetText}&url=${tweetUrl}`}
         target="_blank"
         rel="noopener noreferrer"
-        className="bg-black border border-zinc-700 text-white py-3 px-4 rounded-lg font-bold hover:bg-zinc-900 transition-all active:scale-[0.98] text-center text-sm"
+        className="font-sans bg-black border border-zinc-700 text-white py-3 px-4 rounded-lg font-bold hover:bg-zinc-900 transition-all active:scale-[0.98] text-center text-sm"
       >
         X
       </a>
       <button
         onClick={handleCopy}
-        className="py-3 px-4 rounded-lg font-bold transition-all active:scale-[0.98] bg-zinc-800 text-white hover:bg-zinc-700 text-sm"
+        className="font-sans py-3 px-4 rounded-lg font-bold transition-all active:scale-[0.98] bg-zinc-800 text-white hover:bg-zinc-700 text-sm"
       >
         {copied ? t('copied', lang) : t('share', lang)}
       </button>
