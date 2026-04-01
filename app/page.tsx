@@ -84,14 +84,16 @@ export default function Home() {
             onClick={() => router.push(`/year?region=${region}`)}
             className="w-full bg-zinc-900/80 border border-zinc-800 rounded-2xl px-8 py-5 text-left hover:border-accent/50 hover:scale-[1.01] transition-all group card-glow-timeline"
           >
-            <p className="text-gradient-warm font-display font-black text-3xl tracking-wider mb-3 flex items-center gap-2">
-              <span className="inline-block w-0 h-0 border-t-[8px] border-t-transparent border-b-[8px] border-b-transparent border-l-[12px] border-l-accent" />
-              TIMELINE
-              <span className="text-xs font-normal text-zinc-500 tracking-normal">{lang === 'ja' ? '全10問' : '10 Rounds'}</span>
-            </p>
+            <div className="flex items-end justify-between mb-3">
+              <p className="text-gradient-warm font-display font-black text-3xl tracking-wider flex items-center gap-2">
+                <span className="inline-block w-0 h-0 border-t-[8px] border-t-transparent border-b-[8px] border-b-transparent border-l-[12px] border-l-accent" />
+                TIMELINE
+              </p>
+              <span className="text-sm font-semibold text-zinc-500">{lang === 'ja' ? '全10問' : '10 Rounds'}</span>
+            </div>
             <p className="text-zinc-400 text-xs">
               {lang === 'ja'
-                ? 'あの曲のリリース年を当てるゲーム'
+                ? '曲のリリース年を当てるゲーム'
                 : 'Guess the release year'}
             </p>
           </button>
@@ -101,11 +103,13 @@ export default function Home() {
             onClick={() => router.push(`/game?metric=followers&region=${region}`)}
             className="w-full bg-zinc-900/80 border border-zinc-800 rounded-2xl px-8 py-5 text-left hover:border-brand/50 hover:scale-[1.01] transition-all group card-glow-versus"
           >
-            <p className="text-gradient font-display font-black text-3xl tracking-wider mb-3 flex items-center gap-2">
-              <span className="inline-block w-0 h-0 border-t-[8px] border-t-transparent border-b-[8px] border-b-transparent border-l-[12px] border-l-brand" />
-              VERSUS
-              <span className="text-xs font-normal text-zinc-500 tracking-normal">{lang === 'ja' ? '全5問' : '5 Rounds'}</span>
-            </p>
+            <div className="flex items-end justify-between mb-3">
+              <p className="text-gradient font-display font-black text-3xl tracking-wider flex items-center gap-2">
+                <span className="inline-block w-0 h-0 border-t-[8px] border-t-transparent border-b-[8px] border-b-transparent border-l-[12px] border-l-brand" />
+                VERSUS
+              </p>
+              <span className="text-sm font-semibold text-zinc-500">{lang === 'ja' ? '全5問' : '5 Rounds'}</span>
+            </div>
             <p className="text-zinc-400 text-xs">
               {lang === 'ja'
                 ? 'フォロワー数が近いアーティストを当てるゲーム'
