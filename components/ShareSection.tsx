@@ -22,8 +22,7 @@ export default function ShareSection({ score, mode, lang = 'en', challengeUrl }:
     : `${origin}/share?score=${displayScore.toFixed(2)}&mode=${mode}&v=3`
 
   const shareText = `SOUND IQ - ${modeLabel}\nScore: ${displayScore.toFixed(2)}/100`
-  const tweetText = encodeURIComponent(shareText)
-  const tweetUrl = encodeURIComponent(shareUrl)
+  const tweetContent = `${shareText}\n${shareUrl}`
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(`${shareText}\n${shareUrl}`)
@@ -34,7 +33,7 @@ export default function ShareSection({ score, mode, lang = 'en', challengeUrl }:
   return (
     <>
       <a
-        href={`https://twitter.com/intent/tweet?text=${tweetText}&url=${tweetUrl}`}
+        href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetContent)}`}
         target="_blank"
         rel="noopener noreferrer"
         className="font-sans bg-black border border-zinc-700 text-white py-3 px-4 rounded-lg font-bold hover:bg-zinc-900 transition-all active:scale-[0.98] text-center text-sm"

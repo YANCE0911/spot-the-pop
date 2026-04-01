@@ -70,7 +70,7 @@ export default function ShareButton({ score, results = [], challengeUrl, lang = 
 
       <div className="flex gap-2">
         <a
-          href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`}
+          href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`${shareText}\n${shareUrl}`)}`}
           target="_blank"
           rel="noopener noreferrer"
           className="flex-1 bg-black border border-zinc-700 text-white py-3 px-4 rounded-xl font-bold hover:bg-zinc-900 transition-all active:scale-[0.98] text-center"
