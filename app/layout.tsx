@@ -1,5 +1,6 @@
 import './globals.css'
 import type { Metadata } from 'next'
+import { Analytics } from '@vercel/analytics/react'
 
 export const metadata: Metadata = {
   title: 'SOUND IQ - Music Quiz Game',
@@ -28,6 +29,7 @@ export default function RootLayout({
         <footer className="text-center text-zinc-700 text-xs py-4 px-4">
           Powered by Spotify API — Not affiliated with Spotify
         </footer>
+        <Analytics />
       </body>
     </html>
   )
