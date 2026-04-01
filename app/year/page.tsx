@@ -5,9 +5,10 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { motion } from 'framer-motion'
 import Logo from '@/components/Logo'
 import ScoreRank from '@/components/ScoreRank'
+import ShareSection from '@/components/ShareSection'
 import { saveRanking } from '@/lib/ranking'
 import { getPlayerId } from '@/lib/playerId'
-import { detectLang, type Lang } from '@/lib/i18n'
+import { detectLang, t, type Lang } from '@/lib/i18n'
 
 type TrackQuestion = {
   trackName: string
@@ -413,7 +414,6 @@ function TimelineResults({
   const [playerName, setPlayerName] = useState('')
   const [submitted, setSubmitted] = useState(false)
   const [submitting, setSubmitting] = useState(false)
-  const [copied, setCopied] = useState(false)
   const [autoSaveResult, setAutoSaveResult] = useState<{ updated: boolean; bestScore: number } | null>(null)
 
   // Auto-save for returning users
@@ -446,27 +446,15 @@ function TimelineResults({
     }
   }
 
-  const shareUrl = typeof window !== 'undefined'
-    ? `${window.location.origin}/share?score=${displayScore.toFixed(2)}&mode=timeline`
-    : ''
-  const shareText = `SOUND IQ - TIMELINE\nScore: ${displayScore.toFixed(2)}/100`
-
-  const handleShare = async () => {
-    await navigator.clipboard.writeText(`${shareText}\n${shareUrl}`)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-  }
-
-  const tweetText = encodeURIComponent(shareText)
-  const tweetUrl = encodeURIComponent(shareUrl)
-
   return (
     <main className="min-h-screen bg-black text-white py-8 px-4 font-sans">
       <div className="max-w-lg mx-auto space-y-6">
+        {/* Header */}
         <header className="animate-[fadeInUp_0.4s_ease-out]">
           <div className="mb-4"><Logo size="sm" /></div>
+          <h2 className="text-accent text-lg font-bold mb-2 text-center">TIMELINE {t('results', lang)}</h2>
           <div className="text-center">
-            <p className="text-5xl font-black mt-2">
+            <p className="text-5xl font-black animate-[countUp_0.6s_ease-out_0.2s_both]">
               {displayScore.toFixed(2)}
               <span className="text-zinc-500 text-lg ml-1">/100</span>
             </p>
@@ -477,35 +465,36 @@ function TimelineResults({
           </div>
         </header>
 
-        <ScoreRank score={displayScore} />
+        <ScoreRank score={displayScore} lang={lang} />
 
-        {/* Share */}
-        <div className="flex gap-2">
-          <a
-            href={`https://twitter.com/intent/tweet?text=${tweetText}&url=${tweetUrl}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex-1 bg-black border border-zinc-700 text-white py-3 px-4 rounded-xl font-bold hover:bg-zinc-900 transition-all active:scale-[0.98] text-center"
-          >
-            X
-          </a>
+        {/* Play Again / Top */}
+        <div className="flex gap-3">
           <button
-            onClick={handleShare}
-            className="flex-1 bg-accent text-white py-3 px-4 rounded-xl font-bold hover:brightness-110 transition-all active:scale-[0.98]"
+            onClick={() => window.location.reload()}
+            className="flex-1 bg-accent text-white py-3 rounded-lg font-semibold hover:brightness-110 transition-all"
           >
-            {copied ? (lang === 'ja' ? 'コピーしました' : 'Copied!') : (lang === 'ja' ? 'コピー' : 'Copy')}
+            {t('playAgain', lang)}
+          </button>
+          <button
+            onClick={() => router.push('/')}
+            className="flex-1 bg-zinc-800 text-white py-3 rounded-lg font-semibold hover:bg-zinc-700 transition-all"
+          >
+            {t('top', lang)}
           </button>
         </div>
+
+        {/* Share */}
+        <ShareSection score={displayScore} mode="timeline" lang={lang} />
 
         {/* Name registration */}
         {!submitted ? (
           <div className="bg-zinc-900 p-4 rounded-xl space-y-3 animate-[fadeInUp_0.5s_ease-out]">
-            <h2 className="text-accent font-bold">{lang === 'ja' ? 'ランキングに登録' : 'Register Score'}</h2>
+            <h2 className="text-accent font-bold">{t('registerRanking', lang)}</h2>
             <input
               type="text"
               value={playerName}
               onChange={e => setPlayerName(e.target.value)}
-              placeholder={lang === 'ja' ? '名前を入力' : 'Enter your name'}
+              placeholder={t('nameInput', lang)}
               className="w-full p-2.5 rounded-lg bg-zinc-800 text-white outline-none focus:ring-2 focus:ring-accent"
             />
             <button
@@ -513,31 +502,31 @@ function TimelineResults({
               disabled={submitting}
               className="w-full bg-accent text-white py-2.5 rounded-lg font-semibold hover:brightness-110"
             >
-              {submitting ? (lang === 'ja' ? '登録中...' : 'Submitting...') : (lang === 'ja' ? '登録する' : 'Register')}
+              {submitting ? (lang === 'ja' ? '登録中...' : 'Submitting...') : t('register', lang)}
             </button>
           </div>
         ) : autoSaveResult?.updated ? (
           <div className="text-center space-y-1">
-            <p className="text-accent font-bold text-lg">{lang === 'ja' ? 'ベスト更新!' : 'New Best!'}</p>
+            <p className="text-accent font-bold text-lg">{t('newBest', lang)}</p>
             <p className="text-zinc-400 text-sm">{playerName}</p>
           </div>
         ) : autoSaveResult && !autoSaveResult.updated && autoSaveResult.bestScore > displayScore ? (
           <div className="text-center space-y-1">
             <p className="text-zinc-400 text-sm">
-              {lang === 'ja' ? `ベスト: ${autoSaveResult.bestScore.toFixed(2)}` : `Best: ${autoSaveResult.bestScore.toFixed(2)}`}
+              {t('bestLabel', lang)}: {autoSaveResult.bestScore.toFixed(2)}
             </p>
             <p className="text-zinc-500 text-xs">{playerName}</p>
           </div>
         ) : (
           <div className="text-center space-y-1">
-            <p className="text-accent font-semibold">{lang === 'ja' ? '登録しました！' : 'Registered!'}</p>
+            <p className="text-accent font-semibold">{t('registered', lang)}</p>
             <p className="text-zinc-400 text-sm">{playerName}</p>
           </div>
         )}
 
         {/* Round results */}
         <div className="space-y-2">
-          <h2 className="text-accent font-bold">{lang === 'ja' ? 'ラウンド結果' : 'Round Details'}</h2>
+          <h2 className="text-accent font-bold">{t('roundResults', lang)}</h2>
           {results.map((r, i) => (
             <div
               key={i}
@@ -569,15 +558,6 @@ function TimelineResults({
         <p className="text-center text-zinc-600 text-xs">
           {lang === 'ja' ? '※Spotifyの登録情報に基づく発売年です' : 'Release years based on Spotify data'}
         </p>
-
-        <div className="flex gap-3">
-          <button onClick={() => window.location.reload()} className="flex-1 bg-accent text-white py-3 rounded-lg font-semibold hover:brightness-110">
-            {lang === 'ja' ? 'もう一度プレイ' : 'Play Again'}
-          </button>
-          <button onClick={() => router.push('/')} className="flex-1 bg-zinc-800 text-white py-3 rounded-lg font-semibold hover:bg-zinc-700">
-            {lang === 'ja' ? 'トップ' : 'Home'}
-          </button>
-        </div>
       </div>
     </main>
   )

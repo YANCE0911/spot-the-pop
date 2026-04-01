@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { saveRanking } from '@/lib/ranking'
 import { getPlayerId } from '@/lib/playerId'
-import ShareButton from '@/components/ShareButton'
+import ShareSection from '@/components/ShareSection'
 import ScoreRank from '@/components/ScoreRank'
 import type { GameResult } from '@/types'
 import { formatMetricValue } from '@/lib/metrics'
@@ -84,21 +84,42 @@ export default function Results() {
   const displayScore = Math.round(score * 100) / 100
 
   return (
-    <main className="min-h-screen bg-black text-white py-8 px-4">
+    <main className="min-h-screen bg-black text-white py-8 px-4 font-sans">
       <div className="max-w-lg mx-auto space-y-6">
+        {/* Header */}
         <header className="animate-[fadeInUp_0.4s_ease-out]">
           <div className="mb-4"><Logo size="sm" /></div>
-          <h2 className="text-brand text-lg font-bold mb-2 text-center">{t('results', lang)}</h2>
-          <p className="text-5xl font-black animate-[countUp_0.6s_ease-out_0.2s_both]">
-            {displayScore.toFixed(2)}
-          </p>
-          <p className="text-zinc-500 text-sm mt-1">{lang === 'ja' ? '/ 100' : '/ 100'}</p>
+          <h2 className="text-brand text-lg font-bold mb-2 text-center">VERSUS {t('results', lang)}</h2>
+          <div className="text-center">
+            <p className="text-5xl font-black animate-[countUp_0.6s_ease-out_0.2s_both]">
+              {displayScore.toFixed(2)}
+              <span className="text-zinc-500 text-lg ml-1">/100</span>
+            </p>
+          </div>
         </header>
 
         <ScoreRank score={displayScore} lang={lang} />
 
-        <ShareButton score={score} mode="Classic" metric={metric} results={results} challengeUrl={challengeUrl} lang={lang} />
+        {/* Play Again / Top */}
+        <div className="flex gap-3">
+          <button
+            onClick={() => router.push('/game')}
+            className="flex-1 bg-brand text-black py-3 rounded-lg font-semibold hover:bg-brand-light transition-all"
+          >
+            {t('playAgain', lang)}
+          </button>
+          <button
+            onClick={() => router.push('/')}
+            className="flex-1 bg-zinc-800 text-white py-3 rounded-lg font-semibold hover:bg-zinc-700 transition-all"
+          >
+            {t('top', lang)}
+          </button>
+        </div>
 
+        {/* Share */}
+        <ShareSection score={score} mode="versus" lang={lang} challengeUrl={challengeUrl} />
+
+        {/* Name registration */}
         {!submitted ? (
           <div className="bg-zinc-900 p-4 rounded-xl space-y-3 animate-[fadeInUp_0.5s_ease-out]">
             <h2 className="text-brand font-bold">{t('registerRanking', lang)}</h2>
@@ -107,19 +128,23 @@ export default function Results() {
               placeholder={t('nameInput', lang)}
               className="w-full p-2.5 rounded-lg bg-zinc-800 text-white outline-none focus:ring-2 focus:ring-brand"
             />
-            <button onClick={handleSubmit} className="w-full bg-brand text-black py-2.5 rounded-lg font-semibold hover:bg-brand-light">
-              {t('register', lang)}
+            <button
+              onClick={handleSubmit}
+              disabled={submitting}
+              className="w-full bg-brand text-black py-2.5 rounded-lg font-semibold hover:bg-brand-light"
+            >
+              {submitting ? (lang === 'ja' ? '登録中...' : 'Submitting...') : t('register', lang)}
             </button>
           </div>
         ) : autoSaveResult?.updated ? (
           <div className="text-center space-y-1">
-            <p className="text-brand font-bold text-lg">{lang === 'ja' ? 'ベスト更新!' : 'New Best!'}</p>
+            <p className="text-brand font-bold text-lg">{t('newBest', lang)}</p>
             <p className="text-zinc-400 text-sm">{playerName}</p>
           </div>
         ) : autoSaveResult && !autoSaveResult.updated && autoSaveResult.bestScore > displayScore ? (
           <div className="text-center space-y-1">
             <p className="text-zinc-400 text-sm">
-              {lang === 'ja' ? `ベスト: ${autoSaveResult.bestScore.toFixed(2)}` : `Best: ${autoSaveResult.bestScore.toFixed(2)}`}
+              {t('bestLabel', lang)}: {autoSaveResult.bestScore.toFixed(2)}
             </p>
             <p className="text-zinc-500 text-xs">{playerName}</p>
           </div>
@@ -162,15 +187,6 @@ export default function Results() {
               </div>
             </div>
           ))}
-        </div>
-
-        <div className="flex gap-3">
-          <button onClick={() => router.push('/game')} className="flex-1 bg-brand text-black py-3 rounded-lg font-semibold hover:bg-brand-light">
-            Play Again
-          </button>
-          <button onClick={() => router.push('/')} className="flex-1 bg-zinc-800 text-white py-3 rounded-lg font-semibold hover:bg-zinc-700">
-            Top
-          </button>
         </div>
       </div>
     </main>
