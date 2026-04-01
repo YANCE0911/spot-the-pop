@@ -620,6 +620,18 @@ function TimelineResults({
         <p className="text-center text-zinc-600 text-xs">
           {lang === 'ja' ? '※Spotifyの登録情報に基づく発売年です' : 'Release years based on Spotify data'}
         </p>
+
+        {/* Support link */}
+        <div className="text-center pt-2">
+          <a
+            href="https://buymeacoffee.com/yance"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-zinc-600 hover:text-zinc-400 text-xs transition-colors"
+          >
+            {lang === 'ja' ? 'Buy Me a Coffee で応援する' : 'Support on Buy Me a Coffee'}
+          </a>
+        </div>
       </div>
     </main>
   )
