@@ -74,9 +74,6 @@ export default function Home() {
         </div>
 
         {/* Game mode cards */}
-        <p className="text-sm font-semibold text-zinc-400 uppercase tracking-widest text-center animate-[fadeInUp_0.5s_ease-out_0.1s_both]">
-          {lang === 'ja' ? 'ゲームを選ぶ' : 'Select Game'}
-        </p>
         <div className="space-y-4 animate-[fadeInUp_0.5s_ease-out_0.1s_both]">
           {/* TIMELINE — Main mode */}
           <button
