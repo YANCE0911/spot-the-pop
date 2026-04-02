@@ -140,10 +140,10 @@ export default function DailyResults() {
         )}
 
         <div className="flex gap-3">
-          <button onClick={() => router.push('/daily')} className="flex-1 bg-brand text-black py-3 rounded-lg font-semibold hover:bg-brand-light">
+          <button onClick={() => router.push('/daily')} className="flex-1 bg-brand text-black py-3 rounded-lg font-display font-semibold hover:bg-brand-light">
             {t('playAgain', lang)}
           </button>
-          <button onClick={() => router.push('/')} className="flex-1 bg-zinc-800 text-white py-3 rounded-lg font-semibold hover:bg-zinc-700">
+          <button onClick={() => router.push('/')} className="flex-1 bg-zinc-800 text-white py-3 rounded-lg font-display font-semibold hover:bg-zinc-700">
             {t('backToTop', lang)}
           </button>
         </div>

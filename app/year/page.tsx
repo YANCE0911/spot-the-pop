@@ -558,7 +558,7 @@ function TimelineResults({
         {/* Play Again (full width) */}
         <button
           onClick={() => router.push(`/year?region=${region}`)}
-          className="w-full bg-accent text-white py-3 rounded-lg font-sans font-semibold hover:brightness-110 transition-all"
+          className="w-full bg-accent text-white py-3 rounded-lg font-display font-semibold hover:brightness-110 transition-all"
         >
           {t('playAgain', lang)}
         </button>

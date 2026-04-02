@@ -51,13 +51,14 @@ export default function ShareSection({ score, mode, lang = 'en', challengeUrl }:
     <>
       <button
         onClick={handleShare}
-        className="font-sans bg-black border border-zinc-700 text-white py-3 px-4 rounded-lg font-bold hover:bg-zinc-900 transition-all active:scale-[0.98] text-center text-sm"
+        className="font-display bg-black border border-zinc-700 text-white py-3 px-4 rounded-lg font-bold hover:bg-zinc-900 transition-all active:scale-[0.98] text-center text-sm flex items-center justify-center gap-2"
       >
+        <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
         {t('shareOnX', lang)}
       </button>
       <button
         onClick={handleCopy}
-        className="font-sans py-3 px-4 rounded-lg font-bold transition-all active:scale-[0.98] bg-zinc-800 text-white hover:bg-zinc-700 text-sm"
+        className="font-display py-3 px-4 rounded-lg font-bold transition-all active:scale-[0.98] bg-zinc-800 text-white hover:bg-zinc-700 text-sm"
       >
         {copied ? t('copied', lang) : t('share', lang)}
       </button>
@@ -70,7 +71,7 @@ export default function ShareSection({ score, mode, lang = 'en', challengeUrl }:
             setCopied(true)
             setTimeout(() => setCopied(false), 2000)
           }}
-          className="col-span-2 bg-zinc-800 text-white py-3 px-6 rounded-lg font-bold hover:bg-zinc-700 transition-all active:scale-[0.98] text-sm"
+          className="col-span-2 bg-zinc-800 text-white py-3 px-6 rounded-lg font-display font-bold hover:bg-zinc-700 transition-all active:scale-[0.98] text-sm"
         >
           {t('challengeFriend', lang)}
         </button>

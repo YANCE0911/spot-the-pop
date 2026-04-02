@@ -113,7 +113,7 @@ export default function Results() {
             const region = localStorage.getItem('soundiq_region') || 'jp'
             router.push(`/game?metric=followers&region=${region}`)
           }}
-          className="w-full bg-brand text-black py-3 rounded-lg font-sans font-semibold hover:bg-brand-light transition-all"
+          className="w-full bg-brand text-black py-3 rounded-lg font-display font-semibold hover:bg-brand-light transition-all"
         >
           {t('playAgain', lang)}
         </button>

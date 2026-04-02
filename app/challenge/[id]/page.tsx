@@ -141,7 +141,7 @@ export default function ChallengePage() {
       <main className="min-h-screen bg-black text-white flex items-center justify-center">
         <div className="text-center space-y-4">
           <p className="text-red-400 text-lg">{error || 'Challenge not found'}</p>
-          <button onClick={() => router.push('/')} className="bg-brand text-black py-2 px-6 rounded-lg font-semibold">
+          <button onClick={() => router.push('/')} className="bg-brand text-black py-2 px-6 rounded-lg font-display font-semibold">
             {t('backToTop', lang)}
           </button>
         </div>
@@ -258,7 +258,7 @@ export default function ChallengePage() {
         )}
 
         <div className="flex gap-3">
-          <button onClick={() => router.push('/')} className="flex-1 bg-brand text-black py-3 rounded-lg font-semibold hover:bg-brand-light">
+          <button onClick={() => router.push('/')} className="flex-1 bg-brand text-black py-3 rounded-lg font-display font-semibold hover:bg-brand-light">
             {t('backToTop', lang)}
           </button>
         </div>

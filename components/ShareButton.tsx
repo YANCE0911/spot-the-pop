@@ -77,13 +77,14 @@ export default function ShareButton({ score, results = [], challengeUrl, lang = 
       <div className="flex gap-2">
         <button
           onClick={handleShare}
-          className="flex-1 bg-black border border-zinc-700 text-white py-3 px-4 rounded-xl font-bold hover:bg-zinc-900 transition-all active:scale-[0.98] text-center"
+          className="flex-1 bg-black border border-zinc-700 text-white py-3 px-4 rounded-xl font-display font-bold hover:bg-zinc-900 transition-all active:scale-[0.98] text-center flex items-center justify-center gap-2"
         >
+          <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
           {t('shareOnX', lang)}
         </button>
         <button
           onClick={handleCopy}
-          className="flex-1 bg-brand text-black py-3 px-4 rounded-xl font-bold hover:bg-brand-light transition-all active:scale-[0.98]"
+          className="flex-1 bg-brand text-black py-3 px-4 rounded-xl font-display font-bold hover:bg-brand-light transition-all active:scale-[0.98]"
         >
           {copied ? t('copied', lang) : t('share', lang)}
         </button>
@@ -92,7 +93,7 @@ export default function ShareButton({ score, results = [], challengeUrl, lang = 
       {challengeUrl && (
         <button
           onClick={handleChallengeLink}
-          className="w-full bg-zinc-800 text-white py-3 px-6 rounded-xl font-bold hover:bg-zinc-700 transition-all active:scale-[0.98]"
+          className="w-full bg-zinc-800 text-white py-3 px-6 rounded-xl font-display font-bold hover:bg-zinc-700 transition-all active:scale-[0.98]"
         >
           {t('challengeFriend', lang)}
         </button>
