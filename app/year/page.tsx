@@ -231,7 +231,7 @@ function YearGame() {
     return () => {
       if (elapsedTimerRef.current) clearInterval(elapsedTimerRef.current)
     }
-  }, [currentRound, currentQ, feedback, loading, questions.length])
+  }, [currentRound, currentQ, feedback, loading, questions.length, gameStarted])
 
   const handleSubmit = () => {
     const year = parseInt(guessYear)
