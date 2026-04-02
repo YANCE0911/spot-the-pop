@@ -285,6 +285,23 @@ function YearGame() {
     )
   }
 
+  if (finished) {
+    const displayScore = Math.round(totalScore * 100) / 100
+    const displayBase = Math.round(totalBaseScore * 10) / 10
+    const displayBonus = Math.round(totalTimeBonus * 10) / 10
+    return (
+      <TimelineResults
+        displayScore={displayScore}
+        displayBase={displayBase}
+        displayBonus={displayBonus}
+        results={results}
+        router={router}
+        lang={lang}
+        region={gameRegion}
+      />
+    )
+  }
+
   if (questions.length === 0) {
     return (
       <main className="min-h-screen bg-black text-white flex items-center justify-center">
@@ -301,23 +318,6 @@ function YearGame() {
           </div>
         </div>
       </main>
-    )
-  }
-
-  if (finished) {
-    const displayScore = Math.round(totalScore * 100) / 100
-    const displayBase = Math.round(totalBaseScore * 10) / 10
-    const displayBonus = Math.round(totalTimeBonus * 10) / 10
-    return (
-      <TimelineResults
-        displayScore={displayScore}
-        displayBase={displayBase}
-        displayBonus={displayBonus}
-        results={results}
-        router={router}
-        lang={lang}
-        region={gameRegion}
-      />
     )
   }
 
