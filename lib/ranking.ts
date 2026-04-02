@@ -16,35 +16,44 @@ import type { Ranking } from '@/types'
 const RANKING_COLLECTION = 'ranking'
 
 // --- Season helpers ---
-// Season 1 = April 2026, Season 2 = May 2026, ...
+// Quarterly seasons: Season 1 = Apr-Jun 2026, Season 2 = Jul-Sep 2026, ...
 // Everything before April 2026 is "Season 0" (pre-season / old scoring)
 const SEASON_ORIGIN_YEAR = 2026
-const SEASON_ORIGIN_MONTH = 4 // April
+const SEASON_ORIGIN_QUARTER = 1 // Q2 (Apr-Jun) = Season 1
+
+// Quarter boundaries: Q1=Jan-Mar, Q2=Apr-Jun, Q3=Jul-Sep, Q4=Oct-Dec
+const QUARTER_START_MONTHS = [0, 3, 6, 9] // 0-indexed months (Jan, Apr, Jul, Oct)
+const MONTH_ABBR = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
 export function getCurrentSeasonNumber(): number {
   const now = new Date()
   // JST = UTC+9
   const jst = new Date(now.getTime() + 9 * 60 * 60 * 1000)
   const year = jst.getUTCFullYear()
-  const month = jst.getUTCMonth() + 1 // 1-indexed
-  return (year - SEASON_ORIGIN_YEAR) * 12 + (month - SEASON_ORIGIN_MONTH) + 1
+  const month = jst.getUTCMonth() // 0-indexed
+  const quarter = Math.floor(month / 3) // 0=Q1, 1=Q2, 2=Q3, 3=Q4
+  // Season 1 starts at Q2 2026 (quarter index 1)
+  return (year - SEASON_ORIGIN_YEAR) * 4 + (quarter - SEASON_ORIGIN_QUARTER) + 1
 }
 
 export function getSeasonLabel(seasonNum: number): string {
-  const monthOffset = seasonNum - 1
-  const year = SEASON_ORIGIN_YEAR + Math.floor((SEASON_ORIGIN_MONTH - 1 + monthOffset) / 12)
-  const month = ((SEASON_ORIGIN_MONTH - 1 + monthOffset) % 12) + 1
-  return `${year}年${month}月`
+  const quarterOffset = seasonNum - 1 + SEASON_ORIGIN_QUARTER
+  const year = SEASON_ORIGIN_YEAR + Math.floor(quarterOffset / 4)
+  const quarter = quarterOffset % 4 // 0-3
+  const startMonth = QUARTER_START_MONTHS[quarter]
+  const endMonth = startMonth + 2
+  return `${MONTH_ABBR[startMonth]}-${MONTH_ABBR[endMonth]} ${year}`
 }
 
 export function getSeasonRange(seasonNum: number): { start: Timestamp; end: Timestamp } {
-  const monthOffset = seasonNum - 1
-  const year = SEASON_ORIGIN_YEAR + Math.floor((SEASON_ORIGIN_MONTH - 1 + monthOffset) / 12)
-  const month = ((SEASON_ORIGIN_MONTH - 1 + monthOffset) % 12) // 0-indexed
+  const quarterOffset = seasonNum - 1 + SEASON_ORIGIN_QUARTER
+  const year = SEASON_ORIGIN_YEAR + Math.floor(quarterOffset / 4)
+  const quarter = quarterOffset % 4
+  const startMonth = QUARTER_START_MONTHS[quarter] // 0-indexed
 
   // JST midnight → UTC (subtract 9 hours)
-  const start = new Date(Date.UTC(year, month, 1, -9))
-  const end = new Date(Date.UTC(year, month + 1, 1, -9))
+  const start = new Date(Date.UTC(year, startMonth, 1, -9))
+  const end = new Date(Date.UTC(year, startMonth + 3, 1, -9))
   return {
     start: Timestamp.fromDate(start),
     end: Timestamp.fromDate(end),
