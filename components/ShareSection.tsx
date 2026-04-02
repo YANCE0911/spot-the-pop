@@ -31,14 +31,12 @@ export default function ShareSection({ score, mode, lang = 'en', challengeUrl }:
   const origin = typeof window !== 'undefined' ? window.location.origin : BASE_URL
   const shareUrl = challengeUrl
     ? `${origin}${challengeUrl}`
-    : `${BASE_URL}/share?score=${displayScore.toFixed(2)}&mode=${mode}&v=5`
+    : `${BASE_URL}/share?score=${displayScore.toFixed(2)}&mode=${mode}&v=6`
 
   const scoreLine = displayScore >= 70
     ? `${displayScore.toFixed(2)}点で${rank}ランク`
     : `${displayScore.toFixed(2)}点で${rank}ランク...`
-  const cta = mode === 'versus'
-    ? '音楽好きなら当てられる？'
-    : 'あの曲のリリース年、当てられる？'
+  const cta = 'あなたの音楽力は？'
 
   const shareText = `SOUND IQ - ${modeLabel}\n${scoreLine}\n${cta}\n${shareUrl}`
 

@@ -33,13 +33,13 @@ export default function ShareButton({ score, results = [], challengeUrl, lang = 
   const origin = typeof window !== 'undefined' ? window.location.origin : BASE_URL
   const shareUrl = challengeUrl
     ? `${origin}${challengeUrl}`
-    : `${BASE_URL}/share?score=${displayScore.toFixed(2)}&mode=versus&v=5`
+    : `${BASE_URL}/share?score=${displayScore.toFixed(2)}&mode=versus&v=6`
 
   const scoreLine = displayScore >= 70
     ? `${displayScore.toFixed(2)}点で${grade.label}ランク`
     : `${displayScore.toFixed(2)}点で${grade.label}ランク...`
 
-  const shareText = `SOUND IQ - VERSUS\n${scoreLine}\n音楽好きなら当てられる？\n${shareUrl}`
+  const shareText = `SOUND IQ - VERSUS\n${scoreLine}\nあなたの音楽力は？\n${shareUrl}`
 
   const handleShare = () => {
     const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}`
