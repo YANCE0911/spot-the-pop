@@ -688,7 +688,7 @@ function TimelineResults({
 
         {/* Play Again + Top */}
         <button
-          onClick={() => { localStorage.removeItem('yearGameResults'); router.push(`/year?region=${region}`) }}
+          onClick={() => { localStorage.removeItem('yearGameResults'); window.location.href = `/year?region=${region}` }}
           className="w-full bg-accent text-white py-3 rounded-lg font-display font-semibold hover:brightness-110 transition-all"
         >
           {t('playAgain', lang)}
