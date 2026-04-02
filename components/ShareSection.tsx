@@ -31,7 +31,7 @@ export default function ShareSection({ score, mode, lang = 'en', challengeUrl }:
   const origin = typeof window !== 'undefined' ? window.location.origin : BASE_URL
   const shareUrl = challengeUrl
     ? `${origin}${challengeUrl}`
-    : `${BASE_URL}/share?score=${displayScore.toFixed(2)}&mode=${mode}&v=3`
+    : `${BASE_URL}/share?score=${displayScore.toFixed(2)}&mode=${mode}&v=4`
 
   const scoreLine = displayScore >= 70
     ? `${displayScore.toFixed(2)}点で${rank}ランク`
