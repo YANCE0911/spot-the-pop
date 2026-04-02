@@ -23,7 +23,8 @@ const SEASON_ORIGIN_QUARTER = 1 // Q2 (Apr-Jun) = Season 1
 
 // Quarter boundaries: Q1=Jan-Mar, Q2=Apr-Jun, Q3=Jul-Sep, Q4=Oct-Dec
 const QUARTER_START_MONTHS = [0, 3, 6, 9] // 0-indexed months (Jan, Apr, Jul, Oct)
-const MONTH_ABBR = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+const MONTH_ABBR_EN = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+const MONTH_ABBR_JA = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月']
 
 export function getCurrentSeasonNumber(): number {
   const now = new Date()
@@ -36,13 +37,16 @@ export function getCurrentSeasonNumber(): number {
   return (year - SEASON_ORIGIN_YEAR) * 4 + (quarter - SEASON_ORIGIN_QUARTER) + 1
 }
 
-export function getSeasonLabel(seasonNum: number): string {
+export function getSeasonLabel(seasonNum: number, lang: 'en' | 'ja' = 'ja'): string {
   const quarterOffset = seasonNum - 1 + SEASON_ORIGIN_QUARTER
   const year = SEASON_ORIGIN_YEAR + Math.floor(quarterOffset / 4)
   const quarter = quarterOffset % 4 // 0-3
   const startMonth = QUARTER_START_MONTHS[quarter]
   const endMonth = startMonth + 2
-  return `${MONTH_ABBR[startMonth]}-${MONTH_ABBR[endMonth]} ${year}`
+  if (lang === 'ja') {
+    return `${MONTH_ABBR_JA[startMonth]}-${MONTH_ABBR_JA[endMonth]} ${year}`
+  }
+  return `${MONTH_ABBR_EN[startMonth]}-${MONTH_ABBR_EN[endMonth]} ${year}`
 }
 
 export function getSeasonRange(seasonNum: number): { start: Timestamp; end: Timestamp } {
@@ -61,11 +65,11 @@ export function getSeasonRange(seasonNum: number): { start: Timestamp; end: Time
 }
 
 // List all past seasons (Season 1 to current-1)
-export function getPastSeasons(): { num: number; label: string }[] {
+export function getPastSeasons(lang: 'en' | 'ja' = 'ja'): { num: number; label: string }[] {
   const current = getCurrentSeasonNumber()
   const seasons: { num: number; label: string }[] = []
   for (let i = current - 1; i >= 1; i--) {
-    seasons.push({ num: i, label: getSeasonLabel(i) })
+    seasons.push({ num: i, label: getSeasonLabel(i, lang) })
   }
   return seasons
 }

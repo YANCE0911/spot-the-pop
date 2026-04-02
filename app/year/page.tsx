@@ -37,6 +37,69 @@ type RoundResult = {
 const TOTAL_ROUNDS = 10
 const BONUS_ZONE = 15 // time bonus available in first 15 seconds
 const PROGRESS_KEY = 'soundiq_timeline_progress'
+const SEEN_IDS_KEY = 'soundiq_timeline_seen'
+
+// ISO week helper (matches buildWeeklyPacks.ts)
+function getISOWeek(d: Date): { year: number; week: number } {
+  const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()))
+  date.setUTCDate(date.getUTCDate() + 4 - (date.getUTCDay() || 7))
+  const yearStart = new Date(Date.UTC(date.getUTCFullYear(), 0, 1))
+  const week = Math.ceil(((date.getTime() - yearStart.getTime()) / 86400000 + 1) / 7)
+  return { year: date.getUTCFullYear(), week }
+}
+
+function getWeekKey(): string {
+  const { year, week } = getISOWeek(new Date())
+  return `${year}-${String(week).padStart(2, '0')}`
+}
+
+// Load seen track IDs from localStorage, reset if week changed
+function loadSeenIds(): Set<string> {
+  try {
+    const raw = localStorage.getItem(SEEN_IDS_KEY)
+    if (!raw) return new Set()
+    const data = JSON.parse(raw)
+    if (data.week !== getWeekKey()) return new Set() // new week, reset
+    return new Set<string>(data.ids ?? [])
+  } catch { return new Set() }
+}
+
+function saveSeenIds(ids: Set<string>) {
+  localStorage.setItem(SEEN_IDS_KEY, JSON.stringify({ week: getWeekKey(), ids: [...ids] }))
+}
+
+// Fetch questions: try static pack first, fallback to API
+async function fetchQuestions(count: number, region: 'jp' | 'global'): Promise<TrackQuestion[]> {
+  const weekKey = getWeekKey()
+  const seen = loadSeenIds()
+
+  try {
+    const res = await fetch(`/packs/${region}/week-${weekKey}.json`)
+    if (res.ok) {
+      const pack = await res.json()
+      const all: TrackQuestion[] = [...(pack.main ?? []), ...(pack.extra ?? [])]
+
+      // Filter out already-seen questions (by trackName+artistName as unique key)
+      const unseen = all.filter(q => !seen.has(`${q.artistName}::${q.trackName}`))
+      const pool = unseen.length >= count ? unseen : all
+
+      // Shuffle and pick
+      const shuffled = pool.sort(() => Math.random() - 0.5).slice(0, count)
+
+      // Mark as seen
+      for (const q of shuffled) seen.add(`${q.artistName}::${q.trackName}`)
+      saveSeenIds(seen)
+
+      if (shuffled.length >= count) return shuffled
+    }
+  } catch { /* fall through to API */ }
+
+  // Fallback to API
+  const locale = region === 'jp' ? 'ja' : 'en'
+  const res = await fetch(`/api/year/tracks?count=${count}&locale=${locale}`)
+  const data = await res.json()
+  return data.questions ?? []
+}
 
 // Base score: smooth power curve. 7.5 × (1 − d/11)^1.13, rounded to 0.1
 // diff=0→7.5, diff=5→3.8, diff=10→0.5, diff=11+→0
@@ -144,13 +207,10 @@ function YearGame() {
       }
     } catch { /* ignore */ }
 
-    const region = searchParams?.get('region') || localStorage.getItem('soundiq_region') || (lang === 'ja' ? 'jp' : 'global')
-    const locale = region === 'jp' ? 'ja' : 'en'
-    fetch(`/api/year/tracks?count=10&locale=${locale}`)
-      .then(r => r.json())
-      .then(data => {
-        if (data.questions?.length > 0) {
-          setQuestions(data.questions)
+    fetchQuestions(10, gameRegion)
+      .then(questions => {
+        if (questions.length > 0) {
+          setQuestions(questions)
           setCountdown(3)
         }
       })

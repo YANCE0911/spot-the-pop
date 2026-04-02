@@ -1,0 +1,44 @@
+name: Build Weekly Question Packs
+
+on:
+  schedule:
+    - cron: '0 15 * * 0' # Every Sunday 00:00 JST (15:00 UTC Saturday)
+  workflow_dispatch: # Manual trigger
+
+jobs:
+  build-packs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - run: npm ci
+
+      - name: Remove packs older than 4 weeks
+        run: |
+          find public/packs -name 'week-*.json' -mtime +28 -delete 2>/dev/null || true
+
+      - name: Build weekly packs
+        run: npx ts-node scripts/buildWeeklyPacks.ts
+
+      - name: Check for new packs
+        id: changes
+        run: |
+          if git diff --quiet public/packs/ && [ -z "$(git ls-files --others --exclude-standard public/packs/)" ]; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Commit and push
+        if: steps.changes.outputs.changed == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add public/packs/
+          git commit -m "chore: build weekly question packs $(date +%Y-W%V)"
+          git push

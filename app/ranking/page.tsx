@@ -28,7 +28,7 @@ export default function RankingPage() {
   const currentSeason = getCurrentSeasonNumber()
   const [viewingSeason, setViewingSeason] = useState(currentSeason)
   const [showPastSeasons, setShowPastSeasons] = useState(false)
-  const pastSeasons = getPastSeasons()
+  const pastSeasons = getPastSeasons(lang)
   const isCurrentSeason = viewingSeason === currentSeason
 
   useEffect(() => {
@@ -93,7 +93,7 @@ export default function RankingPage() {
             </p>
             <p className="text-lg font-bold">
               Season {viewingSeason}
-              <span className="text-zinc-400 text-sm font-normal ml-2">{getSeasonLabel(viewingSeason)}</span>
+              <span className="text-zinc-400 text-sm font-normal ml-2">{getSeasonLabel(viewingSeason, lang)}</span>
             </p>
           </div>
           {pastSeasons.length > 0 && (
@@ -115,7 +115,7 @@ export default function RankingPage() {
                 isCurrentSeason ? 'bg-zinc-700 text-white' : 'hover:bg-zinc-800 text-zinc-400'
               }`}
             >
-              Season {currentSeason} — {getSeasonLabel(currentSeason)}
+              Season {currentSeason} — {getSeasonLabel(currentSeason, lang)}
               <span className="text-xs text-zinc-500 ml-2">{lang === 'ja' ? '(現在)' : '(current)'}</span>
             </button>
             {pastSeasons.map(s => (

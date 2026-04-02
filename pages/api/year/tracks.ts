@@ -227,7 +227,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       questions = await questionsFromSpotifyAPI(count, region === 'global' ? 'US' : 'JP')
     }
 
-    res.setHeader('Cache-Control', 'no-store')
+    res.setHeader('Cache-Control', 'private, max-age=60')
     return res.status(200).json({ questions })
   } catch (error) {
     console.error('Error:', error)
