@@ -99,6 +99,23 @@ function YearGame() {
   const elapsedTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   useEffect(() => {
+    // Try to restore finished results first
+    try {
+      const finishedData = localStorage.getItem('yearGameResults')
+      if (finishedData) {
+        const data = JSON.parse(finishedData)
+        if (data.results?.length > 0) {
+          setResults(data.results)
+          setTotalScore(data.score)
+          setTotalBaseScore(data.baseScore)
+          setTotalTimeBonus(data.timeBonus)
+          setFinished(true)
+          setLoading(false)
+          return
+        }
+      }
+    } catch { /* ignore */ }
+
     // Try to restore saved progress
     try {
       const saved = localStorage.getItem(PROGRESS_KEY)
@@ -557,7 +574,7 @@ function TimelineResults({
 
         {/* Play Again (full width) */}
         <button
-          onClick={() => router.push(`/year?region=${region}`)}
+          onClick={() => { localStorage.removeItem('yearGameResults'); router.push(`/year?region=${region}`) }}
           className="w-full bg-accent text-white py-3 rounded-lg font-display font-semibold hover:brightness-110 transition-all"
         >
           {t('playAgain', lang)}
