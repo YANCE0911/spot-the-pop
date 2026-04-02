@@ -187,25 +187,8 @@ function YearGame() {
       localStorage.removeItem('yearGameResults')
     }
 
-    // Try to restore saved progress
-    try {
-      const saved = localStorage.getItem(PROGRESS_KEY)
-      if (saved) {
-        const progress = JSON.parse(saved)
-        if (progress.gameRegion === gameRegion && progress.questions?.length > 0 && progress.currentRound < progress.questions.length) {
-          setQuestions(progress.questions)
-          setCurrentRound(progress.currentRound)
-          setTotalScore(progress.totalScore)
-          setTotalBaseScore(progress.totalBaseScore)
-          setTotalTimeBonus(progress.totalTimeBonus)
-          setResults(progress.results)
-          setGameStarted(true)
-          setLoading(false)
-          return
-        }
-        localStorage.removeItem(PROGRESS_KEY)
-      }
-    } catch { /* ignore */ }
+    // Clear any in-progress game on reload — start fresh
+    localStorage.removeItem(PROGRESS_KEY)
 
     fetchQuestions(10, gameRegion)
       .then(questions => {
