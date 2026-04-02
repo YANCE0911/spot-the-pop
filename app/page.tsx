@@ -27,7 +27,7 @@ export default function Home() {
   }
 
   return (
-    <main className="bg-black text-white py-6 px-4 font-sans">
+    <main className="min-h-screen bg-black text-white py-10 px-4 font-sans flex flex-col">
       <div className="max-w-lg mx-auto space-y-5">
         {/* Language toggle */}
         <div className="flex justify-end">
@@ -127,7 +127,19 @@ export default function Home() {
             {lang === 'ja' ? 'ランキング' : 'Rankings'}
           </button>
         </div>
+      </div>
 
+      {/* Bottom — pushes to bottom via flex-grow */}
+      <div className="flex-grow" />
+      <div className="text-center py-4">
+        <a
+          href="https://buymeacoffee.com/yance"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-zinc-600 hover:text-zinc-400 text-xs transition-colors"
+        >
+          {lang === 'ja' ? 'Buy Me a Coffee で応援する' : 'Support on Buy Me a Coffee'}
+        </a>
       </div>
     </main>
   )
