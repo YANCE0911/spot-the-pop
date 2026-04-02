@@ -107,25 +107,9 @@ export default function Results() {
 
         <ScoreRank score={displayScore} lang={lang} />
 
-        {/* Play Again (full width) */}
-        <button
-          onClick={() => {
-            const region = localStorage.getItem('soundiq_region') || 'jp'
-            router.push(`/game?metric=followers&region=${region}`)
-          }}
-          className="w-full bg-brand text-black py-3 rounded-lg font-display font-semibold hover:bg-brand-light transition-all"
-        >
-          {t('playAgain', lang)}
-        </button>
-
-        {/* X / Copy */}
-        <div className="grid grid-cols-2 gap-2">
-          <ShareSection score={score} mode="versus" lang={lang} challengeUrl={challengeUrl} />
-        </div>
-
-        {/* Name registration */}
+        {/* Name registration — prominent, right after score */}
         {!submitted ? (
-          <div className="bg-zinc-900 p-4 rounded-xl space-y-3 animate-[fadeInUp_0.5s_ease-out]">
+          <div className="border border-brand/30 bg-zinc-900 p-4 rounded-xl space-y-3 animate-[fadeInUp_0.5s_ease-out]">
             <h2 className="text-brand font-bold">{t('registerRanking', lang)}</h2>
             <input
               type="text" value={playerName} onChange={e => setPlayerName(e.target.value)}
@@ -168,6 +152,11 @@ export default function Results() {
           </div>
         )}
 
+        {/* X / Copy */}
+        <div className="grid grid-cols-2 gap-2">
+          <ShareSection score={score} mode="versus" lang={lang} challengeUrl={challengeUrl} />
+        </div>
+
         {/* Round results */}
         <div className="space-y-2">
           <h2 className="text-brand font-bold">{t('roundResults', lang)}</h2>
@@ -202,7 +191,16 @@ export default function Results() {
           ))}
         </div>
 
-        {/* Top */}
+        {/* Play Again + Top */}
+        <button
+          onClick={() => {
+            const region = localStorage.getItem('soundiq_region') || 'jp'
+            router.push(`/game?metric=followers&region=${region}`)
+          }}
+          className="w-full bg-brand text-black py-3 rounded-lg font-display font-semibold hover:bg-brand-light transition-all"
+        >
+          {t('playAgain', lang)}
+        </button>
         <button
           onClick={() => router.push('/')}
           className="w-full bg-zinc-800 text-white py-3 rounded-lg font-sans font-semibold hover:bg-zinc-700 transition-all text-sm"

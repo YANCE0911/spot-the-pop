@@ -640,22 +640,9 @@ function TimelineResults({
 
         <ScoreRank score={displayScore} lang={lang} />
 
-        {/* Play Again (full width) */}
-        <button
-          onClick={() => { localStorage.removeItem('yearGameResults'); router.push(`/year?region=${region}`) }}
-          className="w-full bg-accent text-white py-3 rounded-lg font-display font-semibold hover:brightness-110 transition-all"
-        >
-          {t('playAgain', lang)}
-        </button>
-
-        {/* X / Copy */}
-        <div className="grid grid-cols-2 gap-2">
-          <ShareSection score={displayScore} mode="timeline" lang={lang} />
-        </div>
-
-        {/* Name registration */}
+        {/* Name registration — prominent, right after score */}
         {!submitted ? (
-          <div className="bg-zinc-900 p-4 rounded-xl space-y-3 animate-[fadeInUp_0.5s_ease-out]">
+          <div className="border border-accent/30 bg-zinc-900 p-4 rounded-xl space-y-3 animate-[fadeInUp_0.5s_ease-out]">
             <h2 className="text-accent font-bold">{t('registerRanking', lang)}</h2>
             <input
               type="text"
@@ -700,6 +687,11 @@ function TimelineResults({
           </div>
         )}
 
+        {/* X / Copy */}
+        <div className="grid grid-cols-2 gap-2">
+          <ShareSection score={displayScore} mode="timeline" lang={lang} />
+        </div>
+
         {/* Round results */}
         <div className="space-y-2">
           <h2 className="text-accent font-bold">{t('roundResults', lang)}</h2>
@@ -735,7 +727,13 @@ function TimelineResults({
           {lang === 'ja' ? '※Spotifyの登録情報に基づく発売年です' : 'Release years based on Spotify data'}
         </p>
 
-        {/* Top */}
+        {/* Play Again + Top */}
+        <button
+          onClick={() => { localStorage.removeItem('yearGameResults'); router.push(`/year?region=${region}`) }}
+          className="w-full bg-accent text-white py-3 rounded-lg font-display font-semibold hover:brightness-110 transition-all"
+        >
+          {t('playAgain', lang)}
+        </button>
         <button
           onClick={() => router.push('/')}
           className="w-full bg-zinc-800 text-white py-3 rounded-lg font-sans font-semibold hover:bg-zinc-700 transition-all text-sm"

@@ -100,7 +100,7 @@ const translations = {
     themeArtist: 'ターゲット',
     popularity: 'Popularity',
     followers: 'Followers',
-    inputLabel: '近いFollowersのアーティストを入力:',
+    inputLabel: '近いFollowersのアーティストを入力',
     inputPlaceholder: '例: YOASOBI',
     submit: 'OK',
     submitting: '確認中...',
