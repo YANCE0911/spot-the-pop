@@ -33,7 +33,7 @@ export default function ShareButton({ score, results = [], challengeUrl, lang = 
   const origin = typeof window !== 'undefined' ? window.location.origin : BASE_URL
   const shareUrl = challengeUrl
     ? `${origin}${challengeUrl}`
-    : `${BASE_URL}/share?score=${displayScore.toFixed(2)}&mode=versus&v=4`
+    : `${BASE_URL}/share?score=${displayScore.toFixed(2)}&mode=versus&v=5`
 
   const scoreLine = displayScore >= 70
     ? `${displayScore.toFixed(2)}点で${grade.label}ランク`

@@ -13,8 +13,8 @@ export const getServerSideProps: GetServerSideProps<Props> = async ({ query }) =
   const score = (query.score as string) || '0'
   const mode = (query.mode as string) || 'versus'
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : 'https://soundiq.vercel.app')
-  const ogImage = mode === 'timeline' ? 'og-timeline.png' : 'og-versus.png'
-  const ogUrl = `${baseUrl}/${ogImage}?v=2`
+  const ogImage = mode === 'timeline' ? 'og-timeline-v2.png' : 'og-versus-v2.png'
+  const ogUrl = `${baseUrl}/${ogImage}`
   return { props: { score, mode, ogUrl } }
 }
 

@@ -14,13 +14,13 @@ export const metadata: Metadata = {
     description: 'How deep is your music knowledge?',
     siteName: 'SOUND IQ',
     type: 'website',
-    images: ['https://soundiq.vercel.app/og-brand.png?v=2'],
+    images: ['https://soundiq.vercel.app/og-brand-v2.png'],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'SOUND IQ',
     description: 'How deep is your music knowledge?',
-    images: ['https://soundiq.vercel.app/og-brand.png?v=2'],
+    images: ['https://soundiq.vercel.app/og-brand-v2.png'],
   },
 }
 
