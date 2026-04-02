@@ -99,22 +99,30 @@ function YearGame() {
   const elapsedTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   useEffect(() => {
-    // Try to restore finished results first
-    try {
-      const finishedData = localStorage.getItem('yearGameResults')
-      if (finishedData) {
-        const data = JSON.parse(finishedData)
-        if (data.results?.length > 0) {
-          setResults(data.results)
-          setTotalScore(data.score)
-          setTotalBaseScore(data.baseScore)
-          setTotalTimeBonus(data.timeBonus)
-          setFinished(true)
-          setLoading(false)
-          return
+    // Only restore finished results on page reload (not on navigation from other pages)
+    const navEntries = performance.getEntriesByType?.('navigation') as PerformanceNavigationTiming[] | undefined
+    const isReload = navEntries?.[0]?.type === 'reload'
+
+    if (isReload) {
+      try {
+        const finishedData = localStorage.getItem('yearGameResults')
+        if (finishedData) {
+          const data = JSON.parse(finishedData)
+          if (data.results?.length > 0) {
+            setResults(data.results)
+            setTotalScore(data.score)
+            setTotalBaseScore(data.baseScore)
+            setTotalTimeBonus(data.timeBonus)
+            setFinished(true)
+            setLoading(false)
+            return
+          }
         }
-      }
-    } catch { /* ignore */ }
+      } catch { /* ignore */ }
+    } else {
+      // Clear stale results on fresh navigation
+      localStorage.removeItem('yearGameResults')
+    }
 
     // Try to restore saved progress
     try {
