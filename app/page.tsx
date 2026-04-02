@@ -27,7 +27,7 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-screen bg-black text-white py-6 px-4 font-sans">
+    <main className="bg-black text-white py-6 px-4 font-sans">
       <div className="max-w-lg mx-auto space-y-5">
         {/* Language toggle */}
         <div className="flex justify-end">
