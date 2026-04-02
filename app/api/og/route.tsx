@@ -3,6 +3,13 @@ import { NextRequest } from 'next/server'
 
 export const runtime = 'edge'
 
+async function loadFont(): Promise<ArrayBuffer> {
+  const res = await fetch(
+    'https://fonts.gstatic.com/s/montserrat/v29/JTUHjIg1_i6t8kCHKm4532VJOt5-QNFgpCuM70w-Y3tcoqK5.ttf'
+  )
+  return res.arrayBuffer()
+}
+
 function getGrade(score: number): { label: string; color: string } {
   if (score >= 90) return { label: 'S', color: '#facc15' }
   if (score >= 80) return { label: 'A', color: '#4ade80' }
@@ -13,6 +20,9 @@ function getGrade(score: number): { label: string; color: string } {
 }
 
 export async function GET(req: NextRequest) {
+  const fontData = await loadFont()
+  const fonts = [{ name: 'Montserrat', data: fontData, weight: 900 as const, style: 'normal' as const }]
+
   const { searchParams } = req.nextUrl
   const brand = searchParams.get('brand')
   const mode = searchParams.get('mode') ?? 'versus'
@@ -24,17 +34,18 @@ export async function GET(req: NextRequest) {
   if (brand === '1') {
     return new ImageResponse(
       (
-        <div style={{ display: 'flex', flexDirection: 'column', width: '100%', height: '100%', backgroundColor: '#000', padding: '60px 80px' }}>
-          <div style={{ display: 'flex', fontSize: '48px', fontWeight: 900, color: '#a1a1aa' }}>SOUND IQ</div>
+        <div style={{ display: 'flex', flexDirection: 'column', width: '100%', height: '100%', backgroundColor: '#000', padding: '60px 80px', fontFamily: 'Montserrat' }}>
+          <div style={{ display: 'flex', fontSize: '52px', fontWeight: 900, color: '#71717a', letterSpacing: '-0.02em' }}>SOUND IQ</div>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1 }}>
-            <div style={{ display: 'flex', fontSize: '64px', fontWeight: 900, color: accentColor, letterSpacing: '0.08em' }}>{modeLabel}</div>
-            <div style={{ display: 'flex', fontSize: '36px', fontWeight: 700, color: '#a1a1aa', marginTop: '24px' }}>How deep is your music knowledge?</div>
+            <div style={{ display: 'flex', fontSize: '80px', fontWeight: 900, color: accentColor, letterSpacing: '0.1em' }}>{modeLabel}</div>
+            <div style={{ display: 'flex', fontSize: '32px', fontWeight: 900, color: '#52525b', marginTop: '20px', letterSpacing: '0.02em' }}>How deep is your music knowledge?</div>
           </div>
         </div>
       ),
       {
         width: 1200,
         height: 630,
+        fonts,
         headers: { 'Cache-Control': 'public, max-age=31536000, immutable' },
       },
     )
@@ -47,13 +58,13 @@ export async function GET(req: NextRequest) {
 
   return new ImageResponse(
     (
-      <div style={{ display: 'flex', flexDirection: 'column', width: '100%', height: '100%', backgroundColor: '#000', padding: '60px 80px' }}>
-        <div style={{ display: 'flex', fontSize: '48px', fontWeight: 900, color: '#a1a1aa' }}>SOUND IQ</div>
+      <div style={{ display: 'flex', flexDirection: 'column', width: '100%', height: '100%', backgroundColor: '#000', padding: '60px 80px', fontFamily: 'Montserrat' }}>
+        <div style={{ display: 'flex', fontSize: '52px', fontWeight: 900, color: '#71717a', letterSpacing: '-0.02em' }}>SOUND IQ</div>
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1 }}>
-          <div style={{ display: 'flex', fontSize: '32px', fontWeight: 700, color: accentColor, letterSpacing: '0.05em' }}>{modeLabel} RESULTS</div>
+          <div style={{ display: 'flex', fontSize: '32px', fontWeight: 900, color: accentColor, letterSpacing: '0.08em' }}>{modeLabel} RESULTS</div>
           <div style={{ display: 'flex', alignItems: 'baseline', marginTop: '16px' }}>
             <div style={{ display: 'flex', fontSize: '180px', fontWeight: 900, color: '#fff', lineHeight: 1 }}>{numScore.toFixed(2)}</div>
-            <div style={{ display: 'flex', fontSize: '56px', fontWeight: 700, color: '#71717a', marginLeft: '8px' }}>/100</div>
+            <div style={{ display: 'flex', fontSize: '56px', fontWeight: 900, color: '#52525b', marginLeft: '8px' }}>/100</div>
           </div>
           <div style={{ display: 'flex', fontSize: '80px', fontWeight: 900, color: grade.color, marginTop: '24px' }}>{grade.label}</div>
         </div>
@@ -62,6 +73,7 @@ export async function GET(req: NextRequest) {
     {
       width: 1200,
       height: 630,
+      fonts,
       headers: { 'Cache-Control': 'public, max-age=3600, s-maxage=3600' },
     },
   )
