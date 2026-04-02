@@ -40,8 +40,8 @@ export async function GET(req: NextRequest) {
       (
         <div style={{ display: 'flex', position: 'relative', width: '100%', height: '100%', backgroundColor: '#0A0A0A', fontFamily: 'Montserrat' }}>
           <div style={{ display: 'flex', position: 'absolute', top: '56px', left: '64px', fontSize: '48px', fontWeight: 900, color: accentColor, letterSpacing: '0.06em' }}>{modeLabel}</div>
-          <div style={{ display: 'flex', position: 'absolute', top: '210px', width: '100%', justifyContent: 'center', fontSize: '180px', fontWeight: 900, color: '#A1A1AA', letterSpacing: '-0.02em', lineHeight: 1 }}>SOUND IQ</div>
-          <div style={{ display: 'flex', position: 'absolute', top: '430px', width: '100%', justifyContent: 'center', fontSize: '80px', fontWeight: 900, color: '#D4D4D8', fontFamily: 'NotoSansJP' }}>あなたの音楽IQは？</div>
+          <div style={{ display: 'flex', position: 'absolute', top: '150px', width: '100%', justifyContent: 'center', fontSize: '80px', fontWeight: 900, color: '#A1A1AA', letterSpacing: '-0.02em', lineHeight: 1 }}>SOUND IQ</div>
+          <div style={{ display: 'flex', position: 'absolute', top: '270px', width: '100%', justifyContent: 'center', fontSize: '180px', fontWeight: 900, color: '#D4D4D8', fontFamily: 'NotoSansJP', lineHeight: 1 }}>あなたの音楽IQは？</div>
         </div>
       ),
       {
