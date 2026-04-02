@@ -14,13 +14,36 @@ function getGrade(score: number): { label: string; color: string } {
 
 export async function GET(req: NextRequest) {
   const { searchParams } = req.nextUrl
-  const score = searchParams.get('score') ?? '0'
+  const brand = searchParams.get('brand')
   const mode = searchParams.get('mode') ?? 'versus'
-  const numScore = parseFloat(score)
-  const grade = getGrade(numScore)
   const isTimeline = mode === 'timeline'
   const accentColor = isTimeline ? '#a855f7' : '#1DB954'
   const modeLabel = isTimeline ? 'TIMELINE' : 'VERSUS'
+
+  // Brand mode: static image without scores
+  if (brand === '1') {
+    return new ImageResponse(
+      (
+        <div style={{ display: 'flex', flexDirection: 'column', width: '100%', height: '100%', backgroundColor: '#000', padding: '60px 80px' }}>
+          <div style={{ display: 'flex', fontSize: '48px', fontWeight: 900, color: '#a1a1aa' }}>SOUND IQ</div>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1 }}>
+            <div style={{ display: 'flex', fontSize: '64px', fontWeight: 900, color: accentColor, letterSpacing: '0.08em' }}>{modeLabel}</div>
+            <div style={{ display: 'flex', fontSize: '36px', fontWeight: 700, color: '#a1a1aa', marginTop: '24px' }}>How deep is your music knowledge?</div>
+          </div>
+        </div>
+      ),
+      {
+        width: 1200,
+        height: 630,
+        headers: { 'Cache-Control': 'public, max-age=31536000, immutable' },
+      },
+    )
+  }
+
+  // Dynamic score mode (kept for backward compat)
+  const score = searchParams.get('score') ?? '0'
+  const numScore = parseFloat(score)
+  const grade = getGrade(numScore)
 
   return new ImageResponse(
     (

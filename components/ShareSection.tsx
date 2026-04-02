@@ -21,7 +21,9 @@ export default function ShareSection({ score, mode, lang = 'en', challengeUrl }:
     ? `${origin}${challengeUrl}`
     : `${origin}/share?score=${displayScore.toFixed(2)}&mode=${mode}&v=3`
 
-  const shareText = `SOUND IQ - ${modeLabel}\nScore: ${displayScore.toFixed(2)}/100`
+  const shareText = lang === 'ja'
+    ? `SOUND IQ - ${modeLabel}\nScore: ${displayScore.toFixed(2)}/100\nあなたの音楽IQは？`
+    : `SOUND IQ - ${modeLabel}\nScore: ${displayScore.toFixed(2)}/100\nHow deep is your music knowledge?`
   const tweetContent = `${shareText}\n${shareUrl}`
 
   const handleCopy = async () => {
@@ -38,7 +40,7 @@ export default function ShareSection({ score, mode, lang = 'en', challengeUrl }:
         rel="noopener noreferrer"
         className="font-sans bg-black border border-zinc-700 text-white py-3 px-4 rounded-lg font-bold hover:bg-zinc-900 transition-all active:scale-[0.98] text-center text-sm"
       >
-        X
+        {t('shareOnX', lang)}
       </a>
       <button
         onClick={handleCopy}
@@ -55,7 +57,7 @@ export default function ShareSection({ score, mode, lang = 'en', challengeUrl }:
             setCopied(true)
             setTimeout(() => setCopied(false), 2000)
           }}
-          className="col-span-3 bg-zinc-800 text-white py-3 px-6 rounded-lg font-bold hover:bg-zinc-700 transition-all active:scale-[0.98] text-sm"
+          className="col-span-2 bg-zinc-800 text-white py-3 px-6 rounded-lg font-bold hover:bg-zinc-700 transition-all active:scale-[0.98] text-sm"
         >
           {t('challengeFriend', lang)}
         </button>

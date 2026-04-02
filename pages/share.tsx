@@ -13,8 +13,8 @@ export const getServerSideProps: GetServerSideProps<Props> = async ({ query }) =
   const score = (query.score as string) || '0'
   const mode = (query.mode as string) || 'versus'
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : 'https://soundiq.vercel.app')
-  const v = (query.v as string) || '1'
-  const ogUrl = `${baseUrl}/api/og?score=${score}&mode=${mode}&v=${v}`
+  const ogImage = mode === 'timeline' ? 'og-timeline.png' : 'og-versus.png'
+  const ogUrl = `${baseUrl}/${ogImage}`
   return { props: { score, mode, ogUrl } }
 }
 
@@ -30,9 +30,9 @@ export default function SharePage({ score, mode, ogUrl }: Props) {
   return (
     <Head>
       <title>{`SOUND IQ ${modeLabel} - Score: ${score}/100`}</title>
-      <meta name="description" content="Can you beat this score? Try SOUND IQ!" />
+      <meta name="description" content="あなたの音楽IQは？ SOUND IQに挑戦しよう！" />
       <meta property="og:title" content={`SOUND IQ ${modeLabel} - Score: ${score}/100`} />
-      <meta property="og:description" content="Can you beat this score? Try SOUND IQ!" />
+      <meta property="og:description" content="あなたの音楽IQは？ SOUND IQに挑戦しよう！" />
       <meta property="og:image" content={ogUrl} />
       <meta property="og:image:width" content="1200" />
       <meta property="og:image:height" content="630" />

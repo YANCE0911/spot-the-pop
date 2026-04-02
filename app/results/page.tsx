@@ -118,15 +118,9 @@ export default function Results() {
           {t('playAgain', lang)}
         </button>
 
-        {/* X / Copy / Top */}
-        <div className="grid grid-cols-3 gap-2">
+        {/* X / Copy */}
+        <div className="grid grid-cols-2 gap-2">
           <ShareSection score={score} mode="versus" lang={lang} challengeUrl={challengeUrl} />
-          <button
-            onClick={() => router.push('/')}
-            className="bg-zinc-800 text-white py-3 rounded-lg font-sans font-semibold hover:bg-zinc-700 transition-all text-sm"
-          >
-            {t('top', lang)}
-          </button>
         </div>
 
         {/* Name registration */}
@@ -207,6 +201,14 @@ export default function Results() {
             </div>
           ))}
         </div>
+
+        {/* Top */}
+        <button
+          onClick={() => router.push('/')}
+          className="w-full bg-zinc-800 text-white py-3 rounded-lg font-sans font-semibold hover:bg-zinc-700 transition-all text-sm"
+        >
+          {t('top', lang)}
+        </button>
 
         {/* Support link */}
         <div className="text-center pt-2">

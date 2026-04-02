@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { t, type Lang } from '@/lib/i18n'
 import type { GameResult } from '@/types'
 
 type Props = {
@@ -9,7 +10,7 @@ type Props = {
   metric: string
   results?: GameResult[]
   challengeUrl?: string
-  lang?: 'en' | 'ja'
+  lang?: Lang
 }
 
 // Total score out of 100
@@ -32,10 +33,9 @@ export default function ShareButton({ score, results = [], challengeUrl, lang = 
     ? `${origin}${challengeUrl}`
     : `${origin}/share?score=${displayScore.toFixed(2)}&mode=versus&v=3`
 
-  const shareText = [
-    'SOUND IQ',
-    `Score: ${displayScore.toFixed(2)}/100 (${grade.label})`,
-  ].join('\n')
+  const shareText = lang === 'ja'
+    ? `SOUND IQ\nScore: ${displayScore.toFixed(2)}/100 (${grade.label})\nあなたの音楽IQは？`
+    : `SOUND IQ\nScore: ${displayScore.toFixed(2)}/100 (${grade.label})\nHow deep is your music knowledge?`
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(`${shareText}\n${shareUrl}`)
@@ -75,13 +75,13 @@ export default function ShareButton({ score, results = [], challengeUrl, lang = 
           rel="noopener noreferrer"
           className="flex-1 bg-black border border-zinc-700 text-white py-3 px-4 rounded-xl font-bold hover:bg-zinc-900 transition-all active:scale-[0.98] text-center"
         >
-          X
+          {t('shareOnX', lang)}
         </a>
         <button
           onClick={handleCopy}
           className="flex-1 bg-brand text-black py-3 px-4 rounded-xl font-bold hover:bg-brand-light transition-all active:scale-[0.98]"
         >
-          {copied ? 'Copied!' : 'Copy'}
+          {copied ? t('copied', lang) : t('share', lang)}
         </button>
       </div>
 
@@ -90,7 +90,7 @@ export default function ShareButton({ score, results = [], challengeUrl, lang = 
           onClick={handleChallengeLink}
           className="w-full bg-zinc-800 text-white py-3 px-6 rounded-xl font-bold hover:bg-zinc-700 transition-all active:scale-[0.98]"
         >
-          {lang === 'ja' ? 'Challenge Link' : 'Challenge a Friend'}
+          {t('challengeFriend', lang)}
         </button>
       )}
 
