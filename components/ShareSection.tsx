@@ -10,38 +10,54 @@ type Props = {
   challengeUrl?: string
 }
 
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://soundiq.vercel.app'
+
+function getRankLabel(score: number): string {
+  if (score >= 90) return 'S'
+  if (score >= 80) return 'A'
+  if (score >= 70) return 'B'
+  if (score >= 60) return 'C'
+  if (score >= 50) return 'D'
+  return 'E'
+}
+
 export default function ShareSection({ score, mode, lang = 'en', challengeUrl }: Props) {
   const [copied, setCopied] = useState(false)
 
   const displayScore = Math.round(score * 100) / 100
   const modeLabel = mode === 'versus' ? 'VERSUS' : 'TIMELINE'
+  const rank = getRankLabel(displayScore)
 
-  const origin = typeof window !== 'undefined' ? window.location.origin : ''
+  const origin = typeof window !== 'undefined' ? window.location.origin : BASE_URL
   const shareUrl = challengeUrl
     ? `${origin}${challengeUrl}`
-    : `${origin}/share?score=${displayScore.toFixed(2)}&mode=${mode}&v=3`
+    : `${BASE_URL}/share?score=${displayScore.toFixed(2)}&mode=${mode}&v=3`
 
-  const shareText = lang === 'ja'
-    ? `SOUND IQ - ${modeLabel}\nScore: ${displayScore.toFixed(2)}/100\nあなたの音楽IQは？`
-    : `SOUND IQ - ${modeLabel}\nScore: ${displayScore.toFixed(2)}/100\nHow deep is your music knowledge?`
-  const tweetContent = `${shareText}\n${shareUrl}`
+  const scoreLine = displayScore >= 70
+    ? `${displayScore.toFixed(2)}点 ${rank}ランク`
+    : `${displayScore.toFixed(2)}点 ${rank}ランク...`
+
+  const shareText = `SOUND IQ - ${modeLabel}\n${scoreLine}\n${shareUrl}`
+
+  const handleShare = () => {
+    const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}`
+    window.open(url, '_blank', 'noopener,noreferrer')
+  }
 
   const handleCopy = async () => {
-    await navigator.clipboard.writeText(`${shareText}\n${shareUrl}`)
+    await navigator.clipboard.writeText(shareText)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }
 
   return (
     <>
-      <a
-        href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetContent)}`}
-        target="_blank"
-        rel="noopener noreferrer"
+      <button
+        onClick={handleShare}
         className="font-sans bg-black border border-zinc-700 text-white py-3 px-4 rounded-lg font-bold hover:bg-zinc-900 transition-all active:scale-[0.98] text-center text-sm"
       >
         {t('shareOnX', lang)}
-      </a>
+      </button>
       <button
         onClick={handleCopy}
         className="font-sans py-3 px-4 rounded-lg font-bold transition-all active:scale-[0.98] bg-zinc-800 text-white hover:bg-zinc-700 text-sm"
@@ -52,7 +68,7 @@ export default function ShareSection({ score, mode, lang = 'en', challengeUrl }:
       {challengeUrl && (
         <button
           onClick={async () => {
-            const fullUrl = `${window.location.origin}${challengeUrl}`
+            const fullUrl = `${origin}${challengeUrl}`
             await navigator.clipboard.writeText(fullUrl)
             setCopied(true)
             setTimeout(() => setCopied(false), 2000)

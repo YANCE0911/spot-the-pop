@@ -13,39 +13,48 @@ type Props = {
   lang?: Lang
 }
 
-// Total score out of 100
-function getScoreGrade(total: number): { label: string; color: string } {
-  if (total >= 95) return { label: 'S', color: 'text-brand' }
-  if (total >= 85) return { label: 'A', color: 'text-emerald-400' }
-  if (total >= 70) return { label: 'B', color: 'text-sky-400' }
-  if (total >= 50) return { label: 'C', color: 'text-amber-400' }
-  return { label: 'D', color: 'text-red-400' }
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://soundiq.vercel.app'
+
+function getRankLabel(score: number): { label: string; color: string } {
+  if (score >= 90) return { label: 'S', color: 'text-yellow-400' }
+  if (score >= 80) return { label: 'A', color: 'text-emerald-400' }
+  if (score >= 70) return { label: 'B', color: 'text-sky-400' }
+  if (score >= 60) return { label: 'C', color: 'text-zinc-300' }
+  if (score >= 50) return { label: 'D', color: 'text-amber-400' }
+  return { label: 'E', color: 'text-red-400' }
 }
 
 export default function ShareButton({ score, results = [], challengeUrl, lang = 'en' }: Props) {
   const [copied, setCopied] = useState(false)
 
   const displayScore = Math.round(score * 100) / 100
-  const grade = getScoreGrade(displayScore)
+  const grade = getRankLabel(displayScore)
 
-  const origin = typeof window !== 'undefined' ? window.location.origin : ''
+  const origin = typeof window !== 'undefined' ? window.location.origin : BASE_URL
   const shareUrl = challengeUrl
     ? `${origin}${challengeUrl}`
-    : `${origin}/share?score=${displayScore.toFixed(2)}&mode=versus&v=3`
+    : `${BASE_URL}/share?score=${displayScore.toFixed(2)}&mode=versus&v=3`
 
-  const shareText = lang === 'ja'
-    ? `SOUND IQ\nScore: ${displayScore.toFixed(2)}/100 (${grade.label})\nあなたの音楽IQは？`
-    : `SOUND IQ\nScore: ${displayScore.toFixed(2)}/100 (${grade.label})\nHow deep is your music knowledge?`
+  const scoreLine = displayScore >= 70
+    ? `${displayScore.toFixed(2)}点 ${grade.label}ランク`
+    : `${displayScore.toFixed(2)}点 ${grade.label}ランク...`
+
+  const shareText = `SOUND IQ - VERSUS\n${scoreLine}\n${shareUrl}`
+
+  const handleShare = () => {
+    const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}`
+    window.open(url, '_blank', 'noopener,noreferrer')
+  }
 
   const handleCopy = async () => {
-    await navigator.clipboard.writeText(`${shareText}\n${shareUrl}`)
+    await navigator.clipboard.writeText(shareText)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }
 
   const handleChallengeLink = async () => {
     if (!challengeUrl) return
-    const fullUrl = `${window.location.origin}${challengeUrl}`
+    const fullUrl = `${origin}${challengeUrl}`
     await navigator.clipboard.writeText(fullUrl)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
@@ -69,14 +78,12 @@ export default function ShareButton({ score, results = [], challengeUrl, lang = 
       )}
 
       <div className="flex gap-2">
-        <a
-          href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`${shareText}\n${shareUrl}`)}`}
-          target="_blank"
-          rel="noopener noreferrer"
+        <button
+          onClick={handleShare}
           className="flex-1 bg-black border border-zinc-700 text-white py-3 px-4 rounded-xl font-bold hover:bg-zinc-900 transition-all active:scale-[0.98] text-center"
         >
           {t('shareOnX', lang)}
-        </a>
+        </button>
         <button
           onClick={handleCopy}
           className="flex-1 bg-brand text-black py-3 px-4 rounded-xl font-bold hover:bg-brand-light transition-all active:scale-[0.98]"
