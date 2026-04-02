@@ -3,11 +3,12 @@ import { NextRequest } from 'next/server'
 
 export const runtime = 'edge'
 
-async function loadFont(): Promise<ArrayBuffer> {
-  const res = await fetch(
-    'https://fonts.gstatic.com/s/montserrat/v29/JTUHjIg1_i6t8kCHKm4532VJOt5-QNFgpCuM70w-Y3tcoqK5.ttf'
-  )
-  return res.arrayBuffer()
+async function loadFonts() {
+  const [montserrat, notoSansJp] = await Promise.all([
+    fetch('https://fonts.gstatic.com/s/montserrat/v29/JTUHjIg1_i6t8kCHKm4532VJOt5-QNFgpCuM70w-Y3tcoqK5.ttf').then(r => r.arrayBuffer()),
+    fetch('https://fonts.gstatic.com/s/notosansjp/v56/-F6jfjtqLzI2JPCgQBnw7HFyzSD-AsregP8VFLgk75s.ttf').then(r => r.arrayBuffer()),
+  ])
+  return { montserrat, notoSansJp }
 }
 
 function getGrade(score: number): { label: string; color: string } {
@@ -20,8 +21,11 @@ function getGrade(score: number): { label: string; color: string } {
 }
 
 export async function GET(req: NextRequest) {
-  const fontData = await loadFont()
-  const fonts = [{ name: 'Montserrat', data: fontData, weight: 900 as const, style: 'normal' as const }]
+  const { montserrat, notoSansJp } = await loadFonts()
+  const fonts = [
+    { name: 'Montserrat', data: montserrat, weight: 900 as const, style: 'normal' as const },
+    { name: 'NotoSansJP', data: notoSansJp, weight: 900 as const, style: 'normal' as const },
+  ]
 
   const { searchParams } = req.nextUrl
   const brand = searchParams.get('brand')
@@ -34,12 +38,10 @@ export async function GET(req: NextRequest) {
   if (brand === '1') {
     return new ImageResponse(
       (
-        <div style={{ display: 'flex', flexDirection: 'column', width: '100%', height: '100%', backgroundColor: '#000', padding: '60px 80px', fontFamily: 'Montserrat' }}>
-          <div style={{ display: 'flex', fontSize: '52px', fontWeight: 900, color: '#71717a', letterSpacing: '-0.02em' }}>SOUND IQ</div>
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1 }}>
-            <div style={{ display: 'flex', fontSize: '80px', fontWeight: 900, color: accentColor, letterSpacing: '0.1em' }}>{modeLabel}</div>
-            <div style={{ display: 'flex', fontSize: '32px', fontWeight: 900, color: '#52525b', marginTop: '20px', letterSpacing: '0.02em' }}>How deep is your music knowledge?</div>
-          </div>
+        <div style={{ display: 'flex', position: 'relative', width: '100%', height: '100%', backgroundColor: '#0A0A0A', fontFamily: 'Montserrat' }}>
+          <div style={{ display: 'flex', position: 'absolute', top: '56px', left: '64px', fontSize: '48px', fontWeight: 900, color: accentColor, letterSpacing: '0.06em' }}>{modeLabel}</div>
+          <div style={{ display: 'flex', position: 'absolute', top: '210px', width: '100%', justifyContent: 'center', fontSize: '180px', fontWeight: 900, color: '#A1A1AA', letterSpacing: '-0.02em', lineHeight: 1 }}>SOUND IQ</div>
+          <div style={{ display: 'flex', position: 'absolute', top: '430px', width: '100%', justifyContent: 'center', fontSize: '80px', fontWeight: 900, color: '#D4D4D8', fontFamily: 'NotoSansJP' }}>あなたの音楽IQは？</div>
         </div>
       ),
       {
