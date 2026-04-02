@@ -162,32 +162,8 @@ function YearGame() {
   const elapsedTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   useEffect(() => {
-    // Only restore finished results on page reload (not on navigation from other pages)
-    const navEntries = performance.getEntriesByType?.('navigation') as PerformanceNavigationTiming[] | undefined
-    const isReload = navEntries?.[0]?.type === 'reload'
-
-    if (isReload) {
-      try {
-        const finishedData = localStorage.getItem('yearGameResults')
-        if (finishedData) {
-          const data = JSON.parse(finishedData)
-          if (data.results?.length > 0) {
-            setResults(data.results)
-            setTotalScore(data.score)
-            setTotalBaseScore(data.baseScore)
-            setTotalTimeBonus(data.timeBonus)
-            setFinished(true)
-            setLoading(false)
-            return
-          }
-        }
-      } catch { /* ignore */ }
-    } else {
-      // Clear stale results on fresh navigation
-      localStorage.removeItem('yearGameResults')
-    }
-
-    // Clear any in-progress game on reload — start fresh
+    // Always start fresh on load/reload
+    localStorage.removeItem('yearGameResults')
     localStorage.removeItem(PROGRESS_KEY)
 
     fetchQuestions(10, gameRegion)
