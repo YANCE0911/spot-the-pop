@@ -34,7 +34,7 @@ export default function ShareSection({ score, mode, lang = 'en', challengeUrl }:
     : `${BASE_URL}/share?score=${displayScore.toFixed(2)}&mode=${mode}&v=6`
 
   const line = '━━━━━━━━━━━━'
-  const shareText = `${line}\nSOUND IQ - ${modeLabel}\n${line}\n${displayScore.toFixed(2)}点 / ${rank}ランク\n${line}\nあなたの音楽IQは？\n${shareUrl}`
+  const shareText = `SOUND IQ - ${modeLabel}\n${line}\n${displayScore.toFixed(2)}点\n判定：${rank}ランク\n${line}\nあなたの音楽IQは？\n${shareUrl}`
 
   const handleShare = () => {
     const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}`
