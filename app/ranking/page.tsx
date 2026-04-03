@@ -129,58 +129,70 @@ export default function RankingPage() {
           </div>
         )}
 
-        {/* Game mode tabs — underline style */}
-        <div className="flex border-b border-zinc-800">
-          <button
-            onClick={() => setMode('timeline')}
-            className={`flex-1 pb-2.5 text-sm font-bold transition-all relative ${
-              mode === 'timeline'
-                ? 'text-accent'
-                : 'text-zinc-500 hover:text-zinc-300'
-            }`}
-          >
-            TIMELINE
-            {mode === 'timeline' && (
-              <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-12 h-0.5 bg-accent rounded-full" />
-            )}
-          </button>
-          <button
-            onClick={() => setMode('versus')}
-            className={`flex-1 pb-2.5 text-sm font-bold transition-all relative ${
-              mode === 'versus'
-                ? 'text-brand'
-                : 'text-zinc-500 hover:text-zinc-300'
-            }`}
-          >
-            VERSUS
-            {mode === 'versus' && (
-              <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-12 h-0.5 bg-brand rounded-full" />
-            )}
-          </button>
-        </div>
-
-        {/* Difficulty toggle — text style */}
-        <div className="flex items-center justify-center gap-4 text-xs font-bold">
-          <button
-            onClick={() => setDifficulty('easy')}
-            className={`pb-1 transition-all border-b-2 ${
-              difficulty === 'easy'
-                ? (accentColor === 'brand' ? 'border-brand text-brand' : 'border-accent text-accent')
-                : 'border-transparent text-zinc-600 hover:text-zinc-400'
-            }`}
-          >
-            NORMAL
-          </button>
-          <button
-            onClick={() => setDifficulty('hard')}
-            className={`pb-1 transition-all border-b-2 ${
-              difficulty === 'hard'
-                ? (accentColor === 'brand' ? 'border-brand text-brand' : 'border-accent text-accent')
-                : 'border-transparent text-zinc-600 hover:text-zinc-400'
-            }`}
-          >
-            HARD
-          </button>
+        {/* Game mode + difficulty — 2x2 grid, always visible */}
+        <div>
+          {/* Mode row */}
+          <div className="flex">
+            <button
+              onClick={() => setMode('timeline')}
+              className={`flex-1 pb-2.5 text-sm font-bold transition-all ${
+                mode === 'timeline' ? 'text-accent' : 'text-zinc-600 hover:text-zinc-400'
+              }`}
+            >
+              TIMELINE
+            </button>
+            <button
+              onClick={() => setMode('versus')}
+              className={`flex-1 pb-2.5 text-sm font-bold transition-all ${
+                mode === 'versus' ? 'text-brand' : 'text-zinc-600 hover:text-zinc-400'
+              }`}
+            >
+              VERSUS
+            </button>
+          </div>
+          {/* Difficulty row — all 4 always visible */}
+          <div className="flex mt-2">
+            <button
+              onClick={() => { setMode('timeline'); setDifficulty('easy') }}
+              className={`flex-1 pb-1.5 text-xs font-bold transition-all border-b-2 ${
+                mode === 'timeline' && difficulty === 'easy'
+                  ? 'border-accent text-accent'
+                  : 'border-transparent text-zinc-600 hover:text-zinc-400'
+              }`}
+            >
+              NORMAL
+            </button>
+            <button
+              onClick={() => { setMode('timeline'); setDifficulty('hard') }}
+              className={`flex-1 pb-1.5 text-xs font-bold transition-all border-b-2 ${
+                mode === 'timeline' && difficulty === 'hard'
+                  ? 'border-accent text-accent'
+                  : 'border-transparent text-zinc-600 hover:text-zinc-400'
+              }`}
+            >
+              HARD
+            </button>
+            <button
+              onClick={() => { setMode('versus'); setDifficulty('easy') }}
+              className={`flex-1 pb-1.5 text-xs font-bold transition-all border-b-2 ${
+                mode === 'versus' && difficulty === 'easy'
+                  ? 'border-brand text-brand'
+                  : 'border-transparent text-zinc-600 hover:text-zinc-400'
+              }`}
+            >
+              NORMAL
+            </button>
+            <button
+              onClick={() => { setMode('versus'); setDifficulty('hard') }}
+              className={`flex-1 pb-1.5 text-xs font-bold transition-all border-b-2 ${
+                mode === 'versus' && difficulty === 'hard'
+                  ? 'border-brand text-brand'
+                  : 'border-transparent text-zinc-600 hover:text-zinc-400'
+              }`}
+            >
+              HARD
+            </button>
+          </div>
         </div>
 
         {/* Rankings list */}
