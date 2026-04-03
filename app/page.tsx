@@ -23,12 +23,16 @@ export default function Home() {
   const playTimeline = (diff: Difficulty) => {
     setTimelineDifficulty(diff)
     localStorage.setItem('soundiq_timeline_difficulty', diff)
+    localStorage.setItem('soundiq_last_mode', 'timeline')
+    localStorage.setItem('soundiq_last_difficulty', diff)
     router.push(`/year?difficulty=${diff}`)
   }
 
   const playVersus = (diff: Difficulty) => {
     setVersusDifficulty(diff)
     localStorage.setItem('soundiq_versus_difficulty', diff)
+    localStorage.setItem('soundiq_last_mode', 'versus')
+    localStorage.setItem('soundiq_last_difficulty', diff)
     router.push(`/game?metric=followers&difficulty=${diff}`)
   }
 

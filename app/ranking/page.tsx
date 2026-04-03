@@ -13,8 +13,20 @@ type Tab = 'versus' | 'timeline'
 
 export default function RankingPage() {
   const router = useRouter()
-  const [mode, setMode] = useState<Tab>('timeline')
-  const [difficulty, setDifficulty] = useState<Difficulty>('easy')
+  const [mode, setMode] = useState<Tab>(() => {
+    if (typeof window !== 'undefined') {
+      const last = localStorage.getItem('soundiq_last_mode') as Tab | null
+      if (last === 'versus' || last === 'timeline') return last
+    }
+    return 'timeline'
+  })
+  const [difficulty, setDifficulty] = useState<Difficulty>(() => {
+    if (typeof window !== 'undefined') {
+      const last = localStorage.getItem('soundiq_last_difficulty') as Difficulty | null
+      if (last === 'easy' || last === 'hard') return last
+    }
+    return 'easy'
+  })
   const [rankings, setRankings] = useState<Record<string, Ranking[]>>({})
   const [myRanks, setMyRanks] = useState<Record<string, { rank: number; score: number } | null>>({})
   const [loading, setLoading] = useState(true)
@@ -288,8 +300,8 @@ export default function RankingPage() {
           <button
             onClick={() => router.push(
               mode === 'versus'
-                ? `/game?difficulty=${difficulty}`
-                : `/year?difficulty=${difficulty}`
+                ? `/game?difficulty=easy`
+                : `/year?difficulty=easy`
             )}
             className={`w-full py-3 rounded-lg font-semibold transition-all ${
               accentColor === 'brand'
