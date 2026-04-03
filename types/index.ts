@@ -1,3 +1,5 @@
+export type Difficulty = 'easy' | 'hard'
+
 export type Ranking = {
   name: string
   score: number
@@ -9,6 +11,7 @@ export type Ranking = {
   gameType?: 'versus' | 'timeline'
   playerId?: string
   region?: 'jp' | 'global'
+  difficulty?: Difficulty
 }
 
 export type GameMode = 'classic' | 'daily' | 'genre' | 'challenge'

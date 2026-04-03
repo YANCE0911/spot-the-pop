@@ -11,6 +11,7 @@ import { saveRanking, getPlayerRank } from '@/lib/ranking'
 import { getPlayerId } from '@/lib/playerId'
 import { detectLang, t, type Lang } from '@/lib/i18n'
 import { playTick, playGo, playReaction } from '@/lib/sound'
+import type { Difficulty } from '@/types'
 
 type TrackQuestion = {
   trackName: string
@@ -68,35 +69,35 @@ function saveSeenIds(ids: Set<string>) {
   localStorage.setItem(SEEN_IDS_KEY, JSON.stringify({ week: getWeekKey(), ids: [...ids] }))
 }
 
-// Fetch questions: try static pack first, fallback to API
-async function fetchQuestions(count: number, region: 'jp' | 'global'): Promise<TrackQuestion[]> {
+// Fetch questions: try static pack first (hard mode only), fallback to API
+async function fetchQuestions(count: number, region: 'jp' | 'global', difficulty: Difficulty = 'hard'): Promise<TrackQuestion[]> {
   const weekKey = getWeekKey()
   const seen = loadSeenIds()
 
-  try {
-    const res = await fetch(`/packs/${region}/week-${weekKey}.json`)
-    if (res.ok) {
-      const pack = await res.json()
-      const all: TrackQuestion[] = [...(pack.main ?? []), ...(pack.extra ?? [])]
+  // Static packs are built with hard thresholds, so only use them for hard mode
+  if (difficulty === 'hard') {
+    try {
+      const res = await fetch(`/packs/${region}/week-${weekKey}.json`)
+      if (res.ok) {
+        const pack = await res.json()
+        const all: TrackQuestion[] = [...(pack.main ?? []), ...(pack.extra ?? [])]
 
-      // Filter out already-seen questions (by trackName+artistName as unique key)
-      const unseen = all.filter(q => !seen.has(`${q.artistName}::${q.trackName}`))
-      const pool = unseen.length >= count ? unseen : all
+        const unseen = all.filter(q => !seen.has(`${q.artistName}::${q.trackName}`))
+        const pool = unseen.length >= count ? unseen : all
 
-      // Shuffle and pick
-      const shuffled = pool.sort(() => Math.random() - 0.5).slice(0, count)
+        const shuffled = pool.sort(() => Math.random() - 0.5).slice(0, count)
 
-      // Mark as seen
-      for (const q of shuffled) seen.add(`${q.artistName}::${q.trackName}`)
-      saveSeenIds(seen)
+        for (const q of shuffled) seen.add(`${q.artistName}::${q.trackName}`)
+        saveSeenIds(seen)
 
-      if (shuffled.length >= count) return shuffled
-    }
-  } catch { /* fall through to API */ }
+        if (shuffled.length >= count) return shuffled
+      }
+    } catch { /* fall through to API */ }
+  }
 
-  // Fallback to API
+  // API fallback (supports difficulty parameter)
   const locale = region === 'jp' ? 'ja' : 'en'
-  const res = await fetch(`/api/year/tracks?count=${count}&locale=${locale}`)
+  const res = await fetch(`/api/year/tracks?count=${count}&locale=${locale}&difficulty=${difficulty}`)
   const data = await res.json()
   return data.questions ?? []
 }
@@ -151,9 +152,9 @@ function YearGame() {
   const [lang] = useState<Lang>(() => detectLang())
   const [countdown, setCountdown] = useState<number | null>(null)
   const [gameStarted, setGameStarted] = useState(false)
-  const [gameRegion] = useState<'jp' | 'global'>(() => {
-    const r = searchParams?.get('region') || (typeof localStorage !== 'undefined' ? localStorage.getItem('soundiq_region') : null)
-    return r === 'global' ? 'global' : 'jp'
+  const [gameRegion] = useState<'jp' | 'global'>('jp')
+  const [gameDifficulty] = useState<Difficulty>(() => {
+    return searchParams?.get('difficulty') === 'easy' ? 'easy' : 'hard'
   })
 
   // Elapsed time tracking (no hard limit)
@@ -166,7 +167,7 @@ function YearGame() {
     localStorage.removeItem('yearGameResults')
     localStorage.removeItem(PROGRESS_KEY)
 
-    fetchQuestions(10, gameRegion)
+    fetchQuestions(10, gameRegion, gameDifficulty)
       .then(questions => {
         if (questions.length > 0) {
           setQuestions(questions)
@@ -325,6 +326,7 @@ function YearGame() {
         router={router}
         lang={lang}
         region={gameRegion}
+        difficulty={gameDifficulty}
       />
     )
   }
@@ -527,6 +529,7 @@ function TimelineResults({
   router,
   lang,
   region,
+  difficulty,
 }: {
   displayScore: number
   displayBase: number
@@ -535,6 +538,7 @@ function TimelineResults({
   router: ReturnType<typeof useRouter>
   lang: Lang
   region: 'jp' | 'global'
+  difficulty: Difficulty
 }) {
   const [playerName, setPlayerName] = useState('')
   const [submitted, setSubmitted] = useState(false)
@@ -548,11 +552,11 @@ function TimelineResults({
     if (!savedName) return
     setPlayerName(savedName)
     const pid = getPlayerId()
-    saveRanking(savedName, displayScore, 'classic', 'year', undefined, 'timeline', pid, region)
+    saveRanking(savedName, displayScore, 'classic', 'year', undefined, 'timeline', pid, region, difficulty)
       .then(result => {
         setAutoSaveResult(result)
         setSubmitted(true)
-        return getPlayerRank(pid, 'timeline', region)
+        return getPlayerRank(pid, 'timeline', region, difficulty)
       })
       .then(rankResult => {
         if (rankResult) setPlayerRank(rankResult.rank)
@@ -565,11 +569,11 @@ function TimelineResults({
     setSubmitting(true)
     try {
       const pid = getPlayerId()
-      const result = await saveRanking(playerName, displayScore, 'classic', 'year', undefined, 'timeline', pid, region)
+      const result = await saveRanking(playerName, displayScore, 'classic', 'year', undefined, 'timeline', pid, region, difficulty)
       localStorage.setItem('soundiq_name', playerName.trim())
       setAutoSaveResult(result)
       setSubmitted(true)
-      const rankResult = await getPlayerRank(pid, 'timeline', region)
+      const rankResult = await getPlayerRank(pid, 'timeline', region, difficulty)
       if (rankResult) setPlayerRank(rankResult.rank)
     } catch (err) {
       console.error(err)
@@ -584,7 +588,7 @@ function TimelineResults({
         {/* Header */}
         <header className="animate-[fadeInUp_0.4s_ease-out]">
           <div className="mb-4"><Logo size="sm" /></div>
-          <h2 className="text-accent text-lg font-bold mb-2 text-center">TIMELINE {t('results', lang)}</h2>
+          <h2 className="text-accent text-lg font-bold mb-2 text-center">TIMELINE <span className="text-zinc-500 text-sm">{difficulty === 'easy' ? 'NORMAL' : 'HARD'}</span> {t('results', lang)}</h2>
           <div className="text-center">
             <p className="text-5xl font-black animate-[countUp_0.6s_ease-out_0.2s_both]">
               {displayScore.toFixed(2)}
@@ -688,7 +692,7 @@ function TimelineResults({
 
         {/* Play Again + Top */}
         <button
-          onClick={() => { localStorage.removeItem('yearGameResults'); window.location.href = `/year?region=${region}` }}
+          onClick={() => { localStorage.removeItem('yearGameResults'); window.location.href = `/year?difficulty=${difficulty}` }}
           className="w-full bg-accent text-white py-3 rounded-lg font-display font-semibold hover:brightness-110 transition-all"
         >
           {t('playAgain', lang)}

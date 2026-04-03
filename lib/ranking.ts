@@ -11,7 +11,7 @@ import {
   updateDoc,
   Timestamp,
 } from 'firebase/firestore'
-import type { Ranking } from '@/types'
+import type { Ranking, Difficulty } from '@/types'
 
 const RANKING_COLLECTION = 'ranking'
 
@@ -81,7 +81,8 @@ async function getRankingsForRange(
   end: Timestamp,
   count: number,
   gameType?: 'versus' | 'timeline',
-  region?: 'jp' | 'global'
+  region?: 'jp' | 'global',
+  difficulty?: Difficulty
 ): Promise<Ranking[]> {
   try {
     const q = query(
@@ -102,6 +103,10 @@ async function getRankingsForRange(
     if (region) {
       all = all.filter(r => (r.region ?? 'jp') === region)
     }
+    // Filter by difficulty (existing entries without difficulty are treated as 'hard')
+    if (difficulty) {
+      all = all.filter(r => (r.difficulty ?? 'hard') === difficulty)
+    }
     return all.sort((a, b) => b.score - a.score).slice(0, count)
   } catch {
     return []
@@ -109,19 +114,19 @@ async function getRankingsForRange(
 }
 
 // Current season rankings
-export async function getTopRankings(count = 50, gameType?: 'versus' | 'timeline', region?: 'jp' | 'global'): Promise<Ranking[]> {
+export async function getTopRankings(count = 50, gameType?: 'versus' | 'timeline', region?: 'jp' | 'global', difficulty?: Difficulty): Promise<Ranking[]> {
   const { start, end } = getSeasonRange(getCurrentSeasonNumber())
-  return getRankingsForRange(start, end, count, gameType, region)
+  return getRankingsForRange(start, end, count, gameType, region, difficulty)
 }
 
 // Specific season rankings
-export async function getSeasonRankings(seasonNum: number, count = 50, gameType?: 'versus' | 'timeline', region?: 'jp' | 'global'): Promise<Ranking[]> {
+export async function getSeasonRankings(seasonNum: number, count = 50, gameType?: 'versus' | 'timeline', region?: 'jp' | 'global', difficulty?: Difficulty): Promise<Ranking[]> {
   const { start, end } = getSeasonRange(seasonNum)
-  return getRankingsForRange(start, end, count, gameType, region)
+  return getRankingsForRange(start, end, count, gameType, region, difficulty)
 }
 
 // Get player's rank (1-indexed) for current season
-export async function getPlayerRank(playerId: string, gameType: 'versus' | 'timeline', region?: 'jp' | 'global'): Promise<{ rank: number; score: number } | null> {
+export async function getPlayerRank(playerId: string, gameType: 'versus' | 'timeline', region?: 'jp' | 'global', difficulty?: Difficulty): Promise<{ rank: number; score: number } | null> {
   if (!playerId) return null
   try {
     const { start, end } = getSeasonRange(getCurrentSeasonNumber())
@@ -142,6 +147,9 @@ export async function getPlayerRank(playerId: string, gameType: 'versus' | 'time
     if (region) {
       all = all.filter(r => (r.region ?? 'jp') === region)
     }
+    if (difficulty) {
+      all = all.filter(r => (r.difficulty ?? 'hard') === difficulty)
+    }
     const sorted = all.sort((a, b) => b.score - a.score)
     const idx = sorted.findIndex(r => r.playerId === playerId)
     if (idx === -1) return null
@@ -156,7 +164,7 @@ const RATE_LIMIT_WINDOW_MS = 60 * 1000
 const RATE_LIMIT_MAX = 5
 const submitTimestamps = new Map<string, number[]>()
 
-// Save ranking with best-score-only logic per playerId + gameType + season
+// Save ranking with best-score-only logic per playerId + gameType + difficulty + season
 export async function saveRanking(
   name: string,
   score: number,
@@ -165,7 +173,8 @@ export async function saveRanking(
   genre?: string,
   gameType?: 'versus' | 'timeline',
   playerId?: string,
-  region?: 'jp' | 'global'
+  region?: 'jp' | 'global',
+  difficulty?: Difficulty
 ) {
   const rejected = { updated: false, bestScore: 0 }
 
@@ -183,11 +192,12 @@ export async function saveRanking(
   }
 
   const gt = gameType ?? 'versus'
+  const diff = difficulty ?? 'hard'
   const { start } = getSeasonRange(getCurrentSeasonNumber())
 
   // If playerId provided, check for existing entry in current season
   // Use simple query (playerId + gameType only) to avoid composite index requirement,
-  // then filter by season in JS
+  // then filter by season + difficulty in JS
   if (playerId) {
     try {
       const q = query(
@@ -196,11 +206,12 @@ export async function saveRanking(
         where('gameType', '==', gt),
       )
       const snapshot = await getDocs(q)
-      // Filter to current season in JS
+      // Filter to current season + same difficulty in JS
       const startMs = start.toMillis()
       const seasonDocs = snapshot.docs.filter(d => {
-        const created = d.data().createdAt
-        return created && created.toMillis() >= startMs
+        const data = d.data()
+        const created = data.createdAt
+        return created && created.toMillis() >= startMs && (data.difficulty ?? 'hard') === diff
       })
       if (seasonDocs.length > 0) {
         const existingDoc = seasonDocs[0]
@@ -229,6 +240,7 @@ export async function saveRanking(
     gameType: gt,
     playerId: playerId ?? null,
     region: region ?? 'jp',
+    difficulty: diff,
     createdAt: Timestamp.now(),
   })
   return { updated: false, bestScore: score }

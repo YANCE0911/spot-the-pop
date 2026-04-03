@@ -5,25 +5,21 @@ import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { getTopRankings, getSeasonRankings, getPlayerRank, getCurrentSeasonNumber, getSeasonLabel, getPastSeasons } from '@/lib/ranking'
 import { getPlayerId } from '@/lib/playerId'
-import type { Ranking } from '@/types'
+import type { Ranking, Difficulty } from '@/types'
 import { detectLang, type Lang } from '@/lib/i18n'
 import Logo from '@/components/Logo'
 
 type Tab = 'versus' | 'timeline'
 
-type Region = 'jp' | 'global'
-
 export default function RankingPage() {
   const router = useRouter()
-  const [tab, setTab] = useState<Tab>('timeline')
-  const [region, setRegion] = useState<Region>('jp')
-  const [versusRankings, setVersusRankings] = useState<Ranking[]>([])
-  const [timelineRankings, setTimelineRankings] = useState<Ranking[]>([])
+  const [mode, setMode] = useState<Tab>('timeline')
+  const [difficulty, setDifficulty] = useState<Difficulty>('easy')
+  const [rankings, setRankings] = useState<Record<string, Ranking[]>>({})
+  const [myRanks, setMyRanks] = useState<Record<string, { rank: number; score: number } | null>>({})
   const [loading, setLoading] = useState(true)
   const [lang] = useState<Lang>(() => detectLang())
   const [playerId, setPlayerId] = useState('')
-  const [myVersusRank, setMyVersusRank] = useState<{ rank: number; score: number } | null>(null)
-  const [myTimelineRank, setMyTimelineRank] = useState<{ rank: number; score: number } | null>(null)
 
   const currentSeason = getCurrentSeasonNumber()
   const [viewingSeason, setViewingSeason] = useState(currentSeason)
@@ -31,50 +27,52 @@ export default function RankingPage() {
   const pastSeasons = getPastSeasons(lang)
   const isCurrentSeason = viewingSeason === currentSeason
 
-  useEffect(() => {
-    const saved = localStorage.getItem('soundiq_region')
-    if (saved === 'global') setRegion('global')
-  }, [])
+  const region = 'jp' as const
+  const rankingKey = `${mode}-${difficulty}`
 
   useEffect(() => {
     const pid = getPlayerId()
     setPlayerId(pid)
     setLoading(true)
 
-    if (isCurrentSeason) {
-      Promise.all([
-        getTopRankings(50, 'versus', region),
-        getTopRankings(50, 'timeline', region),
-        getPlayerRank(pid, 'versus', region),
-        getPlayerRank(pid, 'timeline', region),
-      ]).then(([v, t, myV, myT]) => {
-        setVersusRankings(v)
-        setTimelineRankings(t)
-        setMyVersusRank(myV)
-        setMyTimelineRank(myT)
-      }).catch(console.error)
-        .finally(() => setLoading(false))
-    } else {
-      Promise.all([
-        getSeasonRankings(viewingSeason, 50, 'versus', region),
-        getSeasonRankings(viewingSeason, 50, 'timeline', region),
-      ]).then(([v, t]) => {
-        setVersusRankings(v)
-        setTimelineRankings(t)
-        setMyVersusRank(null)
-        setMyTimelineRank(null)
-      }).catch(console.error)
-        .finally(() => setLoading(false))
-    }
-  }, [viewingSeason, isCurrentSeason, region])
+    const fetchFn = isCurrentSeason ? getTopRankings : (count: number, gt: 'versus' | 'timeline', r: 'jp' | 'global', d: Difficulty) => getSeasonRankings(viewingSeason, count, gt, r, d)
 
-  const rankings = tab === 'versus' ? versusRankings : timelineRankings
-  const myRank = tab === 'versus' ? myVersusRank : myTimelineRank
+    Promise.all([
+      fetchFn(50, 'timeline', region, 'easy'),
+      fetchFn(50, 'timeline', region, 'hard'),
+      fetchFn(50, 'versus', region, 'easy'),
+      fetchFn(50, 'versus', region, 'hard'),
+      ...(isCurrentSeason ? [
+        getPlayerRank(pid, 'timeline', region, 'easy'),
+        getPlayerRank(pid, 'timeline', region, 'hard'),
+        getPlayerRank(pid, 'versus', region, 'easy'),
+        getPlayerRank(pid, 'versus', region, 'hard'),
+      ] : []),
+    ]).then(([te, th, ve, vh, myTE, myTH, myVE, myVH]) => {
+      setRankings({
+        'timeline-easy': te, 'timeline-hard': th,
+        'versus-easy': ve, 'versus-hard': vh,
+      })
+      if (isCurrentSeason) {
+        setMyRanks({
+          'timeline-easy': myTE ?? null, 'timeline-hard': myTH ?? null,
+          'versus-easy': myVE ?? null, 'versus-hard': myVH ?? null,
+        })
+      } else {
+        setMyRanks({})
+      }
+    }).catch(console.error)
+      .finally(() => setLoading(false))
+  }, [viewingSeason, isCurrentSeason])
+
+  const activeRankings = rankings[rankingKey] ?? []
+  const myRank = myRanks[rankingKey] ?? null
   const isInList = myRank ? myRank.rank <= 50 : false
+  const accentColor = mode === 'versus' ? 'brand' : 'accent'
 
   return (
     <main className="min-h-screen bg-black text-white py-8 px-4">
-      <div className="max-w-lg mx-auto space-y-6">
+      <div className="max-w-lg mx-auto space-y-5">
         {/* Header */}
         <header className="flex items-center justify-between">
           <div>
@@ -106,7 +104,6 @@ export default function RankingPage() {
           )}
         </div>
 
-        {/* Past seasons dropdown */}
         {showPastSeasons && (
           <div className="bg-zinc-900 rounded-xl p-3 space-y-1">
             <button
@@ -132,49 +129,57 @@ export default function RankingPage() {
           </div>
         )}
 
-        {/* Region switcher */}
-        <div className="flex justify-center">
-          <div className="flex bg-zinc-900 rounded-lg p-1">
-            <button
-              onClick={() => setRegion('jp')}
-              className={`flex-1 w-24 py-1 rounded-md text-sm font-bold transition-all ${
-                region === 'jp' ? 'bg-zinc-700 text-white' : 'text-zinc-500 hover:text-zinc-300'
-              }`}
-            >
-              邦楽
-            </button>
-            <button
-              onClick={() => setRegion('global')}
-              className={`flex-1 w-24 py-1 rounded-md text-sm font-bold transition-all ${
-                region === 'global' ? 'bg-zinc-700 text-white' : 'text-zinc-500 hover:text-zinc-300'
-              }`}
-            >
-              洋楽
-            </button>
-          </div>
-        </div>
-
-        {/* Tab switcher */}
-        <div className="flex bg-zinc-900 rounded-lg p-1">
+        {/* Game mode tabs — underline style */}
+        <div className="flex border-b border-zinc-800">
           <button
-            onClick={() => setTab('timeline')}
-            className={`flex-1 py-2 rounded-md text-sm font-bold transition-all ${
-              tab === 'timeline'
-                ? 'bg-accent text-black'
-                : 'text-zinc-400 hover:text-white'
+            onClick={() => setMode('timeline')}
+            className={`flex-1 pb-2.5 text-sm font-bold transition-all relative ${
+              mode === 'timeline'
+                ? 'text-accent'
+                : 'text-zinc-500 hover:text-zinc-300'
             }`}
           >
             TIMELINE
+            {mode === 'timeline' && (
+              <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-12 h-0.5 bg-accent rounded-full" />
+            )}
           </button>
           <button
-            onClick={() => setTab('versus')}
-            className={`flex-1 py-2 rounded-md text-sm font-bold transition-all ${
-              tab === 'versus'
-                ? 'bg-brand text-black'
-                : 'text-zinc-400 hover:text-white'
+            onClick={() => setMode('versus')}
+            className={`flex-1 pb-2.5 text-sm font-bold transition-all relative ${
+              mode === 'versus'
+                ? 'text-brand'
+                : 'text-zinc-500 hover:text-zinc-300'
             }`}
           >
             VERSUS
+            {mode === 'versus' && (
+              <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-12 h-0.5 bg-brand rounded-full" />
+            )}
+          </button>
+        </div>
+
+        {/* Difficulty toggle — text style */}
+        <div className="flex items-center justify-center gap-4 text-xs font-bold">
+          <button
+            onClick={() => setDifficulty('easy')}
+            className={`pb-1 transition-all border-b-2 ${
+              difficulty === 'easy'
+                ? (accentColor === 'brand' ? 'border-brand text-brand' : 'border-accent text-accent')
+                : 'border-transparent text-zinc-600 hover:text-zinc-400'
+            }`}
+          >
+            NORMAL
+          </button>
+          <button
+            onClick={() => setDifficulty('hard')}
+            className={`pb-1 transition-all border-b-2 ${
+              difficulty === 'hard'
+                ? (accentColor === 'brand' ? 'border-brand text-brand' : 'border-accent text-accent')
+                : 'border-transparent text-zinc-600 hover:text-zinc-400'
+            }`}
+          >
+            HARD
           </button>
         </div>
 
@@ -182,10 +187,10 @@ export default function RankingPage() {
         {loading ? (
           <div className="flex justify-center py-12">
             <div className={`animate-spin h-8 w-8 border-4 rounded-full border-t-transparent ${
-              tab === 'versus' ? 'border-brand' : 'border-accent'
+              accentColor === 'brand' ? 'border-brand' : 'border-accent'
             }`} />
           </div>
-        ) : rankings.length === 0 ? (
+        ) : activeRankings.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-zinc-500">
               {lang === 'ja' ? 'まだランキングがありません' : 'No rankings yet'}
@@ -196,7 +201,7 @@ export default function RankingPage() {
           </div>
         ) : (
           <div className="space-y-2">
-            {rankings.map((r, i) => {
+            {activeRankings.map((r, i) => {
               const isMe = playerId && r.playerId === playerId
               return (
                 <motion.div
@@ -206,11 +211,10 @@ export default function RankingPage() {
                   transition={{ delay: i * 0.02 }}
                   className={`flex items-center gap-3 p-3 rounded-lg ${
                     isMe
-                      ? `border-2 ${tab === 'versus' ? 'border-brand bg-brand/10' : 'border-accent bg-accent/10'}`
+                      ? `border-2 ${accentColor === 'brand' ? 'border-brand bg-brand/10' : 'border-accent bg-accent/10'}`
                       : i < 3 ? 'bg-zinc-900 border border-zinc-800' : 'bg-zinc-900/50'
                   }`}
                 >
-                  {/* Rank */}
                   <div className={`w-8 text-center font-black text-lg ${
                     i === 0 ? 'text-yellow-400' :
                     i === 1 ? 'text-zinc-300' :
@@ -219,19 +223,15 @@ export default function RankingPage() {
                   }`}>
                     {i + 1}
                   </div>
-
-                  {/* Name */}
                   <div className="flex-1 min-w-0">
                     <p className={`font-semibold truncate ${
-                      isMe ? (tab === 'versus' ? 'text-brand' : 'text-accent') :
+                      isMe ? (accentColor === 'brand' ? 'text-brand' : 'text-accent') :
                       i < 3 ? 'text-white' : 'text-zinc-300'
                     }`}>
                       {r.name}
                       {isMe && <span className="text-xs ml-1 opacity-60">YOU</span>}
                     </p>
                   </div>
-
-                  {/* Score */}
                   <div className="text-right flex-shrink-0">
                     <p className={`font-mono font-bold ${
                       i === 0 ? 'text-yellow-400 text-lg' :
@@ -248,16 +248,16 @@ export default function RankingPage() {
           </div>
         )}
 
-        {/* Your rank (if outside top 50, current season only) */}
+        {/* Your rank (if outside top 50) */}
         {isCurrentSeason && myRank && !isInList && (
           <div className={`p-4 rounded-xl border-2 ${
-            tab === 'versus' ? 'border-brand/50 bg-brand/5' : 'border-accent/50 bg-accent/5'
+            accentColor === 'brand' ? 'border-brand/50 bg-brand/5' : 'border-accent/50 bg-accent/5'
           }`}>
             <p className="text-zinc-400 text-xs mb-1">
               {lang === 'ja' ? 'あなたの順位' : 'Your Rank'}
             </p>
             <div className="flex items-center justify-between">
-              <span className={`text-2xl font-black ${tab === 'versus' ? 'text-brand' : 'text-accent'}`}>
+              <span className={`text-2xl font-black ${accentColor === 'brand' ? 'text-brand' : 'text-accent'}`}>
                 #{myRank.rank}
               </span>
               <span className="text-zinc-400 font-mono">
@@ -267,24 +267,27 @@ export default function RankingPage() {
           </div>
         )}
 
-        {/* Play button (current season only) */}
+        {/* Play button */}
         {isCurrentSeason && (
           <button
-            onClick={() => router.push(tab === 'versus' ? '/game' : '/year')}
+            onClick={() => router.push(
+              mode === 'versus'
+                ? `/game?difficulty=${difficulty}`
+                : `/year?difficulty=${difficulty}`
+            )}
             className={`w-full py-3 rounded-lg font-semibold transition-all ${
-              tab === 'versus'
+              accentColor === 'brand'
                 ? 'bg-brand text-black hover:bg-brand-light'
                 : 'bg-accent text-black hover:brightness-110'
             }`}
           >
-            {tab === 'versus'
+            {mode === 'versus'
               ? (lang === 'ja' ? 'VERSUS をプレイ' : 'Play VERSUS')
               : (lang === 'ja' ? 'TIMELINE をプレイ' : 'Play TIMELINE')
             }
           </button>
         )}
 
-        {/* Back to current season button (past season view) */}
         {!isCurrentSeason && (
           <button
             onClick={() => setViewingSeason(currentSeason)}

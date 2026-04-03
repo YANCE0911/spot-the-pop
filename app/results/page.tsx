@@ -6,7 +6,7 @@ import { saveRanking, getPlayerRank } from '@/lib/ranking'
 import { getPlayerId } from '@/lib/playerId'
 import ShareSection from '@/components/ShareSection'
 import ScoreRank from '@/components/ScoreRank'
-import type { GameResult } from '@/types'
+import type { GameResult, Difficulty } from '@/types'
 import { formatMetricValue } from '@/lib/metrics'
 import { detectLang, t, type Lang } from '@/lib/i18n'
 import Logo from '@/components/Logo'
@@ -23,6 +23,7 @@ export default function Results() {
   const [lang] = useState<Lang>(() => detectLang())
   const [autoSaveResult, setAutoSaveResult] = useState<{ updated: boolean; bestScore: number } | null>(null)
   const [playerRank, setPlayerRank] = useState<number | null>(null)
+  const [difficulty, setDifficulty] = useState<Difficulty>('hard')
 
   useEffect(() => {
     const saved = localStorage.getItem('gameResults')
@@ -32,6 +33,8 @@ export default function Results() {
       setScore(data.score)
       setResults(data.results ?? [])
       setMetric(data.metric ?? 'popularity')
+      const diff: Difficulty = data.difficulty === 'easy' ? 'easy' : 'hard'
+      setDifficulty(diff)
 
       // Auto-save for returning users
       const savedName = localStorage.getItem('soundiq_name')
@@ -39,12 +42,12 @@ export default function Results() {
         setPlayerName(savedName)
         const displayScore = Math.round(data.score * 100) / 100
         const pid = getPlayerId()
-        const region = localStorage.getItem('soundiq_region') === 'global' ? 'global' : 'jp' as const
-        saveRanking(savedName, displayScore, undefined, undefined, undefined, 'versus', pid, region)
+        const region = 'jp' as const
+        saveRanking(savedName, displayScore, undefined, undefined, undefined, 'versus', pid, region, diff)
           .then(result => {
             setAutoSaveResult(result)
             setSubmitted(true)
-            return getPlayerRank(pid, 'versus', region)
+            return getPlayerRank(pid, 'versus', region, diff)
           })
           .then(rankResult => {
             if (rankResult) setPlayerRank(rankResult.rank)
@@ -64,13 +67,13 @@ export default function Results() {
     try {
       const displayScore = Math.round(score * 100) / 100
       const pid = getPlayerId()
-      const region = localStorage.getItem('soundiq_region') === 'global' ? 'global' : 'jp' as const
-      const result = await saveRanking(playerName, displayScore, undefined, undefined, undefined, 'versus', pid, region)
+      const region = 'jp' as const
+      const result = await saveRanking(playerName, displayScore, undefined, undefined, undefined, 'versus', pid, region, difficulty)
       localStorage.setItem('soundiq_name', playerName.trim())
       localStorage.setItem('rankingSubmitted', 'true')
       setAutoSaveResult(result)
       setSubmitted(true)
-      const rankResult = await getPlayerRank(pid, 'versus', region)
+      const rankResult = await getPlayerRank(pid, 'versus', region, difficulty)
       if (rankResult) setPlayerRank(rankResult.rank)
 
       const questions = results.map(r => r.themeArtist)
@@ -96,7 +99,7 @@ export default function Results() {
         {/* Header */}
         <header className="animate-[fadeInUp_0.4s_ease-out]">
           <div className="mb-4"><Logo size="sm" /></div>
-          <h2 className="text-brand text-lg font-bold mb-2 text-center">VERSUS {t('results', lang)}</h2>
+          <h2 className="text-brand text-lg font-bold mb-2 text-center">VERSUS <span className="text-zinc-500 text-sm">{difficulty === 'easy' ? 'NORMAL' : 'HARD'}</span> {t('results', lang)}</h2>
           <div className="text-center">
             <p className="text-5xl font-black animate-[countUp_0.6s_ease-out_0.2s_both]">
               {displayScore.toFixed(2)}
@@ -194,8 +197,7 @@ export default function Results() {
         {/* Play Again + Top */}
         <button
           onClick={() => {
-            const region = localStorage.getItem('soundiq_region') || 'jp'
-            router.push(`/game?metric=followers&region=${region}`)
+            router.push(`/game?metric=followers&difficulty=${difficulty}`)
           }}
           className="w-full bg-brand text-black py-3 rounded-lg font-display font-semibold hover:bg-brand-light transition-all"
         >

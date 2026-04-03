@@ -6,7 +6,7 @@ import { Suspense } from 'react'
 import GameScreen from '@/components/GameScreen'
 import RoundFeedback from '@/components/RoundFeedback'
 import ConfirmModal from '@/components/ConfirmModal'
-import type { Artist, MetricMode, GenreCategory, GameResult } from '@/types'
+import type { Artist, MetricMode, GenreCategory, GameResult, Difficulty } from '@/types'
 import { calculateScore } from '@/lib/metrics'
 import { detectLang, type Lang } from '@/lib/i18n'
 
@@ -15,6 +15,7 @@ function GameContent() {
   const params = useSearchParams()
   const metric: MetricMode = 'followers'
   const genre = (params?.get('genre') as GenreCategory) || 'all'
+  const difficulty: Difficulty = params?.get('difficulty') === 'easy' ? 'easy' : 'hard'
 
   const [currentRound, setCurrentRound] = useState(1)
   const [questions, setQuestions] = useState<Artist[]>([])
@@ -30,9 +31,8 @@ function GameContent() {
     localStorage.removeItem('rankingSubmitted')
     const fetchQuestions = async () => {
       try {
-        const region = params?.get('region') || localStorage.getItem('soundiq_region') || (detectLang() === 'ja' ? 'jp' : 'global')
-        const locale = region === 'jp' ? 'ja' : 'en'
-        const url = `/api/randomArtist?count=5&locale=${locale}${genre !== 'all' ? `&genre=${genre}` : ''}`
+        const locale = 'ja'
+        const url = `/api/randomArtist?count=5&locale=${locale}&difficulty=${difficulty}${genre !== 'all' ? `&genre=${genre}` : ''}`
         const res = await fetch(url)
         const data = await res.json()
         if (res.ok && data.artists) {
@@ -78,6 +78,7 @@ function GameContent() {
         mode: genre !== 'all' ? 'genre' : 'classic',
         metric,
         genre,
+        difficulty,
       }))
       router.push('/results')
     }

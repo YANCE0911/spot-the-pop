@@ -2,7 +2,7 @@
 import { LARGE_JAPANESE_ARTISTS } from './JapaneseArtists'
 import { GLOBAL_ARTISTS } from './GlobalArtists'
 import { filterByGenre } from './genres'
-import type { Artist, GenreCategory } from '@/types'
+import type { Artist, GenreCategory, Difficulty } from '@/types'
 
 // Japanese artist detection keywords
 const JP_GENRE_KEYWORDS = [
@@ -18,7 +18,8 @@ function isJapaneseArtist(a: { nameJa?: string; genres?: readonly string[] }): b
   )
 }
 
-const MIN_FOLLOWERS = 100_000
+const MIN_FOLLOWERS_HARD = 100_000
+const MIN_FOLLOWERS_EASY = 400_000
 
 // Exclude VTubers, proseka units, game characters, soundtrack composers
 const EXCLUDED_IDS = new Set([
@@ -37,22 +38,25 @@ const EXCLUDED_IDS = new Set([
   '0YC192cP3KPCRWx8zr8MfZ', // Hans Zimmer
 ])
 
-const japaneseArtists = (LARGE_JAPANESE_ARTISTS as unknown as Artist[])
-  .filter(a =>
-    isJapaneseArtist(a as { nameJa?: string; genres?: readonly string[] })
-    && (a.followers ?? 0) >= MIN_FOLLOWERS
-    && !EXCLUDED_IDS.has(a.id)
-  )
+function buildPool(artists: Artist[], minFollowers: number): Artist[] {
+  return artists.filter(a => (a.followers ?? 0) >= minFollowers && !EXCLUDED_IDS.has(a.id))
+}
 
-const globalArtists = (GLOBAL_ARTISTS as unknown as Artist[])
-  .filter(a => (a.followers ?? 0) >= MIN_FOLLOWERS && !EXCLUDED_IDS.has(a.id))
+const allJapanese = (LARGE_JAPANESE_ARTISTS as unknown as Artist[])
+  .filter(a => isJapaneseArtist(a as { nameJa?: string; genres?: readonly string[] }) && !EXCLUDED_IDS.has(a.id))
+
+const allGlobal = (GLOBAL_ARTISTS as unknown as Artist[])
+  .filter(a => !EXCLUDED_IDS.has(a.id))
 
 export async function getRandomArtist(
   count = 5,
   genre: GenreCategory = 'all',
-  region: 'jp' | 'global' = 'jp'
+  region: 'jp' | 'global' = 'jp',
+  difficulty: Difficulty = 'hard'
 ): Promise<Artist[]> {
-  const pool = region === 'global' ? globalArtists : japaneseArtists
+  const minFollowers = difficulty === 'easy' ? MIN_FOLLOWERS_EASY : MIN_FOLLOWERS_HARD
+  const base = region === 'global' ? allGlobal : allJapanese
+  const pool = buildPool(base, minFollowers)
   const filtered = filterByGenre(pool, genre)
 
   // Pure random shuffle

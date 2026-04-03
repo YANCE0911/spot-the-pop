@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { getRandomArtist } from '@/lib/getRandomArtist'
-import type { GenreCategory } from '@/types'
+import type { GenreCategory, Difficulty } from '@/types'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
@@ -12,10 +12,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const genre = (req.query.genre as GenreCategory) || 'all'
     const locale = (req.query.locale as string) || 'ja'
     const region: 'jp' | 'global' = locale.startsWith('ja') ? 'jp' : 'global'
+    const difficulty: Difficulty = req.query.difficulty === 'easy' ? 'easy' : 'hard'
 
-    // Use static list values directly (no Spotify API calls)
-    // followers/popularity are updated monthly via GitHub Actions
-    const artists = await getRandomArtist(count, genre, region)
+    const artists = await getRandomArtist(count, genre, region, difficulty)
 
     return res.status(200).json({ artists })
   } catch (error) {

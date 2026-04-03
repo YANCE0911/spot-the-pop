@@ -49,19 +49,30 @@ function isValidQuestion(trackName: string, albumName: string, albumType?: strin
   return true
 }
 
-// Year-based artist popularity thresholds
-function meetsPopularityThreshold(q: BankQuestion): boolean {
+// Year-based artist popularity thresholds (Hard = current, Easy = +20)
+function meetsPopularityThreshold(q: BankQuestion, difficulty: 'easy' | 'hard' = 'hard'): boolean {
   const year = q.releaseYear
+  if (difficulty === 'easy') {
+    if (year <= 2004) return q.artistPopularity >= 55
+    if (year <= 2014) return q.artistPopularity >= 60
+    if (year <= 2019) return q.artistPopularity >= 60
+    return q.artistPopularity >= 65
+  }
   if (year <= 2004) return q.artistPopularity >= 20
   if (year <= 2014) return q.artistPopularity >= 25
   if (year <= 2019) return q.artistPopularity >= 35
   return q.artistPopularity >= 40
 }
 
-// Year-based track popularity thresholds — filters out obscure deep cuts
-// Data is NOT deleted; change thresholds to adjust difficulty (0 = no filter)
-function meetsTrackPopularity(q: BankQuestion): boolean {
+// Year-based track popularity thresholds (Hard = current, Easy = +10)
+function meetsTrackPopularity(q: BankQuestion, difficulty: 'easy' | 'hard' = 'hard'): boolean {
   const year = q.releaseYear
+  if (difficulty === 'easy') {
+    if (year <= 2004) return q.trackPopularity >= 45
+    if (year <= 2014) return q.trackPopularity >= 40
+    if (year <= 2019) return q.trackPopularity >= 38
+    return q.trackPopularity >= 35
+  }
   if (year <= 2004) return q.trackPopularity >= 15
   if (year <= 2014) return q.trackPopularity >= 20
   if (year <= 2019) return q.trackPopularity >= 25
@@ -98,13 +109,13 @@ function loadBanks(): void {
   console.log(`Loaded question banks: JP=${jpBank.length}, Global=${globalBank!.length}`)
 }
 
-function questionsFromBank(count: number, region: 'jp' | 'global' = 'jp'): TrackQuestion[] {
+function questionsFromBank(count: number, region: 'jp' | 'global' = 'jp', difficulty: 'easy' | 'hard' = 'hard'): TrackQuestion[] {
   loadBanks()
   const pool = region === 'jp' ? jpBank! : globalBank!
   if (pool.length === 0) return []
 
   const eligible = pool.filter(q =>
-    meetsPopularityThreshold(q) && meetsTrackPopularity(q) && isValidQuestion(q.trackName, q.albumName, q.source === 'single' ? 'single' : 'album')
+    meetsPopularityThreshold(q, difficulty) && meetsTrackPopularity(q, difficulty) && isValidQuestion(q.trackName, q.albumName, q.source === 'single' ? 'single' : 'album')
   )
   const buckets: BankQuestion[][] = YEAR_BUCKETS.map(() => [])
   for (const q of eligible) {
@@ -218,10 +229,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const count = Math.min(parseInt(req.query.count as string) || 10, 15)
   const locale = (req.query.locale as string) || 'ja'
   const region: 'jp' | 'global' = locale.startsWith('ja') ? 'jp' : 'global'
+  const difficulty: 'easy' | 'hard' = req.query.difficulty === 'easy' ? 'easy' : 'hard'
 
   try {
     // Try question bank first, fallback to Spotify API
-    let questions = questionsFromBank(count, region)
+    let questions = questionsFromBank(count, region, difficulty)
     if (questions.length < count) {
       console.log('Question bank unavailable or insufficient, falling back to Spotify API')
       questions = await questionsFromSpotifyAPI(count, region === 'global' ? 'US' : 'JP')
