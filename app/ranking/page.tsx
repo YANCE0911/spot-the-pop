@@ -150,48 +150,52 @@ export default function RankingPage() {
               VERSUS
             </button>
           </div>
-          {/* Difficulty row — all 4 always visible */}
+          {/* Difficulty row — grouped under each mode */}
           <div className="flex mt-2">
-            <button
-              onClick={() => { setMode('timeline'); setDifficulty('easy') }}
-              className={`flex-1 pb-1.5 text-xs font-bold transition-all border-b-2 ${
-                mode === 'timeline' && difficulty === 'easy'
-                  ? 'border-accent text-accent'
-                  : 'border-transparent text-zinc-600 hover:text-zinc-400'
-              }`}
-            >
-              NORMAL
-            </button>
-            <button
-              onClick={() => { setMode('timeline'); setDifficulty('hard') }}
-              className={`flex-1 pb-1.5 text-xs font-bold transition-all border-b-2 ${
-                mode === 'timeline' && difficulty === 'hard'
-                  ? 'border-accent text-accent'
-                  : 'border-transparent text-zinc-600 hover:text-zinc-400'
-              }`}
-            >
-              HARD
-            </button>
-            <button
-              onClick={() => { setMode('versus'); setDifficulty('easy') }}
-              className={`flex-1 pb-1.5 text-xs font-bold transition-all border-b-2 ${
-                mode === 'versus' && difficulty === 'easy'
-                  ? 'border-brand text-brand'
-                  : 'border-transparent text-zinc-600 hover:text-zinc-400'
-              }`}
-            >
-              NORMAL
-            </button>
-            <button
-              onClick={() => { setMode('versus'); setDifficulty('hard') }}
-              className={`flex-1 pb-1.5 text-xs font-bold transition-all border-b-2 ${
-                mode === 'versus' && difficulty === 'hard'
-                  ? 'border-brand text-brand'
-                  : 'border-transparent text-zinc-600 hover:text-zinc-400'
-              }`}
-            >
-              HARD
-            </button>
+            <div className="flex-1 flex justify-center gap-6">
+              <button
+                onClick={() => { setMode('timeline'); setDifficulty('easy') }}
+                className={`w-16 text-center pb-1.5 text-xs font-bold transition-all border-b-2 ${
+                  mode === 'timeline' && difficulty === 'easy'
+                    ? 'border-accent text-accent'
+                    : 'border-transparent text-zinc-600 hover:text-zinc-400'
+                }`}
+              >
+                NORMAL
+              </button>
+              <button
+                onClick={() => { setMode('timeline'); setDifficulty('hard') }}
+                className={`w-16 text-center pb-1.5 text-xs font-bold transition-all border-b-2 ${
+                  mode === 'timeline' && difficulty === 'hard'
+                    ? 'border-accent text-accent'
+                    : 'border-transparent text-zinc-600 hover:text-zinc-400'
+                }`}
+              >
+                HARD
+              </button>
+            </div>
+            <div className="flex-1 flex justify-center gap-6">
+              <button
+                onClick={() => { setMode('versus'); setDifficulty('easy') }}
+                className={`w-16 text-center pb-1.5 text-xs font-bold transition-all border-b-2 ${
+                  mode === 'versus' && difficulty === 'easy'
+                    ? 'border-brand text-brand'
+                    : 'border-transparent text-zinc-600 hover:text-zinc-400'
+                }`}
+              >
+                NORMAL
+              </button>
+              <button
+                onClick={() => { setMode('versus'); setDifficulty('hard') }}
+                className={`w-16 text-center pb-1.5 text-xs font-bold transition-all border-b-2 ${
+                  mode === 'versus' && difficulty === 'hard'
+                    ? 'border-brand text-brand'
+                    : 'border-transparent text-zinc-600 hover:text-zinc-400'
+                }`}
+              >
+                HARD
+              </button>
+            </div>
           </div>
         </div>
 
