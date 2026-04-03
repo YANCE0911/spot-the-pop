@@ -129,6 +129,18 @@ export default function Home() {
             {lang === 'ja' ? 'ランキング' : 'Rankings'}
           </button>
         </div>
+
+        {/* Support link */}
+        <div className="text-center pt-2 animate-[fadeInUp_0.5s_ease-out_0.3s_both]">
+          <a
+            href="https://buymeacoffee.com/yance"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-zinc-600 hover:text-zinc-400 text-xs transition-colors"
+          >
+            {lang === 'ja' ? 'Buy Me a Coffee で応援する' : 'Support on Buy Me a Coffee'}
+          </a>
+        </div>
       </div>
     </main>
   )
