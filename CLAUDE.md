@@ -119,8 +119,8 @@ spot-the-pop/
 │   ├── challenge.ts          # チャレンジ作成ヘルパー
 │   ├── dailyChallenge.ts     # デイリーチャレンジロジック
 │   ├── fetchArtistData.ts    # Spotifyデータ拡充
-│   ├── JapaneseArtists.ts    # 日本アーティストデータ（約4,000組）
-│   ├── GlobalArtists.ts      # グローバルアーティストデータ（約11,000組）
+│   ├── JapaneseArtists.ts    # 日本アーティストデータ（約2,200組）
+│   ├── GlobalArtists.ts      # グローバルアーティストデータ（約6,600組）
 │   ├── types.ts              # マルチプレイヤー用型定義（将来用）
 │   └── fetchPopularityBatch.ts # 人気度バッチ取得
 ├── types/
@@ -204,8 +204,8 @@ spot-the-pop/
 - プレイヤー識別: `playerId`（UUID、localStorage 永続）
 
 ### アーティストデータ
-- `lib/JapaneseArtists.ts`: 約4,000組（nameJa, genres, popularity, followers付き）
-- `lib/GlobalArtists.ts`: 約11,000組
+- `lib/JapaneseArtists.ts`: 約2,200組（nameJa, genres, popularity, followers付き）
+- `lib/GlobalArtists.ts`: 約6,600組
 - 除外リスト: VTuber、プロセカユニット、Hans Zimmer 等（`EXCLUDED_IDS`）
 
 ## 環境変数

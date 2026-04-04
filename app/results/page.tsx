@@ -155,6 +155,16 @@ export default function Results() {
           </div>
         )}
 
+        {/* Play Again + Top */}
+        <button
+          onClick={() => {
+            router.push(`/game?metric=followers&difficulty=${difficulty}`)
+          }}
+          className="w-full bg-brand text-black py-3 rounded-lg font-display font-semibold hover:bg-brand-light transition-all"
+        >
+          {t('playAgain', lang)}
+        </button>
+
         {/* X / Copy */}
         <div className="grid grid-cols-2 gap-2">
           <ShareSection score={score} mode="versus" lang={lang} challengeUrl={challengeUrl} />
@@ -194,15 +204,7 @@ export default function Results() {
           ))}
         </div>
 
-        {/* Play Again + Top */}
-        <button
-          onClick={() => {
-            router.push(`/game?metric=followers&difficulty=${difficulty}`)
-          }}
-          className="w-full bg-brand text-black py-3 rounded-lg font-display font-semibold hover:bg-brand-light transition-all"
-        >
-          {t('playAgain', lang)}
-        </button>
+        {/* Top */}
         <button
           onClick={() => router.push('/')}
           className="w-full bg-zinc-800 text-white py-3 rounded-lg font-sans font-semibold hover:bg-zinc-700 transition-all text-sm"

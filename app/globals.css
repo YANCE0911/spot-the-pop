@@ -86,8 +86,8 @@ body {
 
 /* Button press feedback — HARD: intense neon glow */
 .btn-hard-timeline:active {
-  box-shadow: 0 0 28px rgba(168, 85, 247, 0.7), 0 0 8px rgba(168, 85, 247, 0.5) inset;
+  box-shadow: 0 0 28px rgba(168, 85, 247, 0.2), 0 0 8px rgba(168, 85, 247, 0.0) inset;
 }
 .btn-hard-versus:active {
-  box-shadow: 0 0 28px rgba(29, 185, 84, 0.7), 0 0 8px rgba(29, 185, 84, 0.5) inset;
+  box-shadow: 0 0 28px rgba(29, 185, 84, 0.2), 0 0 8px rgba(29, 185, 84, 0.0) inset;
 }

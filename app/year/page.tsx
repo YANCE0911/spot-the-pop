@@ -673,6 +673,14 @@ function TimelineResults({
           </div>
         )}
 
+        {/* Play Again */}
+        <button
+          onClick={() => { localStorage.removeItem('yearGameResults'); window.location.href = `/year?difficulty=${difficulty}` }}
+          className="w-full bg-accent text-white py-3 rounded-lg font-display font-semibold hover:brightness-110 transition-all"
+        >
+          {t('playAgain', lang)}
+        </button>
+
         {/* X / Copy */}
         <div className="grid grid-cols-2 gap-2">
           <ShareSection score={displayScore} mode="timeline" lang={lang} />
@@ -713,13 +721,7 @@ function TimelineResults({
           {lang === 'ja' ? '※Spotifyの登録情報に基づく発売年です' : 'Release years based on Spotify data'}
         </p>
 
-        {/* Play Again + Top */}
-        <button
-          onClick={() => { localStorage.removeItem('yearGameResults'); window.location.href = `/year?difficulty=${difficulty}` }}
-          className="w-full bg-accent text-white py-3 rounded-lg font-display font-semibold hover:brightness-110 transition-all"
-        >
-          {t('playAgain', lang)}
-        </button>
+        {/* Top */}
         <button
           onClick={() => router.push('/')}
           className="w-full bg-zinc-800 text-white py-3 rounded-lg font-sans font-semibold hover:bg-zinc-700 transition-all text-sm"
