@@ -10,6 +10,7 @@ export default function Home() {
   const [lang, setLang] = useState<Lang>('en')
   const [timelineDifficulty, setTimelineDifficulty] = useState<Difficulty>('easy')
   const [versusDifficulty, setVersusDifficulty] = useState<Difficulty>('easy')
+  const [showGuide, setShowGuide] = useState(false)
 
   useEffect(() => {
     const detectedLang = detectLang()
@@ -18,6 +19,10 @@ export default function Home() {
     if (savedTl === 'easy' || savedTl === 'hard') setTimelineDifficulty(savedTl)
     const savedVs = localStorage.getItem('soundiq_versus_difficulty') as Difficulty | null
     if (savedVs === 'easy' || savedVs === 'hard') setVersusDifficulty(savedVs)
+    if (!localStorage.getItem('soundiq_visited')) {
+      setShowGuide(true)
+      localStorage.setItem('soundiq_visited', '1')
+    }
   }, [])
 
   const playTimeline = (diff: Difficulty) => {
@@ -65,18 +70,13 @@ export default function Home() {
         <div className="space-y-4 animate-[fadeInUp_0.5s_ease-out_0.1s_both]">
           {/* TIMELINE */}
           <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl px-8 py-5 card-glow-timeline">
-            <div className="flex items-end justify-between mb-3">
+            <div className="flex items-end justify-between mb-4">
               <p className="text-gradient-warm font-display font-black text-3xl tracking-wider flex items-center gap-2">
                 <span className="inline-block w-0 h-0 border-t-[8px] border-t-transparent border-b-[8px] border-b-transparent border-l-[12px] border-l-accent" />
                 TIMELINE
               </p>
               <span className="text-sm font-semibold text-zinc-500">{lang === 'ja' ? '全10問' : '10 Rounds'}</span>
             </div>
-            <p className="text-zinc-400 text-xs mb-4">
-              {lang === 'ja'
-                ? '曲のリリース年を当てるゲーム'
-                : 'Guess the release year'}
-            </p>
             <div className="flex gap-2">
               <button
                 onClick={() => playTimeline('easy')}
@@ -103,18 +103,13 @@ export default function Home() {
 
           {/* VERSUS */}
           <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl px-8 py-5 card-glow-versus">
-            <div className="flex items-end justify-between mb-3">
+            <div className="flex items-end justify-between mb-4">
               <p className="text-gradient font-display font-black text-3xl tracking-wider flex items-center gap-2">
                 <span className="inline-block w-0 h-0 border-t-[8px] border-t-transparent border-b-[8px] border-b-transparent border-l-[12px] border-l-brand" />
                 VERSUS
               </p>
               <span className="text-sm font-semibold text-zinc-500">{lang === 'ja' ? '全5問' : '5 Rounds'}</span>
             </div>
-            <p className="text-zinc-400 text-xs mb-4">
-              {lang === 'ja'
-                ? 'フォロワー数が近いアーティストを当てるゲーム'
-                : 'Match artists by follower count'}
-            </p>
             <div className="flex gap-2">
               <button
                 onClick={() => playVersus('easy')}
@@ -162,6 +157,49 @@ export default function Home() {
           </a>
         </div>
       </div>
+
+      {/* First-visit guide popup */}
+      {showGuide && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 px-6" onClick={() => setShowGuide(false)}>
+          <div className="bg-zinc-900 border border-zinc-700 rounded-2xl p-6 max-w-sm w-full space-y-4" onClick={e => e.stopPropagation()}>
+            <h2 className="font-display font-black text-xl text-center tracking-tight">
+              {lang === 'ja' ? 'SOUND IQ の遊び方' : 'How to Play'}
+            </h2>
+
+            <div className="space-y-3 text-sm">
+              <div>
+                <p className="text-accent font-bold mb-1">TIMELINE</p>
+                <p className="text-zinc-400 text-xs leading-relaxed">
+                  {lang === 'ja'
+                    ? '曲のリリース年を当てるクイズ'
+                    : 'Guess the release year of each song.'}
+                </p>
+              </div>
+
+              <div>
+                <p className="text-brand font-bold mb-1">VERSUS</p>
+                <p className="text-zinc-400 text-xs leading-relaxed">
+                  {lang === 'ja'
+                    ? 'お題アーティストとフォロワー数が近いアーティストを当てるクイズ'
+                    : 'Find an artist with a similar follower count to the given artist.'}
+                </p>
+              </div>
+
+              <div className="border-t border-zinc-800 pt-3 text-zinc-500 text-xs leading-relaxed space-y-1">
+                <p><span className="text-zinc-400">NORMAL:</span> {lang === 'ja' ? 'ヒット曲・有名アーティスト' : 'Hit songs & famous artists'}</p>
+                <p><span className="text-zinc-400">HARD:</span> {lang === 'ja' ? '制限なし（TIMELINEは速度ボーナスあり）' : 'No limits (speed bonus on TIMELINE)'}</p>
+              </div>
+            </div>
+
+            <button
+              onClick={() => setShowGuide(false)}
+              className="w-full py-2.5 bg-zinc-700 text-zinc-200 font-bold text-sm rounded-lg hover:bg-zinc-600 transition-colors"
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      )}
     </main>
   )
 }
