@@ -178,6 +178,9 @@ export async function saveRanking(
 ) {
   const rejected = { updated: false, bestScore: 0 }
 
+  // Dev mode: skip ranking for YANCE on NORMAL
+  if (name === 'YANCE' && difficulty === 'easy') return rejected
+
   // Score range validation
   if (score < 0 || score > 100) return rejected
 

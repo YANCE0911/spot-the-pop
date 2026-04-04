@@ -86,10 +86,18 @@ export default function Home() {
               </button>
               <button
                 onClick={() => playTimeline('hard')}
-                className="btn-hard-timeline flex-1 py-3 rounded-lg text-sm font-bold tracking-widest transition-all active:scale-[0.93] bg-zinc-900 border-2 border-accent/70 text-accent shadow-[0_0_16px_rgba(168,85,247,0.25),0_0_4px_rgba(168,85,247,0.15)] hover:shadow-[0_0_24px_rgba(168,85,247,0.4),0_0_8px_rgba(168,85,247,0.25)] hover:border-accent"
+                className="btn-hard-timeline flex-1 py-3 rounded-lg text-sm font-bold tracking-widest transition-all active:scale-[0.93] bg-black border-2 border-accent/70 text-accent shadow-[0_0_16px_rgba(168,85,247,0.25),0_0_4px_rgba(168,85,247,0.15)] hover:shadow-[0_0_24px_rgba(168,85,247,0.4),0_0_8px_rgba(168,85,247,0.25)] hover:border-accent"
               >
                 HARD
               </button>
+            </div>
+            <div className="flex gap-2 mt-2.5">
+              <p className="flex-1 text-center text-[10px] text-zinc-500">
+                {lang === 'ja' ? 'ヒット曲のみ' : 'Hits only'}
+              </p>
+              <p className="flex-1 text-center text-[10px] text-zinc-500">
+                {lang === 'ja' ? 'ディープな選曲 + 速度ボーナス' : 'Deep cuts + speed bonus'}
+              </p>
             </div>
           </div>
 
@@ -116,10 +124,18 @@ export default function Home() {
               </button>
               <button
                 onClick={() => playVersus('hard')}
-                className="btn-hard-versus flex-1 py-3 rounded-lg text-sm font-bold tracking-widest transition-all active:scale-[0.93] bg-zinc-900 border-2 border-brand/70 text-brand shadow-[0_0_16px_rgba(29,185,84,0.25),0_0_4px_rgba(29,185,84,0.15)] hover:shadow-[0_0_24px_rgba(29,185,84,0.4),0_0_8px_rgba(29,185,84,0.25)] hover:border-brand"
+                className="btn-hard-versus flex-1 py-3 rounded-lg text-sm font-bold tracking-widest transition-all active:scale-[0.93] bg-black border-2 border-brand/70 text-brand shadow-[0_0_16px_rgba(29,185,84,0.25),0_0_4px_rgba(29,185,84,0.15)] hover:shadow-[0_0_24px_rgba(29,185,84,0.4),0_0_8px_rgba(29,185,84,0.25)] hover:border-brand"
               >
                 HARD
               </button>
+            </div>
+            <div className="flex gap-2 mt-2.5">
+              <p className="flex-1 text-center text-[10px] text-zinc-500">
+                {lang === 'ja' ? '有名アーティスト' : 'Famous artists'}
+              </p>
+              <p className="flex-1 text-center text-[10px] text-zinc-500">
+                {lang === 'ja' ? 'ディープなアーティスト' : 'Deep roster'}
+              </p>
             </div>
           </div>
         </div>

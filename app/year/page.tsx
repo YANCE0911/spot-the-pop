@@ -102,25 +102,36 @@ async function fetchQuestions(count: number, region: 'jp' | 'global', difficulty
   return data.questions ?? []
 }
 
-// Base score: smooth power curve. 7.5 × (1 − d/11)^1.13, rounded to 0.1
-// diff=0→7.5, diff=5→3.8, diff=10→0.5, diff=11+→0
-function calculateBaseScore(guessed: number, actual: number): number {
+// Base score: smooth power curve, scaled by difficulty
+// NORMAL: 10 × (1 − d/11)^1.13 (max 10pt/question, no time bonus, 100pt total)
+// HARD:   7.5 × (1 − d/11)^1.13 (max 7.5pt + time bonus max 2.5 = 10pt/question, 100pt total)
+function calculateBaseScore(guessed: number, actual: number, difficulty: Difficulty = 'hard'): number {
   const diff = Math.abs(guessed - actual)
   if (diff >= 11) return 0
-  return Math.round(7.5 * Math.pow(1 - diff / 11, 1.13) * 10) / 10
+  const maxBase = difficulty === 'easy' ? 10 : 7.5
+  return Math.round(maxBase * Math.pow(1 - diff / 11, 1.13) * 10) / 10
 }
 
-// Time bonus: 5-second steps, max 2.5
-function calculateTimeBonus(elapsedSeconds: number): number {
+// Time bonus: NORMAL = none, HARD = original 5-second steps (2.5/1.5/0.5)
+function calculateTimeBonus(elapsedSeconds: number, difficulty: Difficulty = 'hard'): number {
+  if (difficulty === 'easy') return 0
   if (elapsedSeconds <= 5) return 2.5
   if (elapsedSeconds <= 10) return 1.5
   if (elapsedSeconds <= 15) return 0.5
   return 0
 }
 
-// 5-tier reactions for TIMELINE (baseScore 0–7.5)
-// PERFECT: exact (7.5), GREAT: 1-2yr off (≥6.0), GOOD: 3-5yr (≥4.0), SO SO: 6-8yr (≥2.0), MISS: 9yr+ (<2.0)
-function getReaction(baseScore: number): { label: string; color: string } {
+// 5-tier reactions for TIMELINE
+// NORMAL: 10-point base scale, HARD: 7.5-point base scale (unchanged from original)
+function getReaction(baseScore: number, difficulty: Difficulty = 'hard'): { label: string; color: string } {
+  if (difficulty === 'easy') {
+    if (baseScore >= 10) return { label: 'PERFECT!!!', color: 'text-pink-400' }
+    if (baseScore >= 8.0) return { label: 'GREAT!!', color: 'text-orange-400' }
+    if (baseScore >= 5.3) return { label: 'GOOD!', color: 'text-yellow-400' }
+    if (baseScore >= 2.7) return { label: 'SO SO', color: 'text-emerald-400' }
+    return { label: 'MISS...', color: 'text-blue-400' }
+  }
+  // HARD: original thresholds
   if (baseScore >= 7.5) return { label: 'PERFECT!!!', color: 'text-pink-400' }
   if (baseScore >= 6.0) return { label: 'GREAT!!', color: 'text-orange-400' }
   if (baseScore >= 4.0) return { label: 'GOOD!', color: 'text-yellow-400' }
@@ -171,7 +182,12 @@ function YearGame() {
       .then(questions => {
         if (questions.length > 0) {
           setQuestions(questions)
-          setCountdown(3)
+          if (gameDifficulty === 'hard') {
+            setCountdown(3)
+          } else {
+            // NORMAL: skip countdown, start immediately
+            setGameStarted(true)
+          }
         }
       })
       .catch(console.error)
@@ -217,8 +233,8 @@ function YearGame() {
     if (elapsedTimerRef.current) clearInterval(elapsedTimerRef.current)
 
     const finalElapsed = (Date.now() - startTimeRef.current) / 1000
-    const baseScore = calculateBaseScore(year, currentQ.releaseYear)
-    const timeBonus = baseScore > 0 ? calculateTimeBonus(finalElapsed) : 0
+    const baseScore = calculateBaseScore(year, currentQ.releaseYear, gameDifficulty)
+    const timeBonus = baseScore > 0 ? calculateTimeBonus(finalElapsed, gameDifficulty) : 0
     const score = baseScore + timeBonus
 
     const result: RoundResult = {
@@ -251,11 +267,12 @@ function YearGame() {
       results: [...results, result],
     }))
 
-    // Play reaction sound
-    if (baseScore >= 7.5) playReaction('perfect')
-    else if (baseScore >= 6.0) playReaction('great')
-    else if (baseScore >= 4.0) playReaction('good')
-    else if (baseScore >= 2.0) playReaction('soso')
+    // Play reaction sound (thresholds match getReaction)
+    const r = getReaction(baseScore, gameDifficulty)
+    if (r.label.startsWith('PERFECT')) playReaction('perfect')
+    else if (r.label.startsWith('GREAT')) playReaction('great')
+    else if (r.label.startsWith('GOOD')) playReaction('good')
+    else if (r.label.startsWith('SO')) playReaction('soso')
     else playReaction('miss')
   }
 
@@ -284,7 +301,8 @@ function YearGame() {
   }
 
   const bonusPercent = Math.max(0, (BONUS_ZONE - elapsed) / BONUS_ZONE) * 100
-  const currentBonus = elapsed <= BONUS_ZONE ? calculateTimeBonus(elapsed) : 0
+  const currentBonus = elapsed <= BONUS_ZONE ? calculateTimeBonus(elapsed, gameDifficulty) : 0
+  const showSpeedBonus = gameDifficulty === 'hard'
 
   if (loading) {
     return (
@@ -384,7 +402,7 @@ function YearGame() {
             </div>
           )}
 
-          {currentQ && !feedback && gameStarted && (
+          {currentQ && !feedback && gameStarted && showSpeedBonus && (
             <div className="flex items-center justify-between text-xs h-5">
               {elapsed <= BONUS_ZONE ? (
                 <>
@@ -478,8 +496,8 @@ function YearGame() {
 
           {feedback && (
             <div className="bg-zinc-900 p-5 rounded-xl space-y-4 text-center animate-[fadeIn_0.15s_ease-out]">
-              <p className={`text-4xl font-display font-black ${getReaction(feedback.baseScore).color}`}>
-                {getReaction(feedback.baseScore).label}
+              <p className={`text-4xl font-display font-black ${getReaction(feedback.baseScore, gameDifficulty).color}`}>
+                {getReaction(feedback.baseScore, gameDifficulty).label}
               </p>
               <div className="space-y-1">
                 <p className="text-zinc-400">
@@ -496,10 +514,13 @@ function YearGame() {
                 )}
               </div>
               <div className="flex items-baseline justify-center">
-                <span className={`text-4xl font-black font-mono ${feedback.baseScore >= 6.0 ? 'text-accent' : feedback.baseScore < 1 ? 'text-red-400' : 'text-zinc-300'}`}>
+                <span className={`text-4xl font-black font-mono ${
+                  getReaction(feedback.baseScore, gameDifficulty).label.startsWith('PERFECT') || getReaction(feedback.baseScore, gameDifficulty).label.startsWith('GREAT')
+                    ? 'text-accent' : feedback.baseScore < 1 ? 'text-red-400' : 'text-zinc-300'
+                }`}>
                   +{feedback.baseScore.toFixed(1)}
                 </span>
-                {feedback.timeBonus > 0 && (
+                {showSpeedBonus && feedback.timeBonus > 0 && (
                   <span className="text-sm font-bold font-mono text-violet-300 ml-1.5">+{feedback.timeBonus.toFixed(1)}</span>
                 )}
               </div>
@@ -594,10 +615,12 @@ function TimelineResults({
               {displayScore.toFixed(2)}
               <span className="text-zinc-400 text-lg ml-1">/100</span>
             </p>
-            <div className="flex justify-center gap-4 mt-2 text-sm">
-              <span className="text-zinc-400">Base: <span className="text-white font-bold">{displayBase.toFixed(1)}</span></span>
-              <span className="text-zinc-400">Speed: <span className="text-violet-300 font-bold">+{displayBonus.toFixed(1)}</span></span>
-            </div>
+            {difficulty === 'hard' && (
+              <div className="flex justify-center gap-4 mt-2 text-sm">
+                <span className="text-zinc-400">Base: <span className="text-white font-bold">{displayBase.toFixed(1)}</span></span>
+                <span className="text-zinc-400">Speed: <span className="text-violet-300 font-bold">+{displayBonus.toFixed(1)}</span></span>
+              </div>
+            )}
           </div>
         </header>
 
@@ -676,7 +699,7 @@ function TimelineResults({
                     <span className={`font-mono font-bold text-sm ${r.baseScore >= 6.0 ? 'text-accent' : r.baseScore < 1 ? 'text-red-400' : 'text-zinc-300'}`}>
                       +{r.baseScore.toFixed(1)}
                     </span>
-                    {r.timeBonus > 0 && (
+                    {difficulty === 'hard' && r.timeBonus > 0 && (
                       <span className="text-violet-300 font-mono text-xs font-bold">+{r.timeBonus.toFixed(1)}</span>
                     )}
                   </div>
