@@ -91,7 +91,7 @@ export default function Home() {
                 HARD
               </button>
             </div>
-            <div className="flex gap-2 mt-2.5">
+            <div className="flex gap-2 mt-2">
               <p className="flex-1 text-center text-[10px] text-zinc-500">
                 {lang === 'ja' ? 'ヒット曲' : 'Hit songs'}
               </p>
@@ -124,7 +124,7 @@ export default function Home() {
                 HARD
               </button>
             </div>
-            <div className="flex gap-2 mt-2.5">
+            <div className="flex gap-2 mt-2">
               <p className="flex-1 text-center text-[10px] text-zinc-500">
                 {lang === 'ja' ? '有名アーティスト' : 'Famous artists'}
               </p>
