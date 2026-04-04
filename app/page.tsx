@@ -93,10 +93,10 @@ export default function Home() {
             </div>
             <div className="flex gap-2 mt-2.5">
               <p className="flex-1 text-center text-[10px] text-zinc-500">
-                {lang === 'ja' ? 'ヒット曲のみ' : 'Hits only'}
+                {lang === 'ja' ? 'ヒット曲' : 'Hit songs'}
               </p>
               <p className="flex-1 text-center text-[10px] text-zinc-500">
-                {lang === 'ja' ? 'ディープな選曲 + 速度ボーナス' : 'Deep cuts + speed bonus'}
+                {lang === 'ja' ? '制限なし + 速度ボーナス' : 'No limits + speed bonus'}
               </p>
             </div>
           </div>
@@ -134,7 +134,7 @@ export default function Home() {
                 {lang === 'ja' ? '有名アーティスト' : 'Famous artists'}
               </p>
               <p className="flex-1 text-center text-[10px] text-zinc-500">
-                {lang === 'ja' ? 'ディープなアーティスト' : 'Deep roster'}
+                {lang === 'ja' ? '制限なし' : 'No limits'}
               </p>
             </div>
           </div>
