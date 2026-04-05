@@ -223,6 +223,55 @@ async function questionsFromSpotifyAPI(count: number, market = 'JP'): Promise<Tr
   return questions.sort(() => Math.random() - 0.5)
 }
 
+// Artist-specific mode: fetch all albums from a single artist
+async function questionsFromArtist(artistId: string, count: number): Promise<TrackQuestion[]> {
+  const token = await getSpotifyToken()
+
+  // Fetch all albums (singles + albums, no compilations)
+  const albumsRes = await fetch(
+    `https://api.spotify.com/v1/artists/${artistId}/albums?include_groups=album,single&market=JP&limit=50`,
+    { headers: { Authorization: `Bearer ${token}` } }
+  )
+  if (!albumsRes.ok) return []
+  const albumsData = await albumsRes.json()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const albums = (albumsData.items ?? []) as any[]
+
+  // Get artist name
+  const artistRes = await fetch(
+    `https://api.spotify.com/v1/artists/${artistId}`,
+    { headers: { Authorization: `Bearer ${token}` } }
+  )
+  const artistData = artistRes.ok ? await artistRes.json() : { name: 'Unknown' }
+
+  // Build questions from albums
+  const questions: TrackQuestion[] = []
+  const usedAlbums = new Set<string>()
+
+  for (const album of albums) {
+    const year = parseInt((album.release_date ?? '').split('-')[0])
+    if (!year || year < 1960) continue
+    if (!isValidQuestion(album.name, album.name, album.album_type)) continue
+
+    // Dedupe by album name (avoid deluxe editions etc)
+    const normalizedName = album.name.replace(/\s*[\(\[].+[\)\]]\s*/g, '').toLowerCase()
+    if (usedAlbums.has(normalizedName)) continue
+    usedAlbums.add(normalizedName)
+
+    questions.push({
+      trackName: album.name,
+      singleName: album.name,
+      artistName: artistData.name,
+      albumImageUrl: album.images?.[0]?.url,
+      releaseYear: year,
+      spotifyUrl: album.external_urls?.spotify,
+    })
+  }
+
+  // Shuffle and limit
+  return [...questions].sort(() => Math.random() - 0.5).slice(0, count)
+}
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' })
 
@@ -230,13 +279,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const locale = (req.query.locale as string) || 'ja'
   const region: 'jp' | 'global' = locale.startsWith('ja') ? 'jp' : 'global'
   const difficulty: 'easy' | 'hard' = req.query.difficulty === 'easy' ? 'easy' : 'hard'
+  const artistId = req.query.artist as string | undefined
 
   try {
-    // Try question bank first, fallback to Spotify API
-    let questions = questionsFromBank(count, region, difficulty)
-    if (questions.length < count) {
-      console.log('Question bank unavailable or insufficient, falling back to Spotify API')
-      questions = await questionsFromSpotifyAPI(count, region === 'global' ? 'US' : 'JP')
+    let questions: TrackQuestion[]
+
+    if (artistId) {
+      // Artist-specific mode
+      questions = await questionsFromArtist(artistId, count)
+    } else {
+      // Normal mode: question bank first, fallback to Spotify API
+      questions = questionsFromBank(count, region, difficulty)
+      if (questions.length < count) {
+        console.log('Question bank unavailable or insufficient, falling back to Spotify API')
+        questions = await questionsFromSpotifyAPI(count, region === 'global' ? 'US' : 'JP')
+      }
     }
 
     res.setHeader('Cache-Control', 'no-store')

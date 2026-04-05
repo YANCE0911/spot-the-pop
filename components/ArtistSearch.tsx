@@ -134,7 +134,7 @@ export default function ArtistSearch({ value, onChange, onSelect, placeholder, d
       />
 
       {showDropdown && suggestions.length > 0 && (
-        <ul className="absolute z-50 w-full mt-1 bg-zinc-800 rounded-lg overflow-hidden shadow-xl border border-zinc-700">
+        <ul className="absolute z-[100] w-full mt-1 bg-zinc-800 rounded-lg overflow-y-auto max-h-60 shadow-2xl border border-zinc-700">
           {suggestions.map((s, i) => (
             <li
               key={s.id}

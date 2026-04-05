@@ -36,17 +36,21 @@ export async function GET(req: NextRequest) {
 
   // Brand mode: static image without scores
   if (brand === '1') {
+    // note header ratio: 1280x670
+    const isNoteHeader = searchParams.get('note') === '1'
+    const w = isNoteHeader ? 1280 : 1200
+    const h = isNoteHeader ? 670 : 630
+
     return new ImageResponse(
       (
-        <div style={{ display: 'flex', position: 'relative', width: '100%', height: '100%', backgroundColor: '#0A0A0A', fontFamily: 'Montserrat' }}>
-          <div style={{ display: 'flex', position: 'absolute', top: '56px', left: '64px', fontSize: '40px', fontWeight: 900, color: accentColor, letterSpacing: '0.06em' }}>{modeLabel}</div>
-          <div style={{ display: 'flex', position: 'absolute', top: '190px', width: '100%', justifyContent: 'center', fontSize: '90px', fontWeight: 900, color: '#A1A1AA', letterSpacing: '-0.02em', lineHeight: 1 }}>SOUND IQ</div>
-          <div style={{ display: 'flex', position: 'absolute', top: '315px', width: '100%', justifyContent: 'center', fontSize: '120px', fontWeight: 900, color: '#D4D4D8', fontFamily: 'NotoSansJP', lineHeight: 1 }}>あなたの音楽IQは？</div>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%', backgroundColor: '#0A0A0A', fontFamily: 'Montserrat' }}>
+          <div style={{ display: 'flex', fontSize: '90px', fontWeight: 900, color: '#A1A1AA', letterSpacing: '-0.02em', lineHeight: 1 }}>SOUND IQ</div>
+          <div style={{ display: 'flex', fontSize: '120px', fontWeight: 900, color: '#D4D4D8', fontFamily: 'NotoSansJP', lineHeight: 1, marginTop: '40px' }}>あなたの音楽IQは？</div>
         </div>
       ),
       {
-        width: 1200,
-        height: 630,
+        width: w,
+        height: h,
         fonts,
         headers: { 'Cache-Control': 'public, max-age=31536000, immutable' },
       },
@@ -57,13 +61,15 @@ export async function GET(req: NextRequest) {
   const score = searchParams.get('score') ?? '0'
   const numScore = parseFloat(score)
   const grade = getGrade(numScore)
+  const artist = searchParams.get('artist')
+  const headerLabel = artist ? `TIMELINE - ${artist}` : `${modeLabel} RESULTS`
 
   return new ImageResponse(
     (
       <div style={{ display: 'flex', flexDirection: 'column', width: '100%', height: '100%', backgroundColor: '#000', padding: '60px 80px', fontFamily: 'Montserrat' }}>
         <div style={{ display: 'flex', fontSize: '52px', fontWeight: 900, color: '#71717a', letterSpacing: '-0.02em' }}>SOUND IQ</div>
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1 }}>
-          <div style={{ display: 'flex', fontSize: '32px', fontWeight: 900, color: accentColor, letterSpacing: '0.08em' }}>{modeLabel} RESULTS</div>
+          <div style={{ display: 'flex', fontSize: artist ? '56px' : '32px', fontWeight: 900, color: accentColor, letterSpacing: '0.08em', fontFamily: 'NotoSansJP' }}>{headerLabel}</div>
           <div style={{ display: 'flex', alignItems: 'baseline', marginTop: '16px' }}>
             <div style={{ display: 'flex', fontSize: '180px', fontWeight: 900, color: '#fff', lineHeight: 1 }}>{numScore.toFixed(2)}</div>
             <div style={{ display: 'flex', fontSize: '56px', fontWeight: 900, color: '#52525b', marginLeft: '8px' }}>/100</div>

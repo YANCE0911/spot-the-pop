@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { detectLang, type Lang } from '@/lib/i18n'
+import ArtistSearch from '@/components/ArtistSearch'
 import type { Difficulty } from '@/types'
 
 export default function Home() {
@@ -11,6 +12,8 @@ export default function Home() {
   const [timelineDifficulty, setTimelineDifficulty] = useState<Difficulty>('easy')
   const [versusDifficulty, setVersusDifficulty] = useState<Difficulty>('easy')
   const [showGuide, setShowGuide] = useState(false)
+  const [artistSearchOpen, setArtistSearchOpen] = useState(false)
+  const [artistQuery, setArtistQuery] = useState('')
 
   useEffect(() => {
     const detectedLang = detectLang()
@@ -67,9 +70,9 @@ export default function Home() {
         </header>
 
         {/* Game mode cards */}
-        <div className="space-y-4 animate-[fadeInUp_0.5s_ease-out_0.1s_both]">
+        <div className="space-y-4 animate-[fadeInUp_0.5s_ease-out_0.1s_both] overflow-visible">
           {/* TIMELINE */}
-          <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl px-8 py-5 card-glow-timeline">
+          <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl px-8 py-5 card-glow-timeline relative z-20 overflow-visible">
             <div className="flex items-end justify-between mb-4">
               <p className="text-gradient-warm font-display font-black text-3xl tracking-wider flex items-center gap-2">
                 <span className="inline-block w-0 h-0 border-t-[8px] border-t-transparent border-b-[8px] border-b-transparent border-l-[12px] border-l-accent" />
@@ -99,10 +102,37 @@ export default function Home() {
                 {lang === 'ja' ? '制限なし + 速度ボーナス' : 'No limits + speed bonus'}
               </p>
             </div>
+            {!artistSearchOpen ? (
+              <button
+                onClick={() => setArtistSearchOpen(true)}
+                className="w-full mt-3 py-3 rounded-lg text-sm font-bold transition-all active:scale-[0.97] bg-zinc-700 text-white hover:bg-zinc-600 flex items-center justify-center gap-2"
+              >
+                <svg viewBox="0 0 24 24" className="w-4 h-4 stroke-current fill-none opacity-70" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/></svg>
+                {lang === 'ja' ? 'アーティスト指定' : 'Pick an artist'}
+              </button>
+            ) : (
+              <div className="mt-3 space-y-2">
+                <ArtistSearch
+                  key={String(artistSearchOpen)}
+                  value={artistQuery}
+                  onChange={setArtistQuery}
+                  onSelect={(_name, id) => {
+                    if (id) router.push(`/year?artist=${id}`)
+                  }}
+                  placeholder={lang === 'ja' ? 'アーティスト名を検索...' : 'Search artist...'}
+                />
+                <button
+                  onClick={() => { setArtistSearchOpen(false); setArtistQuery('') }}
+                  className="w-full py-1.5 text-xs text-zinc-500 hover:text-zinc-300 transition-colors"
+                >
+                  {lang === 'ja' ? '閉じる' : 'Cancel'}
+                </button>
+              </div>
+            )}
           </div>
 
           {/* VERSUS */}
-          <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl px-8 py-5 card-glow-versus">
+          <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl px-8 py-5 card-glow-versus relative z-0">
             <div className="flex items-end justify-between mb-4">
               <p className="text-gradient font-display font-black text-3xl tracking-wider flex items-center gap-2">
                 <span className="inline-block w-0 h-0 border-t-[8px] border-t-transparent border-b-[8px] border-b-transparent border-l-[12px] border-l-brand" />
@@ -136,10 +166,10 @@ export default function Home() {
         </div>
 
         {/* Ranking link */}
-        <div className="animate-[fadeInUp_0.5s_ease-out_0.2s_both]">
+        <div className="animate-[fadeInUp_0.5s_ease-out_0.2s_both] relative z-0">
           <button
             onClick={() => router.push('/ranking')}
-            className="w-full bg-zinc-800/80 hover:bg-zinc-700 text-zinc-300 hover:text-white text-sm py-3 rounded-xl transition-all"
+            className="w-full bg-zinc-700 hover:bg-zinc-600 text-white text-sm font-bold py-3 rounded-xl transition-all"
           >
             {lang === 'ja' ? 'ランキング' : 'Rankings'}
           </button>

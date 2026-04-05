@@ -8,6 +8,7 @@ type Props = {
   mode: 'versus' | 'timeline'
   lang?: Lang
   challengeUrl?: string
+  artistName?: string
 }
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://soundiq.vercel.app'
@@ -21,20 +22,22 @@ function getRankLabel(score: number): string {
   return 'E'
 }
 
-export default function ShareSection({ score, mode, lang = 'en', challengeUrl }: Props) {
+export default function ShareSection({ score, mode, lang = 'en', challengeUrl, artistName }: Props) {
   const [copied, setCopied] = useState(false)
 
   const displayScore = Math.round(score * 100) / 100
-  const modeLabel = mode === 'versus' ? 'VERSUS' : 'TIMELINE'
+  const modeLabel = artistName ? `TIMELINE - ${artistName}` : mode === 'versus' ? 'VERSUS' : 'TIMELINE'
   const rank = getRankLabel(displayScore)
 
   const origin = typeof window !== 'undefined' ? window.location.origin : BASE_URL
   const shareUrl = challengeUrl
     ? `${origin}${challengeUrl}`
-    : `${BASE_URL}/share?score=${displayScore.toFixed(2)}&mode=${mode}&v=6`
+    : `${BASE_URL}/share?score=${displayScore.toFixed(2)}&mode=${mode}${artistName ? `&artist=${encodeURIComponent(artistName)}` : ''}&v=6`
 
   const line = '━━━━━━━━━━━━'
-  const shareText = `SOUND IQ - ${modeLabel}\n${line}\n${displayScore.toFixed(2)}点\n判定：${rank}ランク\n${line}\nあなたの音楽IQは？\n${shareUrl}`
+  const shareText = artistName
+    ? `${artistName}で${displayScore.toFixed(2)}点｜SOUND IQ\n${line}\n判定：${rank}ランク\n${line}\nあなたは何点？\n${shareUrl}`
+    : `SOUND IQ - ${modeLabel}\n${line}\n${displayScore.toFixed(2)}点\n判定：${rank}ランク\n${line}\nあなたの音楽IQは？\n${shareUrl}`
 
   const handleShare = () => {
     const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}`

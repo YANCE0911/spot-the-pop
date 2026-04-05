@@ -7,7 +7,7 @@ import Logo from '@/components/Logo'
 import MuteToggle from '@/components/MuteToggle'
 import ScoreRank from '@/components/ScoreRank'
 import ShareSection from '@/components/ShareSection'
-import { saveRanking, getPlayerRank } from '@/lib/ranking'
+import { saveRanking, getPlayerRank, logArtistPlay } from '@/lib/ranking'
 import { getPlayerId } from '@/lib/playerId'
 import { detectLang, t, type Lang } from '@/lib/i18n'
 import { playTick, playGo, playReaction } from '@/lib/sound'
@@ -102,6 +102,13 @@ async function fetchQuestions(count: number, region: 'jp' | 'global', difficulty
   return data.questions ?? []
 }
 
+// Artist-specific fetch
+async function fetchArtistQuestions(artistId: string, count: number): Promise<TrackQuestion[]> {
+  const res = await fetch(`/api/year/tracks?count=${count}&artist=${artistId}`)
+  const data = await res.json()
+  return data.questions ?? []
+}
+
 // Base score: smooth power curve, scaled by difficulty
 // NORMAL: 10 × (1 − d/11)^1.13 (max 10pt/question, no time bonus, 100pt total)
 // HARD:   7.5 × (1 − d/11)^1.13 (max 7.5pt + time bonus max 2.5 = 10pt/question, 100pt total)
@@ -167,6 +174,8 @@ function YearGame() {
   const [gameDifficulty] = useState<Difficulty>(() => {
     return searchParams?.get('difficulty') === 'easy' ? 'easy' : 'hard'
   })
+  const [artistId] = useState<string | null>(() => searchParams?.get('artist') ?? null)
+  const [artistName, setArtistName] = useState<string | null>(null)
 
   // Elapsed time tracking (no hard limit)
   const [elapsed, setElapsed] = useState(0)
@@ -178,14 +187,30 @@ function YearGame() {
     localStorage.removeItem('yearGameResults')
     localStorage.removeItem(PROGRESS_KEY)
 
-    fetchQuestions(10, gameRegion, gameDifficulty)
-      .then(questions => {
+    const loadQuestions = artistId
+      ? fetchArtistQuestions(artistId, 10)
+      : fetchQuestions(10, gameRegion, gameDifficulty)
+
+    loadQuestions
+      .then(async (questions) => {
         if (questions.length > 0) {
+          // Preload album images to prevent flicker
+          await Promise.all(
+            questions.filter(q => q.albumImageUrl).map(q =>
+              new Promise<void>(resolve => {
+                const img = new Image()
+                img.onload = () => resolve()
+                img.onerror = () => resolve()
+                img.src = q.albumImageUrl!
+              })
+            )
+          )
           setQuestions(questions)
-          if (gameDifficulty === 'hard') {
+          if (artistId) setArtistName(questions[0]?.artistName ?? null)
+          if (gameDifficulty === 'hard' && !artistId) {
             setCountdown(3)
           } else {
-            // NORMAL: skip countdown, start immediately
+            // NORMAL or artist mode: skip countdown, start immediately
             setGameStarted(true)
           }
         }
@@ -345,6 +370,8 @@ function YearGame() {
         lang={lang}
         region={gameRegion}
         difficulty={gameDifficulty}
+        artistId={artistId}
+        artistName={artistName}
       />
     )
   }
@@ -551,6 +578,8 @@ function TimelineResults({
   lang,
   region,
   difficulty,
+  artistId,
+  artistName,
 }: {
   displayScore: number
   displayBase: number
@@ -560,15 +589,35 @@ function TimelineResults({
   lang: Lang
   region: 'jp' | 'global'
   difficulty: Difficulty
+  artistId?: string | null
+  artistName?: string | null
 }) {
   const [playerName, setPlayerName] = useState('')
   const [submitted, setSubmitted] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [autoSaveResult, setAutoSaveResult] = useState<{ updated: boolean; bestScore: number } | null>(null)
   const [playerRank, setPlayerRank] = useState<number | null>(null)
+  const [artistBest, setArtistBest] = useState<number | null>(null)
+  const [isNewBest, setIsNewBest] = useState(false)
 
-  // Auto-save for returning users
+  // Artist mode: self-best (localStorage) + silent play log (Firestore)
   useEffect(() => {
+    if (!artistId || !artistName) return
+    // Self-best
+    const key = `soundiq_artist_best_${artistId}`
+    const prev = parseFloat(localStorage.getItem(key) ?? '0')
+    setArtistBest(prev > 0 ? prev : null)
+    if (displayScore > prev) {
+      localStorage.setItem(key, String(displayScore))
+      setIsNewBest(true)
+    }
+    // Silent play log
+    logArtistPlay(artistId, artistName, displayScore)
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Auto-save for returning users (skip in artist mode)
+  useEffect(() => {
+    if (artistId) return
     const savedName = localStorage.getItem('soundiq_name')
     if (!savedName) return
     setPlayerName(savedName)
@@ -609,7 +658,11 @@ function TimelineResults({
         {/* Header */}
         <header className="animate-[fadeInUp_0.4s_ease-out]">
           <div className="mb-4"><Logo size="sm" /></div>
-          <h2 className="text-accent text-lg font-bold mb-2 text-center">TIMELINE <span className="text-zinc-500 text-sm">{difficulty === 'easy' ? 'NORMAL' : 'HARD'}</span> {t('results', lang)}</h2>
+          <h2 className="text-accent text-lg font-bold mb-2 text-center">
+            {artistName ? `TIMELINE - ${artistName}` : 'TIMELINE'}{' '}
+            {!artistName && <span className="text-zinc-500 text-sm">{difficulty === 'easy' ? 'NORMAL' : 'HARD'}</span>}{' '}
+            {t('results', lang)}
+          </h2>
           <div className="text-center">
             <p className="text-5xl font-black animate-[countUp_0.6s_ease-out_0.2s_both]">
               {displayScore.toFixed(2)}
@@ -626,56 +679,80 @@ function TimelineResults({
 
         <ScoreRank score={displayScore} lang={lang} />
 
-        {/* Name registration — prominent, right after score */}
-        {!submitted ? (
-          <div className="border border-accent/30 bg-zinc-900 p-4 rounded-xl space-y-3 animate-[fadeInUp_0.5s_ease-out]">
-            <h2 className="text-accent font-bold">{t('registerRanking', lang)}</h2>
-            <input
-              type="text"
-              value={playerName}
-              onChange={e => setPlayerName(e.target.value)}
-              placeholder={t('nameInput', lang)}
-              className="w-full p-2.5 rounded-lg bg-zinc-800 text-white outline-none focus:ring-2 focus:ring-accent"
-            />
-            <button
-              onClick={handleRegister}
-              disabled={submitting}
-              className="w-full bg-accent text-white py-2.5 rounded-lg font-semibold hover:brightness-110"
-            >
-              {submitting ? (lang === 'ja' ? '登録中...' : 'Submitting...') : t('register', lang)}
-            </button>
-          </div>
-        ) : autoSaveResult?.updated ? (
+        {/* Artist mode: self-best display */}
+        {artistId && (
           <div className="text-center space-y-1">
-            <p className="text-accent font-bold text-lg">{t('newBest', lang)}</p>
-            <p className="text-zinc-400 text-sm">{playerName}</p>
-            {playerRank && (
-              <p className="text-zinc-500 text-xs">{lang === 'ja' ? `現在 ${playerRank}位` : `Rank #${playerRank}`}</p>
-            )}
+            {isNewBest ? (
+              <p className="text-accent font-bold text-lg animate-[fadeInUp_0.4s_ease-out]">
+                {lang === 'ja' ? '自己ベスト更新！' : 'New Personal Best!'}
+              </p>
+            ) : artistBest !== null ? (
+              <p className="text-zinc-400 text-sm">
+                {lang === 'ja' ? '自己ベスト' : 'Personal Best'}: <span className="text-white font-bold">{artistBest.toFixed(2)}</span>
+              </p>
+            ) : null}
           </div>
-        ) : autoSaveResult && !autoSaveResult.updated && autoSaveResult.bestScore > displayScore ? (
-          <div className="text-center space-y-1">
-            <p className="text-zinc-400 text-sm">
-              {t('bestLabel', lang)}: {autoSaveResult.bestScore.toFixed(2)}
-            </p>
-            <p className="text-zinc-500 text-xs">{playerName}</p>
-            {playerRank && (
-              <p className="text-zinc-500 text-xs">{lang === 'ja' ? `現在 ${playerRank}位` : `Rank #${playerRank}`}</p>
+        )}
+
+        {/* Name registration — hidden in artist mode (share only) */}
+        {!artistId && (
+          <>
+            {!submitted ? (
+              <div className="border border-accent/30 bg-zinc-900 p-4 rounded-xl space-y-3 animate-[fadeInUp_0.5s_ease-out]">
+                <h2 className="text-accent font-bold">{t('registerRanking', lang)}</h2>
+                <input
+                  type="text"
+                  value={playerName}
+                  onChange={e => setPlayerName(e.target.value)}
+                  placeholder={t('nameInput', lang)}
+                  className="w-full p-2.5 rounded-lg bg-zinc-800 text-white outline-none focus:ring-2 focus:ring-accent"
+                />
+                <button
+                  onClick={handleRegister}
+                  disabled={submitting}
+                  className="w-full bg-accent text-white py-2.5 rounded-lg font-semibold hover:brightness-110"
+                >
+                  {submitting ? (lang === 'ja' ? '登録中...' : 'Submitting...') : t('register', lang)}
+                </button>
+              </div>
+            ) : autoSaveResult?.updated ? (
+              <div className="text-center space-y-1">
+                <p className="text-accent font-bold text-lg">{t('newBest', lang)}</p>
+                <p className="text-zinc-400 text-sm">{playerName}</p>
+                {playerRank && (
+                  <p className="text-zinc-500 text-xs">{lang === 'ja' ? `現在 ${playerRank}位` : `Rank #${playerRank}`}</p>
+                )}
+              </div>
+            ) : autoSaveResult && !autoSaveResult.updated && autoSaveResult.bestScore > displayScore ? (
+              <div className="text-center space-y-1">
+                <p className="text-zinc-400 text-sm">
+                  {t('bestLabel', lang)}: {autoSaveResult.bestScore.toFixed(2)}
+                </p>
+                <p className="text-zinc-500 text-xs">{playerName}</p>
+                {playerRank && (
+                  <p className="text-zinc-500 text-xs">{lang === 'ja' ? `現在 ${playerRank}位` : `Rank #${playerRank}`}</p>
+                )}
+              </div>
+            ) : (
+              <div className="text-center space-y-1">
+                <p className="text-accent font-semibold">{t('registered', lang)}</p>
+                <p className="text-zinc-400 text-sm">{playerName}</p>
+                {playerRank && (
+                  <p className="text-zinc-500 text-xs">{lang === 'ja' ? `現在 ${playerRank}位` : `Rank #${playerRank}`}</p>
+                )}
+              </div>
             )}
-          </div>
-        ) : (
-          <div className="text-center space-y-1">
-            <p className="text-accent font-semibold">{t('registered', lang)}</p>
-            <p className="text-zinc-400 text-sm">{playerName}</p>
-            {playerRank && (
-              <p className="text-zinc-500 text-xs">{lang === 'ja' ? `現在 ${playerRank}位` : `Rank #${playerRank}`}</p>
-            )}
-          </div>
+          </>
         )}
 
         {/* Play Again */}
         <button
-          onClick={() => { localStorage.removeItem('yearGameResults'); window.location.href = `/year?difficulty=${difficulty}` }}
+          onClick={() => {
+            localStorage.removeItem('yearGameResults')
+            window.location.href = artistId
+              ? `/year?artist=${artistId}`
+              : `/year?difficulty=${difficulty}`
+          }}
           className="w-full bg-accent text-white py-3 rounded-lg font-display font-semibold hover:brightness-110 transition-all"
         >
           {t('playAgain', lang)}
@@ -683,7 +760,7 @@ function TimelineResults({
 
         {/* X / Copy */}
         <div className="grid grid-cols-2 gap-2">
-          <ShareSection score={displayScore} mode="timeline" lang={lang} />
+          <ShareSection score={displayScore} mode="timeline" lang={lang} artistName={artistName ?? undefined} />
         </div>
 
         {/* Round results */}

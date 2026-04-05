@@ -291,3 +291,19 @@ export async function saveDailyRanking(name: string, score: number, date: string
     createdAt: Timestamp.now(),
   })
 }
+
+// --- Artist mode play log (silent, no ranking display) ---
+const ARTIST_PLAYS_COLLECTION = 'artist_plays'
+
+export async function logArtistPlay(artistId: string, artistName: string, score: number) {
+  try {
+    await addDoc(collection(db, ARTIST_PLAYS_COLLECTION), {
+      artistId,
+      artistName,
+      score,
+      createdAt: Timestamp.now(),
+    })
+  } catch (e) {
+    console.error('logArtistPlay failed:', e)
+  }
+}
