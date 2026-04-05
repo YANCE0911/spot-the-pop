@@ -226,21 +226,31 @@ async function questionsFromSpotifyAPI(count: number, market = 'JP'): Promise<Tr
 // Artist-specific mode: fetch all albums from a single artist
 async function questionsFromArtist(artistId: string, count: number): Promise<TrackQuestion[]> {
   const token = await getSpotifyToken()
+  const headers = { Authorization: `Bearer ${token}` }
 
-  // Fetch all albums (singles + albums, no compilations)
-  const albumsRes = await fetch(
-    `https://api.spotify.com/v1/artists/${artistId}/albums?include_groups=album,single&market=JP&limit=50`,
-    { headers: { Authorization: `Bearer ${token}` } }
-  )
-  if (!albumsRes.ok) return []
-  const albumsData = await albumsRes.json()
+  // Fetch all albums with pagination (50 per page)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const albums = (albumsData.items ?? []) as any[]
+  const allAlbums: any[] = []
+  let offset = 0
+  const pageSize = 50
+  while (true) {
+    const albumsRes = await fetch(
+      `https://api.spotify.com/v1/artists/${artistId}/albums?include_groups=album,single&market=JP&limit=${pageSize}&offset=${offset}`,
+      { headers }
+    )
+    if (!albumsRes.ok) break
+    const albumsData = await albumsRes.json()
+    const items = albumsData.items ?? []
+    allAlbums.push(...items)
+    if (items.length < pageSize) break
+    offset += pageSize
+    if (offset >= 200) break // Safety limit
+  }
 
   // Get artist name
   const artistRes = await fetch(
     `https://api.spotify.com/v1/artists/${artistId}`,
-    { headers: { Authorization: `Bearer ${token}` } }
+    { headers }
   )
   const artistData = artistRes.ok ? await artistRes.json() : { name: 'Unknown' }
 
@@ -248,7 +258,7 @@ async function questionsFromArtist(artistId: string, count: number): Promise<Tra
   const questions: TrackQuestion[] = []
   const usedAlbums = new Set<string>()
 
-  for (const album of albums) {
+  for (const album of allAlbums) {
     const year = parseInt((album.release_date ?? '').split('-')[0])
     if (!year || year < 1960) continue
     if (!isValidQuestion(album.name, album.name, album.album_type)) continue
