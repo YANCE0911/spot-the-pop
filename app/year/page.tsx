@@ -611,8 +611,10 @@ function TimelineResults({
       localStorage.setItem(key, String(displayScore))
       setIsNewBest(true)
     }
-    // Silent play log
-    logArtistPlay(artistId, artistName, displayScore)
+    // Silent play log (include name/id for future rankings)
+    const savedName = localStorage.getItem('soundiq_name') ?? undefined
+    const pid = getPlayerId()
+    logArtistPlay(artistId, artistName, displayScore, savedName, pid)
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Auto-save for returning users (skip in artist mode)
