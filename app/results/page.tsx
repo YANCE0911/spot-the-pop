@@ -172,7 +172,7 @@ export default function Results() {
 
         {/* Ranking link */}
         <button
-          onClick={() => router.push('/ranking')}
+          onClick={() => router.push(`/ranking?tab=versus&difficulty=${difficulty}`)}
           className="w-full bg-zinc-700 hover:bg-zinc-600 text-white font-bold py-3 rounded-xl transition-all text-sm"
         >
           {lang === 'ja' ? 'ランキングを見る' : 'View Rankings'}

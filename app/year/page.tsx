@@ -875,7 +875,7 @@ function TimelineResults({
             if (artistId) {
               router.push('/ranking?tab=artist')
             } else {
-              router.push('/ranking')
+              router.push(`/ranking?tab=timeline&difficulty=${difficulty}`)
             }
           }}
           className="w-full bg-zinc-700 hover:bg-zinc-600 text-white font-bold py-3 rounded-xl transition-all text-sm"

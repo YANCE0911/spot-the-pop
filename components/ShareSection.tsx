@@ -61,7 +61,7 @@ export default function ShareSection({ score, mode, lang = 'en', challengeUrl, a
       </button>
       <button
         onClick={handleCopy}
-        className="font-display py-3 px-4 rounded-lg font-bold transition-all active:scale-[0.98] bg-zinc-800 text-white hover:bg-zinc-700 text-sm"
+        className="font-display py-3 px-4 rounded-lg font-bold transition-all active:scale-[0.98] bg-zinc-700 text-white hover:bg-zinc-600 text-sm"
       >
         {copied ? t('copied', lang) : t('share', lang)}
       </button>

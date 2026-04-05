@@ -18,11 +18,14 @@ export default function RankingPage() {
   const [difficulty, setDifficulty] = useState<Difficulty>('easy')
   const [initialized, setInitialized] = useState(false)
 
-  // Read last played mode/difficulty from localStorage on mount
+  // Read mode/difficulty from URL params first, then localStorage fallback
   useEffect(() => {
-    const lastMode = localStorage.getItem('soundiq_last_mode') as Tab | null
-    const lastDiff = localStorage.getItem('soundiq_last_difficulty') as Difficulty | null
-    if (lastMode === 'versus' || lastMode === 'timeline') setMode(lastMode)
+    const params = new URLSearchParams(window.location.search)
+    const urlTab = params.get('tab') as Tab | null
+    const urlDiff = params.get('difficulty') as Difficulty | null
+    const lastMode = urlTab || (localStorage.getItem('soundiq_last_mode') as Tab | null)
+    const lastDiff = urlDiff || (localStorage.getItem('soundiq_last_difficulty') as Difficulty | null)
+    if (lastMode === 'versus' || lastMode === 'timeline' || lastMode === 'artist') setMode(lastMode)
     if (lastDiff === 'easy' || lastDiff === 'hard') setDifficulty(lastDiff)
     setInitialized(true)
   }, [])
