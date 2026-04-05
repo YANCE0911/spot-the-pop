@@ -103,13 +103,16 @@ export default function Home() {
               </p>
             </div>
             {!artistSearchOpen ? (
-              <button
+              <div
                 onClick={() => setArtistSearchOpen(true)}
-                className="w-full mt-3 py-3 rounded-lg text-sm font-bold transition-all active:scale-[0.97] bg-zinc-700 text-white hover:bg-zinc-600 flex items-center justify-center gap-2"
+                className="mt-4 border border-zinc-700 rounded-xl p-3 cursor-pointer hover:border-zinc-500 transition-all active:scale-[0.98] group"
               >
-                <svg viewBox="0 0 24 24" className="w-4 h-4 stroke-current fill-none opacity-70" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/></svg>
-                {lang === 'ja' ? 'アーティスト指定' : 'Pick an artist'}
-              </button>
+                <p className="text-[10px] text-zinc-500 tracking-widest mb-2">ARTIST MODE</p>
+                <div className="flex items-center gap-2 bg-zinc-800 rounded-lg px-3 py-2.5 group-hover:bg-zinc-700 transition-colors">
+                  <svg viewBox="0 0 24 24" className="w-4 h-4 stroke-zinc-400 fill-none flex-shrink-0" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/></svg>
+                  <span className="text-sm text-zinc-400">{lang === 'ja' ? 'アーティスト名を入力...' : 'Search artist...'}</span>
+                </div>
+              </div>
             ) : (
               <div className="mt-3 space-y-2">
                 <ArtistSearch
