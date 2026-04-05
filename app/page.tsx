@@ -168,7 +168,11 @@ export default function Home() {
         {/* Ranking link */}
         <div className="animate-[fadeInUp_0.5s_ease-out_0.2s_both] relative z-0">
           <button
-            onClick={() => router.push('/ranking')}
+            onClick={() => {
+              const lastMode = localStorage.getItem('soundiq_last_mode') || 'timeline'
+              const lastDiff = localStorage.getItem('soundiq_last_difficulty') || 'easy'
+              router.push(`/ranking?tab=${lastMode}&difficulty=${lastDiff}`)
+            }}
             className="w-full bg-zinc-700 hover:bg-zinc-600 text-white text-sm font-bold py-3 rounded-xl transition-all"
           >
             {lang === 'ja' ? 'ランキング' : 'Rankings'}
