@@ -249,6 +249,10 @@ function YearGame() {
 
   // Start elapsed timer when question is shown
   useEffect(() => {
+    if (finished) {
+      if (elapsedTimerRef.current) clearInterval(elapsedTimerRef.current)
+      return
+    }
     if (currentQ && !feedback && !loading && questions.length > 0 && gameStarted) {
       startTimeRef.current = Date.now()
       setElapsed(0)
@@ -261,7 +265,7 @@ function YearGame() {
     return () => {
       if (elapsedTimerRef.current) clearInterval(elapsedTimerRef.current)
     }
-  }, [currentRound, currentQ, feedback, loading, questions.length, gameStarted])
+  }, [currentRound, currentQ, feedback, loading, questions.length, gameStarted, finished])
 
   const handleSubmit = () => {
     const year = parseInt(guessYear)
