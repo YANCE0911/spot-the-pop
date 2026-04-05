@@ -107,7 +107,18 @@ async function getRankingsForRange(
     if (difficulty) {
       all = all.filter(r => (r.difficulty ?? 'hard') === difficulty)
     }
-    return all.sort((a, b) => b.score - a.score).slice(0, count)
+    // Deduplicate by playerId (keep best score only)
+    const sorted = all.sort((a, b) => b.score - a.score)
+    const seen = new Set<string>()
+    const deduped: Ranking[] = []
+    for (const r of sorted) {
+      if (r.playerId) {
+        if (seen.has(r.playerId)) continue
+        seen.add(r.playerId)
+      }
+      deduped.push(r)
+    }
+    return deduped.slice(0, count)
   } catch {
     return []
   }
@@ -292,20 +303,130 @@ export async function saveDailyRanking(name: string, score: number, date: string
   })
 }
 
-// --- Artist mode play log (silent, no ranking display) ---
+// --- Artist mode rankings ---
 const ARTIST_PLAYS_COLLECTION = 'artist_plays'
 
-export async function logArtistPlay(artistId: string, artistName: string, score: number, playerName?: string, playerId?: string) {
+export type ArtistRanking = {
+  artistId: string
+  artistName: string
+  playerName: string
+  playerId: string
+  score: number
+  createdAt: any
+}
+
+// Save artist play with best-score-only logic per playerId + artistId
+export async function saveArtistPlay(
+  artistId: string,
+  artistName: string,
+  score: number,
+  playerName: string,
+  playerId: string
+): Promise<{ updated: boolean; bestScore: number }> {
+  const rejected = { updated: false, bestScore: 0 }
+  if (score < 0 || score > 100) return rejected
+
   try {
-    await addDoc(collection(db, ARTIST_PLAYS_COLLECTION), {
-      artistId,
-      artistName,
-      score,
-      playerName: playerName || null,
-      playerId: playerId || null,
-      createdAt: Timestamp.now(),
-    })
+    // Check for existing entry (playerId + artistId)
+    const q = query(
+      collection(db, ARTIST_PLAYS_COLLECTION),
+      where('playerId', '==', playerId),
+      where('artistId', '==', artistId),
+    )
+    const snapshot = await getDocs(q)
+
+    if (snapshot.docs.length > 0) {
+      const existingDoc = snapshot.docs[0]
+      const existing = existingDoc.data()
+      if (score <= existing.score) {
+        return { updated: false, bestScore: existing.score }
+      }
+      await updateDoc(existingDoc.ref, {
+        playerName,
+        score,
+        createdAt: Timestamp.now(),
+      })
+      return { updated: true, bestScore: score }
+    }
   } catch (e) {
-    console.error('logArtistPlay failed:', e)
+    console.error('saveArtistPlay: existing check failed, creating new', e)
+  }
+
+  await addDoc(collection(db, ARTIST_PLAYS_COLLECTION), {
+    artistId,
+    artistName,
+    playerName,
+    playerId,
+    score,
+    createdAt: Timestamp.now(),
+  })
+  return { updated: false, bestScore: score }
+}
+
+// Get top rankings for a specific artist (no composite index needed — sort in JS)
+export async function getArtistRankings(artistId: string, count = 20): Promise<ArtistRanking[]> {
+  try {
+    const q = query(
+      collection(db, ARTIST_PLAYS_COLLECTION),
+      where('artistId', '==', artistId),
+      limit(500)
+    )
+    const snapshot = await getDocs(q)
+    // Dedupe by playerId (keep best score only — in case of legacy duplicates)
+    const bestByPlayer = new Map<string, ArtistRanking>()
+    for (const doc of snapshot.docs) {
+      const data = doc.data() as ArtistRanking
+      if (!data.playerName || !data.playerId) continue
+      const existing = bestByPlayer.get(data.playerId)
+      if (!existing || data.score > existing.score) {
+        bestByPlayer.set(data.playerId, data)
+      }
+    }
+    return Array.from(bestByPlayer.values())
+      .sort((a, b) => b.score - a.score)
+      .slice(0, count)
+  } catch (e) {
+    console.error('getArtistRankings failed:', e)
+    return []
+  }
+}
+
+// Get player's rank for a specific artist
+export async function getArtistPlayerRank(artistId: string, playerId: string): Promise<{ rank: number; score: number; total: number } | null> {
+  if (!playerId || !artistId) return null
+  try {
+    const rankings = await getArtistRankings(artistId, 500)
+    const idx = rankings.findIndex(r => r.playerId === playerId)
+    if (idx === -1) return null
+    return { rank: idx + 1, score: rankings[idx].score, total: rankings.length }
+  } catch {
+    return null
+  }
+}
+
+// Get popular artists (most played) for ranking page
+export async function getPopularArtists(count = 10): Promise<{ artistId: string; artistName: string; playerCount: number }[]> {
+  try {
+    const q = query(
+      collection(db, ARTIST_PLAYS_COLLECTION),
+      orderBy('createdAt', 'desc'),
+      limit(500)
+    )
+    const snapshot = await getDocs(q)
+    const artistMap = new Map<string, { artistName: string; players: Set<string> }>()
+    for (const doc of snapshot.docs) {
+      const data = doc.data()
+      if (!data.artistId || !data.playerId) continue
+      const entry = artistMap.get(data.artistId) ?? { artistName: data.artistName, players: new Set() }
+      entry.players.add(data.playerId)
+      artistMap.set(data.artistId, entry)
+    }
+    return Array.from(artistMap.entries())
+      .map(([artistId, { artistName, players }]) => ({ artistId, artistName, playerCount: players.size }))
+      .sort((a, b) => b.playerCount - a.playerCount)
+      .slice(0, count)
+  } catch (e) {
+    console.error('getPopularArtists failed:', e)
+    return []
   }
 }

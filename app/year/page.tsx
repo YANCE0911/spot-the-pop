@@ -7,7 +7,7 @@ import Logo from '@/components/Logo'
 import MuteToggle from '@/components/MuteToggle'
 import ScoreRank from '@/components/ScoreRank'
 import ShareSection from '@/components/ShareSection'
-import { saveRanking, getPlayerRank, logArtistPlay } from '@/lib/ranking'
+import { saveRanking, getPlayerRank, saveArtistPlay, getArtistRankings, getArtistPlayerRank, type ArtistRanking } from '@/lib/ranking'
 import { getPlayerId } from '@/lib/playerId'
 import { detectLang, t, type Lang } from '@/lib/i18n'
 import { playTick, playGo, playReaction } from '@/lib/sound'
@@ -599,11 +599,12 @@ function TimelineResults({
   const [playerRank, setPlayerRank] = useState<number | null>(null)
   const [artistBest, setArtistBest] = useState<number | null>(null)
   const [isNewBest, setIsNewBest] = useState(false)
+  const [artistRankings, setArtistRankings] = useState<ArtistRanking[]>([])
+  const [artistRankInfo, setArtistRankInfo] = useState<{ rank: number; total: number } | null>(null)
 
-  // Artist mode: self-best (localStorage) + silent play log (Firestore)
+  // Artist mode: self-best (localStorage) + auto-save if name exists
   useEffect(() => {
     if (!artistId || !artistName) return
-    // Self-best
     const key = `soundiq_artist_best_${artistId}`
     const prev = parseFloat(localStorage.getItem(key) ?? '0')
     setArtistBest(prev > 0 ? prev : null)
@@ -611,13 +612,34 @@ function TimelineResults({
       localStorage.setItem(key, String(displayScore))
       setIsNewBest(true)
     }
-    // Silent play log (include name/id for future rankings)
-    const savedName = localStorage.getItem('soundiq_name') ?? undefined
-    const pid = getPlayerId()
-    logArtistPlay(artistId, artistName, displayScore, savedName, pid)
+    // Auto-save if name already registered
+    const savedName = localStorage.getItem('soundiq_name')
+    if (savedName) {
+      setPlayerName(savedName)
+      const pid = getPlayerId()
+      saveArtistPlay(artistId, artistName, displayScore, savedName, pid)
+        .then(result => {
+          setAutoSaveResult(result)
+          setSubmitted(true)
+        })
+        .catch(e => {
+          console.error('saveArtistPlay failed:', e)
+          setAutoSaveResult({ updated: false, bestScore: displayScore })
+          setSubmitted(true)
+        })
+        .finally(() => {
+          getArtistRankings(artistId, 10).then(setArtistRankings).catch(console.error)
+          getArtistPlayerRank(artistId, pid).then(r => {
+            if (r) setArtistRankInfo({ rank: r.rank, total: r.total })
+          }).catch(console.error)
+        })
+    } else {
+      // Load rankings even before registration
+      getArtistRankings(artistId, 10).then(setArtistRankings).catch(console.error)
+    }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Auto-save for returning users (skip in artist mode)
+  // Auto-save for returning users (normal mode only)
   useEffect(() => {
     if (artistId) return
     const savedName = localStorage.getItem('soundiq_name')
@@ -641,12 +663,25 @@ function TimelineResults({
     setSubmitting(true)
     try {
       const pid = getPlayerId()
-      const result = await saveRanking(playerName, displayScore, 'classic', 'year', undefined, 'timeline', pid, region, difficulty)
-      localStorage.setItem('soundiq_name', playerName.trim())
-      setAutoSaveResult(result)
-      setSubmitted(true)
-      const rankResult = await getPlayerRank(pid, 'timeline', region, difficulty)
-      if (rankResult) setPlayerRank(rankResult.rank)
+      if (artistId && artistName) {
+        const result = await saveArtistPlay(artistId, artistName, displayScore, playerName.trim(), pid)
+        localStorage.setItem('soundiq_name', playerName.trim())
+        setAutoSaveResult(result)
+        setSubmitted(true)
+        const [rankings, rankInfo] = await Promise.all([
+          getArtistRankings(artistId, 10),
+          getArtistPlayerRank(artistId, pid),
+        ])
+        setArtistRankings(rankings)
+        if (rankInfo) setArtistRankInfo({ rank: rankInfo.rank, total: rankInfo.total })
+      } else {
+        const result = await saveRanking(playerName, displayScore, 'classic', 'year', undefined, 'timeline', pid, region, difficulty)
+        localStorage.setItem('soundiq_name', playerName.trim())
+        setAutoSaveResult(result)
+        setSubmitted(true)
+        const rankResult = await getPlayerRank(pid, 'timeline', region, difficulty)
+        if (rankResult) setPlayerRank(rankResult.rank)
+      }
     } catch (err) {
       console.error(err)
     } finally {
@@ -696,55 +731,124 @@ function TimelineResults({
           </div>
         )}
 
-        {/* Name registration — hidden in artist mode (share only) */}
-        {!artistId && (
-          <>
-            {!submitted ? (
-              <div className="border border-accent/30 bg-zinc-900 p-4 rounded-xl space-y-3 animate-[fadeInUp_0.5s_ease-out]">
-                <h2 className="text-accent font-bold">{t('registerRanking', lang)}</h2>
-                <input
-                  type="text"
-                  value={playerName}
-                  onChange={e => setPlayerName(e.target.value)}
-                  placeholder={t('nameInput', lang)}
-                  className="w-full p-2.5 rounded-lg bg-zinc-800 text-white outline-none focus:ring-2 focus:ring-accent"
-                />
-                <button
-                  onClick={handleRegister}
-                  disabled={submitting}
-                  className="w-full bg-accent text-white py-2.5 rounded-lg font-semibold hover:brightness-110"
-                >
-                  {submitting ? (lang === 'ja' ? '登録中...' : 'Submitting...') : t('register', lang)}
-                </button>
-              </div>
-            ) : autoSaveResult?.updated ? (
-              <div className="text-center space-y-1">
-                <p className="text-accent font-bold text-lg">{t('newBest', lang)}</p>
-                <p className="text-zinc-400 text-sm">{playerName}</p>
-                {playerRank && (
-                  <p className="text-zinc-500 text-xs">{lang === 'ja' ? `現在 ${playerRank}位` : `Rank #${playerRank}`}</p>
-                )}
-              </div>
-            ) : autoSaveResult && !autoSaveResult.updated && autoSaveResult.bestScore > displayScore ? (
-              <div className="text-center space-y-1">
-                <p className="text-zinc-400 text-sm">
-                  {t('bestLabel', lang)}: {autoSaveResult.bestScore.toFixed(2)}
-                </p>
-                <p className="text-zinc-500 text-xs">{playerName}</p>
-                {playerRank && (
-                  <p className="text-zinc-500 text-xs">{lang === 'ja' ? `現在 ${playerRank}位` : `Rank #${playerRank}`}</p>
-                )}
-              </div>
-            ) : (
-              <div className="text-center space-y-1">
-                <p className="text-accent font-semibold">{t('registered', lang)}</p>
-                <p className="text-zinc-400 text-sm">{playerName}</p>
-                {playerRank && (
-                  <p className="text-zinc-500 text-xs">{lang === 'ja' ? `現在 ${playerRank}位` : `Rank #${playerRank}`}</p>
-                )}
-              </div>
+        {/* Name registration */}
+        {!submitted ? (
+          <div className="border border-accent/30 bg-zinc-900 p-4 rounded-xl space-y-3 animate-[fadeInUp_0.5s_ease-out]">
+            <h2 className="text-accent font-bold">
+              {artistId
+                ? (lang === 'ja' ? 'ランキングに登録' : 'Register to Ranking')
+                : t('registerRanking', lang)
+              }
+            </h2>
+            <input
+              type="text"
+              value={playerName}
+              onChange={e => setPlayerName(e.target.value)}
+              placeholder={t('nameInput', lang)}
+              className="w-full p-2.5 rounded-lg bg-zinc-800 text-white outline-none focus:ring-2 focus:ring-accent"
+            />
+            <button
+              onClick={handleRegister}
+              disabled={submitting}
+              className="w-full bg-accent text-white py-2.5 rounded-lg font-semibold hover:brightness-110"
+            >
+              {submitting ? (lang === 'ja' ? '登録中...' : 'Submitting...') : t('register', lang)}
+            </button>
+          </div>
+        ) : autoSaveResult?.updated ? (
+          <div className="text-center space-y-1">
+            <p className="text-accent font-bold text-lg">{artistId ? (lang === 'ja' ? 'ハイスコア更新！' : 'New High Score!') : t('newBest', lang)}</p>
+            <p className="text-zinc-400 text-sm">{playerName}</p>
+            {!artistId && playerRank && (
+              <p className="text-zinc-500 text-xs">{lang === 'ja' ? `現在 ${playerRank}位` : `Rank #${playerRank}`}</p>
             )}
-          </>
+            {artistId && artistRankInfo && (
+              <p className="text-zinc-500 text-xs">{lang === 'ja' ? `${artistRankInfo.total}人中 ${artistRankInfo.rank}位` : `#${artistRankInfo.rank} of ${artistRankInfo.total}`}</p>
+            )}
+          </div>
+        ) : autoSaveResult && !autoSaveResult.updated && autoSaveResult.bestScore > displayScore ? (
+          <div className="text-center space-y-1">
+            <p className="text-zinc-400 text-sm">
+              {t('bestLabel', lang)}: {autoSaveResult.bestScore.toFixed(2)}
+            </p>
+            <p className="text-zinc-500 text-xs">{playerName}</p>
+            {!artistId && playerRank && (
+              <p className="text-zinc-500 text-xs">{lang === 'ja' ? `現在 ${playerRank}位` : `Rank #${playerRank}`}</p>
+            )}
+            {artistId && artistRankInfo && (
+              <p className="text-zinc-500 text-xs">{lang === 'ja' ? `${artistRankInfo.total}人中 ${artistRankInfo.rank}位` : `#${artistRankInfo.rank} of ${artistRankInfo.total}`}</p>
+            )}
+          </div>
+        ) : submitted ? (
+          <div className="text-center space-y-1">
+            <p className="text-accent font-semibold">{t('registered', lang)}</p>
+            <p className="text-zinc-400 text-sm">{playerName}</p>
+            {!artistId && playerRank && (
+              <p className="text-zinc-500 text-xs">{lang === 'ja' ? `現在 ${playerRank}位` : `Rank #${playerRank}`}</p>
+            )}
+            {artistId && artistRankInfo && (
+              <p className="text-zinc-500 text-xs">{lang === 'ja' ? `${artistRankInfo.total}人中 ${artistRankInfo.rank}位` : `#${artistRankInfo.rank} of ${artistRankInfo.total}`}</p>
+            )}
+          </div>
+        ) : null}
+
+        {/* Artist ranking */}
+        {artistId && artistName && artistRankings.length > 0 && (
+          <div className="border border-accent/20 bg-zinc-900/80 rounded-xl p-4 space-y-3 animate-[fadeInUp_0.5s_ease-out_0.1s_both]">
+            <div className="flex items-center justify-between">
+              <h3 className="text-accent font-bold text-sm">
+                {artistName} {lang === 'ja' ? 'ランキング' : 'Ranking'}
+              </h3>
+              <span className="text-zinc-500 text-xs">
+                {artistRankings.length}{lang === 'ja' ? '人が挑戦' : ' players'}
+              </span>
+            </div>
+            <div className="space-y-1.5">
+              {artistRankings.map((r, i) => {
+                const isMe = r.playerId === getPlayerId()
+                return (
+                  <div
+                    key={`${r.playerId}-${i}`}
+                    className={`flex items-center gap-3 px-3 py-2 rounded-lg ${
+                      isMe
+                        ? 'border border-accent/50 bg-accent/10'
+                        : i < 3 ? 'bg-zinc-800/80' : 'bg-zinc-800/40'
+                    }`}
+                  >
+                    <span className={`w-6 text-center font-black text-sm ${
+                      i === 0 ? 'text-yellow-400' :
+                      i === 1 ? 'text-zinc-300' :
+                      i === 2 ? 'text-amber-600' :
+                      'text-zinc-600'
+                    }`}>
+                      {i + 1}
+                    </span>
+                    <span className={`flex-1 text-sm truncate ${isMe ? 'text-accent font-semibold' : 'text-zinc-300'}`}>
+                      {r.playerName}
+                      {isMe && <span className="text-xs ml-1 opacity-60">YOU</span>}
+                    </span>
+                    <span className={`font-mono text-sm font-bold ${
+                      i === 0 ? 'text-yellow-400' : isMe ? 'text-accent' : 'text-zinc-400'
+                    }`}>
+                      {r.score.toFixed(1)}
+                    </span>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Artist ranking: empty state (no one registered yet) */}
+        {artistId && artistName && submitted && artistRankings.length === 0 && (
+          <div className="border border-accent/20 bg-zinc-900/80 rounded-xl p-4 text-center animate-[fadeInUp_0.5s_ease-out_0.1s_both]">
+            <p className="text-accent font-bold text-sm mb-1">
+              {artistName} {lang === 'ja' ? 'ランキング' : 'Ranking'}
+            </p>
+            <p className="text-zinc-500 text-xs">
+              {lang === 'ja' ? 'あなたが最初の挑戦者です！' : "You're the first challenger!"}
+            </p>
+          </div>
         )}
 
         {/* Play Again */}

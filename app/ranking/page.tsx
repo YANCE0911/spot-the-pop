@@ -3,13 +3,14 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { getTopRankings, getSeasonRankings, getPlayerRank, getCurrentSeasonNumber, getSeasonLabel, getPastSeasons } from '@/lib/ranking'
+import { getTopRankings, getSeasonRankings, getPlayerRank, getCurrentSeasonNumber, getSeasonLabel, getPastSeasons, getArtistRankings, getPopularArtists, getArtistPlayerRank, type ArtistRanking } from '@/lib/ranking'
 import { getPlayerId } from '@/lib/playerId'
 import type { Ranking, Difficulty } from '@/types'
 import { detectLang, type Lang } from '@/lib/i18n'
 import Logo from '@/components/Logo'
+import ArtistSearch from '@/components/ArtistSearch'
 
-type Tab = 'versus' | 'timeline'
+type Tab = 'versus' | 'timeline' | 'artist'
 
 export default function RankingPage() {
   const router = useRouter()
@@ -33,6 +34,14 @@ export default function RankingPage() {
   const [lang] = useState<Lang>(() => detectLang())
   const [playerId, setPlayerId] = useState('')
 
+  // Artist tab state
+  const [artistQuery, setArtistQuery] = useState('')
+  const [selectedArtist, setSelectedArtist] = useState<{ id: string; name: string } | null>(null)
+  const [artistRankings, setArtistRankings] = useState<ArtistRanking[]>([])
+  const [artistRankInfo, setArtistRankInfo] = useState<{ rank: number; total: number } | null>(null)
+  const [popularArtists, setPopularArtists] = useState<{ artistId: string; artistName: string; playerCount: number }[]>([])
+  const [artistLoading, setArtistLoading] = useState(false)
+
   const currentSeason = getCurrentSeasonNumber()
   const [viewingSeason, setViewingSeason] = useState(currentSeason)
   const [showPastSeasons, setShowPastSeasons] = useState(false)
@@ -41,6 +50,28 @@ export default function RankingPage() {
 
   const region = 'jp' as const
   const rankingKey = `${mode}-${difficulty}`
+
+  // Load popular artists when artist tab is selected
+  useEffect(() => {
+    if (mode !== 'artist') return
+    getPopularArtists(20).then(setPopularArtists).catch(console.error)
+  }, [mode])
+
+  // Load artist rankings when an artist is selected
+  useEffect(() => {
+    if (!selectedArtist) return
+    setArtistLoading(true)
+    const pid = getPlayerId()
+    Promise.all([
+      getArtistRankings(selectedArtist.id, 50),
+      getArtistPlayerRank(selectedArtist.id, pid),
+    ]).then(([rankings, rankInfo]) => {
+      setArtistRankings(rankings)
+      if (rankInfo) setArtistRankInfo({ rank: rankInfo.rank, total: rankInfo.total })
+      else setArtistRankInfo(null)
+    }).catch(console.error)
+      .finally(() => setArtistLoading(false))
+  }, [selectedArtist])
 
   useEffect(() => {
     const pid = getPlayerId()
@@ -141,14 +172,14 @@ export default function RankingPage() {
           </div>
         )}
 
-        {/* Game mode + difficulty — 2x2 grid, always visible */}
+        {/* Game mode tabs */}
         <div>
           {/* Mode row */}
           <div className="flex">
             <button
               onClick={() => setMode('timeline')}
               className={`flex-1 pb-2.5 text-sm font-bold transition-all ${
-                mode === 'timeline' ? 'text-accent' : 'text-zinc-600 hover:text-zinc-400'
+                mode === 'timeline' || mode === 'artist' ? 'text-accent' : 'text-zinc-600 hover:text-zinc-400'
               }`}
             >
               TIMELINE
@@ -162,12 +193,12 @@ export default function RankingPage() {
               VERSUS
             </button>
           </div>
-          {/* Difficulty row — grouped under each mode */}
+          {/* Sub-tab row */}
           <div className="flex mt-2">
-            <div className="flex-1 flex justify-center gap-6">
+            <div className="flex-1 flex justify-center gap-4">
               <button
                 onClick={() => { setMode('timeline'); setDifficulty('easy') }}
-                className={`w-16 text-center pb-1.5 text-xs font-bold transition-all border-b-2 ${
+                className={`text-center pb-1.5 text-xs font-bold transition-all border-b-2 ${
                   mode === 'timeline' && difficulty === 'easy'
                     ? 'border-accent text-accent'
                     : 'border-transparent text-zinc-600 hover:text-zinc-400'
@@ -177,7 +208,7 @@ export default function RankingPage() {
               </button>
               <button
                 onClick={() => { setMode('timeline'); setDifficulty('hard') }}
-                className={`w-16 text-center pb-1.5 text-xs font-bold transition-all border-b-2 ${
+                className={`text-center pb-1.5 text-xs font-bold transition-all border-b-2 ${
                   mode === 'timeline' && difficulty === 'hard'
                     ? 'border-accent text-accent'
                     : 'border-transparent text-zinc-600 hover:text-zinc-400'
@@ -185,11 +216,21 @@ export default function RankingPage() {
               >
                 HARD
               </button>
+              <button
+                onClick={() => setMode('artist')}
+                className={`text-center pb-1.5 text-xs font-bold transition-all border-b-2 ${
+                  mode === 'artist'
+                    ? 'border-accent text-accent'
+                    : 'border-transparent text-zinc-600 hover:text-zinc-400'
+                }`}
+              >
+                ARTIST
+              </button>
             </div>
-            <div className="flex-1 flex justify-center gap-6">
+            <div className="flex-1 flex justify-center gap-4">
               <button
                 onClick={() => { setMode('versus'); setDifficulty('easy') }}
-                className={`w-16 text-center pb-1.5 text-xs font-bold transition-all border-b-2 ${
+                className={`text-center pb-1.5 text-xs font-bold transition-all border-b-2 ${
                   mode === 'versus' && difficulty === 'easy'
                     ? 'border-brand text-brand'
                     : 'border-transparent text-zinc-600 hover:text-zinc-400'
@@ -199,7 +240,7 @@ export default function RankingPage() {
               </button>
               <button
                 onClick={() => { setMode('versus'); setDifficulty('hard') }}
-                className={`w-16 text-center pb-1.5 text-xs font-bold transition-all border-b-2 ${
+                className={`text-center pb-1.5 text-xs font-bold transition-all border-b-2 ${
                   mode === 'versus' && difficulty === 'hard'
                     ? 'border-brand text-brand'
                     : 'border-transparent text-zinc-600 hover:text-zinc-400'
@@ -211,8 +252,140 @@ export default function RankingPage() {
           </div>
         </div>
 
-        {/* Rankings list */}
-        {loading ? (
+        {/* Artist tab content */}
+        {mode === 'artist' && (
+          <div className="space-y-4">
+            <ArtistSearch
+              value={artistQuery}
+              onChange={setArtistQuery}
+              onSelect={(name, id) => {
+                if (id) {
+                  setSelectedArtist({ id, name })
+                  setArtistQuery('')
+                }
+              }}
+              placeholder={lang === 'ja' ? 'アーティスト名を検索...' : 'Search artist...'}
+            />
+
+            {selectedArtist && (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-accent font-bold">{selectedArtist.name}</h3>
+                  <button
+                    onClick={() => { setSelectedArtist(null); setArtistRankings([]); setArtistRankInfo(null) }}
+                    className="text-xs text-zinc-500 hover:text-zinc-300 transition-colors"
+                  >
+                    {lang === 'ja' ? '閉じる' : 'Close'}
+                  </button>
+                </div>
+
+                {artistLoading ? (
+                  <div className="flex justify-center py-8">
+                    <div className="animate-spin h-8 w-8 border-4 rounded-full border-t-transparent border-accent" />
+                  </div>
+                ) : artistRankings.length === 0 ? (
+                  <div className="text-center py-8">
+                    <p className="text-zinc-500">{lang === 'ja' ? 'まだランキングがありません' : 'No rankings yet'}</p>
+                    <p className="text-zinc-600 text-sm mt-1">{lang === 'ja' ? '最初の挑戦者になろう！' : 'Be the first challenger!'}</p>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <p className="text-zinc-500 text-xs">
+                      {artistRankings.length}{lang === 'ja' ? '人が挑戦' : ' players'}
+                    </p>
+                    {artistRankings.map((r, i) => {
+                      const isMe = playerId && r.playerId === playerId
+                      return (
+                        <motion.div
+                          key={`${r.playerId}-${i}`}
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: i * 0.02 }}
+                          className={`flex items-center gap-3 p-3 rounded-lg ${
+                            isMe
+                              ? 'border-2 border-accent bg-accent/10'
+                              : i < 3 ? 'bg-zinc-900 border border-zinc-800' : 'bg-zinc-900/50'
+                          }`}
+                        >
+                          <div className={`w-8 text-center font-black text-lg ${
+                            i === 0 ? 'text-yellow-400' :
+                            i === 1 ? 'text-zinc-300' :
+                            i === 2 ? 'text-amber-600' :
+                            'text-zinc-600'
+                          }`}>
+                            {i + 1}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className={`font-semibold truncate ${
+                              isMe ? 'text-accent' : i < 3 ? 'text-white' : 'text-zinc-300'
+                            }`}>
+                              {r.playerName}
+                              {isMe && <span className="text-xs ml-1 opacity-60">YOU</span>}
+                            </p>
+                          </div>
+                          <div className="text-right flex-shrink-0">
+                            <p className={`font-mono font-bold ${
+                              i === 0 ? 'text-yellow-400 text-lg' : i < 3 ? 'text-white' : 'text-zinc-400'
+                            }`}>
+                              {r.score.toFixed(1)}
+                            </p>
+                            <p className="text-zinc-600 text-[10px]">/ 100</p>
+                          </div>
+                        </motion.div>
+                      )
+                    })}
+                  </div>
+                )}
+
+                {artistRankInfo && artistRankInfo.rank > artistRankings.length && (
+                  <div className="p-4 rounded-xl border-2 border-accent/50 bg-accent/5">
+                    <p className="text-zinc-400 text-xs mb-1">{lang === 'ja' ? 'あなたの順位' : 'Your Rank'}</p>
+                    <div className="flex items-center justify-between">
+                      <span className="text-2xl font-black text-accent">#{artistRankInfo.rank}</span>
+                      <span className="text-zinc-400 text-xs">{artistRankInfo.total}{lang === 'ja' ? '人中' : ' players'}</span>
+                    </div>
+                  </div>
+                )}
+
+                <button
+                  onClick={() => window.location.href = `/year?artist=${selectedArtist.id}`}
+                  className="w-full py-3 rounded-lg font-semibold bg-accent text-black hover:brightness-110 transition-all"
+                >
+                  {lang === 'ja' ? 'このアーティストで遊ぶ' : `Play ${selectedArtist.name}`}
+                </button>
+              </div>
+            )}
+
+            {!selectedArtist && popularArtists.length > 0 && (
+              <div className="space-y-2">
+                <p className="text-zinc-500 text-xs font-bold tracking-wider">
+                  {lang === 'ja' ? '人気アーティスト' : 'POPULAR ARTISTS'}
+                </p>
+                {popularArtists.map(a => (
+                  <button
+                    key={a.artistId}
+                    onClick={() => setSelectedArtist({ id: a.artistId, name: a.artistName })}
+                    className="w-full flex items-center justify-between p-3 bg-zinc-900/50 hover:bg-zinc-800 rounded-lg transition-colors text-left"
+                  >
+                    <span className="text-white font-semibold text-sm">{a.artistName}</span>
+                    <span className="text-zinc-500 text-xs">
+                      {a.playerCount}{lang === 'ja' ? '人が挑戦' : ' players'}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {!selectedArtist && popularArtists.length === 0 && (
+              <div className="text-center py-8">
+                <p className="text-zinc-500">{lang === 'ja' ? 'アーティストを検索してランキングを見よう' : 'Search an artist to see rankings'}</p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Rankings list (timeline/versus) */}
+        {mode !== 'artist' && (loading ? (
           <div className="flex justify-center py-12">
             <div className={`animate-spin h-8 w-8 border-4 rounded-full border-t-transparent ${
               accentColor === 'brand' ? 'border-brand' : 'border-accent'
@@ -274,10 +447,10 @@ export default function RankingPage() {
               )
             })}
           </div>
-        )}
+        ))}
 
         {/* Your rank (if outside top 50) */}
-        {isCurrentSeason && myRank && !isInList && (
+        {mode !== 'artist' && isCurrentSeason && myRank && !isInList && (
           <div className={`p-4 rounded-xl border-2 ${
             accentColor === 'brand' ? 'border-brand/50 bg-brand/5' : 'border-accent/50 bg-accent/5'
           }`}>
@@ -296,12 +469,12 @@ export default function RankingPage() {
         )}
 
         {/* Play button */}
-        {isCurrentSeason && (
+        {mode !== 'artist' && isCurrentSeason && (
           <button
             onClick={() => router.push(
               mode === 'versus'
-                ? `/game?difficulty=easy`
-                : `/year?difficulty=easy`
+                ? `/game?metric=followers&difficulty=${difficulty}`
+                : `/year?difficulty=${difficulty}`
             )}
             className={`w-full py-3 rounded-lg font-semibold transition-all ${
               accentColor === 'brand'
@@ -310,13 +483,13 @@ export default function RankingPage() {
             }`}
           >
             {mode === 'versus'
-              ? (lang === 'ja' ? 'VERSUS をプレイ' : 'Play VERSUS')
-              : (lang === 'ja' ? 'TIMELINE をプレイ' : 'Play TIMELINE')
+              ? (lang === 'ja' ? `VERSUS ${difficulty === 'easy' ? 'NORMAL' : 'HARD'} をプレイ` : `Play VERSUS ${difficulty === 'easy' ? 'NORMAL' : 'HARD'}`)
+              : (lang === 'ja' ? `TIMELINE ${difficulty === 'easy' ? 'NORMAL' : 'HARD'} をプレイ` : `Play TIMELINE ${difficulty === 'easy' ? 'NORMAL' : 'HARD'}`)
             }
           </button>
         )}
 
-        {!isCurrentSeason && (
+        {mode !== 'artist' && !isCurrentSeason && (
           <button
             onClick={() => setViewingSeason(currentSeason)}
             className="w-full py-3 rounded-lg font-semibold bg-zinc-800 text-white hover:bg-zinc-700 transition-all"
