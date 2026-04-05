@@ -9,6 +9,11 @@
   --background-rgb: 0, 0, 0;
 }
 
+html, body {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
 body {
   color: rgb(var(--foreground-rgb));
   background: rgb(var(--background-rgb));

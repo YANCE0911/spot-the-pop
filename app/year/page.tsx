@@ -690,7 +690,7 @@ function TimelineResults({
   }
 
   return (
-    <main className="min-h-screen bg-black text-white py-8 px-4 font-sans">
+    <main className="min-h-screen bg-black text-white py-8 px-4 font-sans overflow-y-auto">
       <div className="max-w-lg mx-auto space-y-6">
         {/* Header */}
         <header className="animate-[fadeInUp_0.4s_ease-out]">
