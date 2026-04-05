@@ -170,6 +170,14 @@ export default function Results() {
           <ShareSection score={score} mode="versus" lang={lang} challengeUrl={challengeUrl} />
         </div>
 
+        {/* Ranking link */}
+        <button
+          onClick={() => router.push('/ranking')}
+          className="w-full bg-zinc-700 hover:bg-zinc-600 text-white font-bold py-3 rounded-xl transition-all text-sm"
+        >
+          {lang === 'ja' ? 'ランキングを見る' : 'View Rankings'}
+        </button>
+
         {/* Round results */}
         <div className="space-y-2">
           <h2 className="text-brand font-bold">{t('roundResults', lang)}</h2>
@@ -204,13 +212,15 @@ export default function Results() {
           ))}
         </div>
 
-        {/* Top */}
-        <button
-          onClick={() => router.push('/')}
-          className="w-full bg-zinc-800 text-white py-3 rounded-lg font-sans font-semibold hover:bg-zinc-700 transition-all text-sm"
-        >
-          {t('top', lang)}
-        </button>
+        {/* Top link */}
+        <div className="text-center">
+          <button
+            onClick={() => router.push('/')}
+            className="text-zinc-500 hover:text-zinc-300 text-sm transition-colors"
+          >
+            {t('top', lang)}
+          </button>
+        </div>
 
         {/* Support link */}
         <div className="text-center pt-2">

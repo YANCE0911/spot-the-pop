@@ -869,6 +869,20 @@ function TimelineResults({
           <ShareSection score={displayScore} mode="timeline" lang={lang} artistName={artistName ?? undefined} />
         </div>
 
+        {/* Ranking link */}
+        <button
+          onClick={() => {
+            if (artistId) {
+              router.push('/ranking?tab=artist')
+            } else {
+              router.push('/ranking')
+            }
+          }}
+          className="w-full bg-zinc-700 hover:bg-zinc-600 text-white font-bold py-3 rounded-xl transition-all text-sm"
+        >
+          {lang === 'ja' ? 'ランキングを見る' : 'View Rankings'}
+        </button>
+
         {/* Round results */}
         <div className="space-y-2">
           <h2 className="text-accent font-bold">{t('roundResults', lang)}</h2>
@@ -904,13 +918,15 @@ function TimelineResults({
           {lang === 'ja' ? '※Spotifyの登録情報に基づく発売年です' : 'Release years based on Spotify data'}
         </p>
 
-        {/* Top */}
-        <button
-          onClick={() => router.push('/')}
-          className="w-full bg-zinc-800 text-white py-3 rounded-lg font-sans font-semibold hover:bg-zinc-700 transition-all text-sm"
-        >
-          {t('top', lang)}
-        </button>
+        {/* Top link */}
+        <div className="text-center">
+          <button
+            onClick={() => router.push('/')}
+            className="text-zinc-500 hover:text-zinc-300 text-sm transition-colors"
+          >
+            {t('top', lang)}
+          </button>
+        </div>
 
         {/* Support link */}
         <div className="text-center pt-2">
