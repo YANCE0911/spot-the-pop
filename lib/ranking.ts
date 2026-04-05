@@ -312,7 +312,7 @@ export type ArtistRanking = {
   playerName: string
   playerId: string
   score: number
-  createdAt: any
+  createdAt: Timestamp
 }
 
 // Save artist play with best-score-only logic per playerId + artistId
