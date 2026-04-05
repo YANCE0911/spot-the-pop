@@ -11,6 +11,13 @@ import { formatMetricValue } from '@/lib/metrics'
 import { detectLang, t, type Lang } from '@/lib/i18n'
 import Logo from '@/components/Logo'
 
+function withTimeout<T>(promise: Promise<T>, ms: number, fallback: T): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>(resolve => setTimeout(() => resolve(fallback), ms)),
+  ])
+}
+
 export default function Results() {
   const router = useRouter()
   const [score, setScore] = useState(0)
@@ -43,16 +50,19 @@ export default function Results() {
         const displayScore = Math.round(data.score * 100) / 100
         const pid = getPlayerId()
         const region = 'jp' as const
-        saveRanking(savedName, displayScore, undefined, undefined, undefined, 'versus', pid, region, diff)
+        withTimeout(saveRanking(savedName, displayScore, undefined, undefined, undefined, 'versus', pid, region, diff), 8000, { updated: false, bestScore: displayScore })
           .then(result => {
             setAutoSaveResult(result)
             setSubmitted(true)
-            return getPlayerRank(pid, 'versus', region, diff)
+            return withTimeout(getPlayerRank(pid, 'versus', region, diff), 8000, null)
           })
           .then(rankResult => {
             if (rankResult) setPlayerRank(rankResult.rank)
           })
-          .catch(console.error)
+          .catch(e => {
+            console.error('Auto-save failed:', e)
+            setSubmitted(true)
+          })
       } else if (localStorage.getItem('rankingSubmitted') === 'true') {
         setSubmitted(true)
       }
@@ -68,12 +78,12 @@ export default function Results() {
       const displayScore = Math.round(score * 100) / 100
       const pid = getPlayerId()
       const region = 'jp' as const
-      const result = await saveRanking(playerName, displayScore, undefined, undefined, undefined, 'versus', pid, region, difficulty)
+      const result = await withTimeout(saveRanking(playerName, displayScore, undefined, undefined, undefined, 'versus', pid, region, difficulty), 8000, { updated: false, bestScore: displayScore })
       localStorage.setItem('soundiq_name', playerName.trim())
       localStorage.setItem('rankingSubmitted', 'true')
       setAutoSaveResult(result)
       setSubmitted(true)
-      const rankResult = await getPlayerRank(pid, 'versus', region, difficulty)
+      const rankResult = await withTimeout(getPlayerRank(pid, 'versus', region, difficulty), 8000, null)
       if (rankResult) setPlayerRank(rankResult.rank)
 
       const questions = results.map(r => r.themeArtist)

@@ -28,6 +28,10 @@ function GameContent() {
   const [pendingConfirm, setPendingConfirm] = useState<Artist | null>(null)
 
   useEffect(() => {
+    // Track last played mode/difficulty for ranking page
+    localStorage.setItem('soundiq_last_mode', 'versus')
+    localStorage.setItem('soundiq_last_difficulty', difficulty)
+
     localStorage.removeItem('rankingSubmitted')
     const fetchQuestions = async () => {
       try {

@@ -13,6 +13,14 @@ import { detectLang, t, type Lang } from '@/lib/i18n'
 import { playTick, playGo, playReaction } from '@/lib/sound'
 import type { Difficulty } from '@/types'
 
+// Timeout wrapper for Firestore calls to prevent hanging
+function withTimeout<T>(promise: Promise<T>, ms: number, fallback: T): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>(resolve => setTimeout(() => resolve(fallback), ms)),
+  ])
+}
+
 type TrackQuestion = {
   trackName: string
   singleName: string
@@ -183,6 +191,10 @@ function YearGame() {
   const elapsedTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   useEffect(() => {
+    // Track last played mode/difficulty for ranking page
+    localStorage.setItem('soundiq_last_mode', artistId ? 'artist' : 'timeline')
+    localStorage.setItem('soundiq_last_difficulty', gameDifficulty)
+
     // Always start fresh on load/reload
     localStorage.removeItem('yearGameResults')
     localStorage.removeItem(PROGRESS_KEY)
@@ -617,7 +629,7 @@ function TimelineResults({
     if (savedName) {
       setPlayerName(savedName)
       const pid = getPlayerId()
-      saveArtistPlay(artistId, artistName, displayScore, savedName, pid)
+      withTimeout(saveArtistPlay(artistId, artistName, displayScore, savedName, pid), 8000, { updated: false, bestScore: displayScore })
         .then(result => {
           setAutoSaveResult(result)
           setSubmitted(true)
@@ -628,14 +640,14 @@ function TimelineResults({
           setSubmitted(true)
         })
         .finally(() => {
-          getArtistRankings(artistId, 10).then(setArtistRankings).catch(console.error)
-          getArtistPlayerRank(artistId, pid).then(r => {
+          withTimeout(getArtistRankings(artistId, 10), 8000, []).then(setArtistRankings).catch(console.error)
+          withTimeout(getArtistPlayerRank(artistId, pid), 8000, null).then(r => {
             if (r) setArtistRankInfo({ rank: r.rank, total: r.total })
           }).catch(console.error)
         })
     } else {
       // Load rankings even before registration
-      getArtistRankings(artistId, 10).then(setArtistRankings).catch(console.error)
+      withTimeout(getArtistRankings(artistId, 10), 8000, []).then(setArtistRankings).catch(console.error)
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -646,16 +658,19 @@ function TimelineResults({
     if (!savedName) return
     setPlayerName(savedName)
     const pid = getPlayerId()
-    saveRanking(savedName, displayScore, 'classic', 'year', undefined, 'timeline', pid, region, difficulty)
+    withTimeout(saveRanking(savedName, displayScore, 'classic', 'year', undefined, 'timeline', pid, region, difficulty), 8000, { updated: false, bestScore: displayScore })
       .then(result => {
         setAutoSaveResult(result)
         setSubmitted(true)
-        return getPlayerRank(pid, 'timeline', region, difficulty)
+        return withTimeout(getPlayerRank(pid, 'timeline', region, difficulty), 8000, null)
       })
       .then(rankResult => {
         if (rankResult) setPlayerRank(rankResult.rank)
       })
-      .catch(console.error)
+      .catch(e => {
+        console.error('Auto-save failed:', e)
+        setSubmitted(true)
+      })
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleRegister = async () => {
