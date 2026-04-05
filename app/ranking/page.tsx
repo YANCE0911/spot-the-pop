@@ -14,20 +14,18 @@ type Tab = 'versus' | 'timeline' | 'artist'
 
 export default function RankingPage() {
   const router = useRouter()
-  const [mode, setMode] = useState<Tab>(() => {
-    if (typeof window !== 'undefined') {
-      const last = localStorage.getItem('soundiq_last_mode') as Tab | null
-      if (last === 'versus' || last === 'timeline') return last
-    }
-    return 'timeline'
-  })
-  const [difficulty, setDifficulty] = useState<Difficulty>(() => {
-    if (typeof window !== 'undefined') {
-      const last = localStorage.getItem('soundiq_last_difficulty') as Difficulty | null
-      if (last === 'easy' || last === 'hard') return last
-    }
-    return 'easy'
-  })
+  const [mode, setMode] = useState<Tab>('timeline')
+  const [difficulty, setDifficulty] = useState<Difficulty>('easy')
+  const [initialized, setInitialized] = useState(false)
+
+  // Read last played mode/difficulty from localStorage on mount
+  useEffect(() => {
+    const lastMode = localStorage.getItem('soundiq_last_mode') as Tab | null
+    const lastDiff = localStorage.getItem('soundiq_last_difficulty') as Difficulty | null
+    if (lastMode === 'versus' || lastMode === 'timeline') setMode(lastMode)
+    if (lastDiff === 'easy' || lastDiff === 'hard') setDifficulty(lastDiff)
+    setInitialized(true)
+  }, [])
   const [rankings, setRankings] = useState<Record<string, Ranking[]>>({})
   const [myRanks, setMyRanks] = useState<Record<string, { rank: number; score: number } | null>>({})
   const [loading, setLoading] = useState(true)
@@ -74,6 +72,7 @@ export default function RankingPage() {
   }, [selectedArtist])
 
   useEffect(() => {
+    if (!initialized) return
     const pid = getPlayerId()
     setPlayerId(pid)
     setLoading(true)
@@ -106,7 +105,7 @@ export default function RankingPage() {
       }
     }).catch(console.error)
       .finally(() => setLoading(false))
-  }, [viewingSeason, isCurrentSeason])
+  }, [viewingSeason, isCurrentSeason, initialized])
 
   const activeRankings = rankings[rankingKey] ?? []
   const myRank = myRanks[rankingKey] ?? null
