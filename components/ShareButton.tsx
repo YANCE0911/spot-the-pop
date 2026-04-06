@@ -13,7 +13,7 @@ type Props = {
   lang?: Lang
 }
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://soundiq.vercel.app'
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://soundiq.app'
 
 function getRankLabel(score: number): { label: string; color: string } {
   if (score >= 90) return { label: 'S', color: 'text-yellow-400' }

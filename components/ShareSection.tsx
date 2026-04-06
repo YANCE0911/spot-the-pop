@@ -11,7 +11,7 @@ type Props = {
   artistName?: string
 }
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://soundiq.vercel.app'
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://soundiq.app'
 
 function getRankLabel(score: number): string {
   if (score >= 90) return 'S'

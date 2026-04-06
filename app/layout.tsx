@@ -14,13 +14,13 @@ export const metadata: Metadata = {
     description: 'How deep is your music knowledge?',
     siteName: 'SOUND IQ',
     type: 'website',
-    images: ['https://soundiq.vercel.app/og-brand.png?v=7'],
+    images: ['https://soundiq.app/og-brand.png?v=7'],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'SOUND IQ',
     description: 'How deep is your music knowledge?',
-    images: ['https://soundiq.vercel.app/og-brand.png?v=7'],
+    images: ['https://soundiq.app/og-brand.png?v=7'],
   },
 }
 
@@ -32,6 +32,44 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+        <Script id="domain-migrate" strategy="beforeInteractive">
+          {`
+            (function() {
+              var OLD_HOST = 'soundiq.vercel.app';
+              var NEW_HOST = 'soundiq.app';
+              var KEYS = ['soundiq_player_id', 'soundiq_name', 'soundiq_last_mode', 'soundiq_last_difficulty', 'soundiq_timeline_difficulty', 'soundiq_versus_difficulty', 'soundiq_visited', 'soundiq_lang'];
+
+              // On old domain: collect localStorage and redirect to new domain
+              if (location.hostname === OLD_HOST || location.hostname === 'spot-the-pop.vercel.app') {
+                var data = {};
+                for (var i = 0; i < KEYS.length; i++) {
+                  var v = localStorage.getItem(KEYS[i]);
+                  if (v) data[KEYS[i]] = v;
+                }
+                var qs = Object.keys(data).length > 0 ? '?migrate=' + encodeURIComponent(JSON.stringify(data)) : '';
+                location.replace('https://' + NEW_HOST + location.pathname + qs);
+                return;
+              }
+
+              // On new domain: import migrated data
+              if (location.hostname === NEW_HOST) {
+                var params = new URLSearchParams(location.search);
+                var raw = params.get('migrate');
+                if (raw) {
+                  try {
+                    var d = JSON.parse(raw);
+                    for (var k in d) {
+                      if (!localStorage.getItem(k)) localStorage.setItem(k, d[k]);
+                    }
+                  } catch(e) {}
+                  params.delete('migrate');
+                  var clean = params.toString();
+                  history.replaceState(null, '', location.pathname + (clean ? '?' + clean : ''));
+                }
+              }
+            })();
+          `}
+        </Script>
         <Script src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`} strategy="afterInteractive" />
         <Script id="gtag-init" strategy="afterInteractive">
           {`
