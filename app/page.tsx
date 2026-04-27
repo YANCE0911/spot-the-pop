@@ -181,7 +181,7 @@ export default function Home() {
 
         {/* Credit & Support */}
         <div className="text-center pt-4 animate-[fadeInUp_0.5s_ease-out_0.3s_both] space-y-2">
-          <p className="text-zinc-500 text-sm">
+          <p className="text-zinc-400 text-sm">
             Created by{' '}
             <a
               href="https://x.com/sbsysil"
@@ -199,7 +199,7 @@ export default function Home() {
             href="https://buymeacoffee.com/yance"
             target="_blank"
             rel="noopener noreferrer"
-            className="block text-zinc-600 hover:text-zinc-400 text-sm transition-colors"
+            className="block text-zinc-500 hover:text-zinc-300 text-sm transition-colors underline underline-offset-4 decoration-zinc-700 hover:decoration-zinc-400"
           >
             {lang === 'ja' ? 'Buy Me a Coffee で応援する' : 'Support on Buy Me a Coffee'}
           </a>
