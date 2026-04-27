@@ -181,7 +181,7 @@ export default function Home() {
 
         {/* Credit & Support */}
         <div className="text-center pt-4 animate-[fadeInUp_0.5s_ease-out_0.3s_both] space-y-2">
-          <p className="text-zinc-400 text-sm">
+          <p className="text-zinc-600 text-sm">
             Created by{' '}
             <a
               href="https://x.com/sbsysil"
