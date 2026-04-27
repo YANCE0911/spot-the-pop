@@ -180,28 +180,29 @@ export default function Home() {
         </div>
 
         {/* Credit & Support */}
-        <div className="text-center pt-4 animate-[fadeInUp_0.5s_ease-out_0.3s_both] space-y-3">
-          <p className="text-zinc-400 text-sm">
-            Created by{' '}
-            <a
-              href="https://x.com/sbsysil"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-white font-bold hover:text-zinc-300 transition-colors inline-flex items-center gap-1.5 underline underline-offset-4 decoration-zinc-600 hover:decoration-white"
-            >
-              YANCE
-              <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 fill-current" aria-hidden="true">
-                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-              </svg>
-            </a>
-          </p>
+        <div className="flex flex-wrap justify-center items-center gap-2.5 pt-4 animate-[fadeInUp_0.5s_ease-out_0.3s_both]">
+          <a
+            href="https://x.com/sbsysil"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-white/20 hover:border-white bg-white/5 hover:bg-white/10 text-white text-xs transition-all"
+          >
+            <span className="text-zinc-400">Created by</span>
+            <span className="font-bold">YANCE</span>
+            <svg viewBox="0 0 24 24" className="w-3 h-3 fill-current" aria-hidden="true">
+              <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+            </svg>
+          </a>
           <a
             href="https://buymeacoffee.com/yance"
             target="_blank"
             rel="noopener noreferrer"
-            className="block text-zinc-600 hover:text-zinc-400 text-xs transition-colors"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-white/20 hover:border-white bg-white/5 hover:bg-white/10 text-amber-200/80 hover:text-amber-200 text-xs transition-all"
           >
-            {lang === 'ja' ? 'Buy Me a Coffee で応援する' : 'Support on Buy Me a Coffee'}
+            <svg viewBox="0 0 24 24" className="w-3 h-3 stroke-current fill-none opacity-80" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M18 8h1a4 4 0 0 1 0 8h-1M5 8h13v9a4 4 0 0 1-4 4H9a4 4 0 0 1-4-4V8zM6 1v3M10 1v3M14 1v3"/>
+            </svg>
+            <span>{lang === 'ja' ? 'Buy Me a Coffee' : 'Buy Me a Coffee'}</span>
           </a>
         </div>
       </div>
