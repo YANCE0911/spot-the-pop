@@ -46,7 +46,7 @@ export async function GET(req: NextRequest) {
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%', backgroundColor: '#0A0A0A', fontFamily: 'Montserrat', position: 'relative' }}>
           <div style={{ display: 'flex', fontSize: '90px', fontWeight: 900, color: '#A1A1AA', letterSpacing: '-0.02em', lineHeight: 1 }}>SOUND IQ</div>
           <div style={{ display: 'flex', fontSize: '120px', fontWeight: 900, color: '#D4D4D8', fontFamily: 'NotoSansJP', lineHeight: 1, marginTop: '40px' }}>あなたの音楽IQは？</div>
-          <div style={{ display: 'flex', position: 'absolute', bottom: '40px', right: '60px', fontSize: '28px', fontWeight: 900, color: '#71717a', letterSpacing: '0.02em' }}>created by @sbsysil</div>
+          <div style={{ display: 'flex', position: 'absolute', bottom: '40px', right: '60px', fontSize: '28px', fontWeight: 900, color: '#71717a', letterSpacing: '0.02em' }}>created by YANCE</div>
         </div>
       ),
       {
@@ -77,7 +77,7 @@ export async function GET(req: NextRequest) {
           </div>
           <div style={{ display: 'flex', fontSize: '80px', fontWeight: 900, color: grade.color, marginTop: '24px' }}>{grade.label}</div>
         </div>
-        <div style={{ display: 'flex', position: 'absolute', bottom: '32px', right: '60px', fontSize: '24px', fontWeight: 900, color: '#52525b', letterSpacing: '0.02em' }}>created by @sbsysil</div>
+        <div style={{ display: 'flex', position: 'absolute', bottom: '32px', right: '60px', fontSize: '24px', fontWeight: 900, color: '#52525b', letterSpacing: '0.02em' }}>created by YANCE</div>
       </div>
     ),
     {
