@@ -199,9 +199,17 @@ export default function Home() {
             href="https://buymeacoffee.com/yance"
             target="_blank"
             rel="noopener noreferrer"
-            className="block text-zinc-500 hover:text-zinc-300 text-sm transition-colors underline underline-offset-4 decoration-zinc-700 hover:decoration-zinc-400"
+            className="block text-zinc-600 hover:text-zinc-400 text-sm transition-colors"
           >
-            {lang === 'ja' ? 'Buy Me a Coffee で応援する' : 'Support on Buy Me a Coffee'}
+            {lang === 'ja' ? (
+              <>
+                <span className="underline underline-offset-4 decoration-zinc-700 group-hover:decoration-zinc-500">Buy Me a Coffee</span> で応援する
+              </>
+            ) : (
+              <>
+                Support on <span className="underline underline-offset-4 decoration-zinc-700 group-hover:decoration-zinc-500">Buy Me a Coffee</span>
+              </>
+            )}
           </a>
         </div>
       </div>
