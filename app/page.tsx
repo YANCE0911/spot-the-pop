@@ -71,12 +71,12 @@ export default function Home() {
 
         {/* Game mode cards */}
         <div className="space-y-4 animate-[fadeInUp_0.5s_ease-out_0.1s_both] overflow-visible">
-          {/* TIMELINE */}
+          {/* TIMELINE (display: WHEN?) */}
           <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl px-8 py-5 card-glow-timeline relative z-20 overflow-visible">
             <div className="flex items-end justify-between mb-4">
               <p className="text-gradient-warm font-display font-black text-3xl tracking-wider flex items-center gap-2">
                 <span className="inline-block w-0 h-0 border-t-[8px] border-t-transparent border-b-[8px] border-b-transparent border-l-[12px] border-l-accent" />
-                TIMELINE
+                WHEN?
               </p>
               <span className="text-sm font-semibold text-zinc-500">{lang === 'ja' ? '全10問' : '10 Rounds'}</span>
             </div>
@@ -131,12 +131,12 @@ export default function Home() {
             )}
           </div>
 
-          {/* VERSUS */}
+          {/* VERSUS (display: WHO?) */}
           <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl px-8 py-5 card-glow-versus relative z-0">
             <div className="flex items-end justify-between mb-4">
               <p className="text-gradient font-display font-black text-3xl tracking-wider flex items-center gap-2">
                 <span className="inline-block w-0 h-0 border-t-[8px] border-t-transparent border-b-[8px] border-b-transparent border-l-[12px] border-l-brand" />
-                VERSUS
+                WHO?
               </p>
               <span className="text-sm font-semibold text-zinc-500">{lang === 'ja' ? '全5問' : '5 Rounds'}</span>
             </div>
@@ -179,13 +179,27 @@ export default function Home() {
           </button>
         </div>
 
-        {/* Support link */}
-        <div className="text-center pt-2 animate-[fadeInUp_0.5s_ease-out_0.3s_both]">
+        {/* Credit & Support */}
+        <div className="text-center pt-4 animate-[fadeInUp_0.5s_ease-out_0.3s_both] space-y-3">
+          <p className="text-zinc-400 text-sm">
+            Created by{' '}
+            <a
+              href="https://x.com/sbsysil"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-white font-bold hover:text-zinc-300 transition-colors inline-flex items-center gap-1.5 underline underline-offset-4 decoration-zinc-600 hover:decoration-white"
+            >
+              YANCE
+              <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 fill-current" aria-hidden="true">
+                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+              </svg>
+            </a>
+          </p>
           <a
             href="https://buymeacoffee.com/yance"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-zinc-600 hover:text-zinc-400 text-xs transition-colors"
+            className="block text-zinc-600 hover:text-zinc-400 text-xs transition-colors"
           >
             {lang === 'ja' ? 'Buy Me a Coffee で応援する' : 'Support on Buy Me a Coffee'}
           </a>
@@ -202,7 +216,7 @@ export default function Home() {
 
             <div className="space-y-3 text-sm">
               <div>
-                <p className="text-accent font-bold mb-1">TIMELINE</p>
+                <p className="text-accent font-bold mb-1">WHEN?</p>
                 <p className="text-zinc-400 text-xs leading-relaxed">
                   {lang === 'ja'
                     ? '曲のリリース年を当てるクイズ'
@@ -211,7 +225,7 @@ export default function Home() {
               </div>
 
               <div>
-                <p className="text-brand font-bold mb-1">VERSUS</p>
+                <p className="text-brand font-bold mb-1">WHO?</p>
                 <p className="text-zinc-400 text-xs leading-relaxed">
                   {lang === 'ja'
                     ? 'お題アーティストとフォロワー数が近いアーティストを当てるクイズ'
@@ -221,7 +235,7 @@ export default function Home() {
 
               <div className="border-t border-zinc-800 pt-3 text-zinc-500 text-xs leading-relaxed space-y-1">
                 <p><span className="text-zinc-400">NORMAL:</span> {lang === 'ja' ? 'ヒット曲・有名アーティスト' : 'Hit songs & famous artists'}</p>
-                <p><span className="text-zinc-400">HARD:</span> {lang === 'ja' ? '制限なし（TIMELINEは速度ボーナスあり）' : 'No limits (speed bonus on TIMELINE)'}</p>
+                <p><span className="text-zinc-400">HARD:</span> {lang === 'ja' ? '制限なし（WHEN?は速度ボーナスあり）' : 'No limits (speed bonus on WHEN?)'}</p>
               </div>
             </div>
 

@@ -49,6 +49,20 @@ export default function RankingPage() {
   const pastSeasons = getPastSeasons(lang)
   const isCurrentSeason = viewingSeason === currentSeason
 
+  const [isAdmin, setIsAdmin] = useState(false)
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    if (params.get('admin') === '1') setIsAdmin(true)
+  }, [])
+
+  const MOCK_NAMES = new Set([
+    'Jeep', '傳次郎', 'ay', 'マイネール', 'Flea', 'ぽんず', 'DOTT', '甘栗',
+    'rx7', 'ミゾレ', 'BARK', '千歳', 'glu', 'ヤマダ電機', 'Peco', '凪',
+    'TOFU', '銀杏', 'mk2', 'シャバーニ', 'Lento', '無印', 'CRAB', '半蔵',
+    'oui', 'ドリアン', 'Stitch', '末吉', 'fn', 'ゴエモン',
+  ])
+
   const region = 'jp' as const
   const rankingKey = `${mode}-${difficulty}`
 
@@ -184,7 +198,7 @@ export default function RankingPage() {
                 mode === 'timeline' || mode === 'artist' ? 'text-accent' : 'text-zinc-600 hover:text-zinc-400'
               }`}
             >
-              TIMELINE
+              WHEN?
             </button>
             <button
               onClick={() => setMode('versus')}
@@ -192,7 +206,7 @@ export default function RankingPage() {
                 mode === 'versus' ? 'text-brand' : 'text-zinc-600 hover:text-zinc-400'
               }`}
             >
-              VERSUS
+              WHO?
             </button>
           </div>
           {/* Sub-tab row */}
@@ -323,6 +337,7 @@ export default function RankingPage() {
                             }`}>
                               {r.playerName}
                               {isMe && <span className="text-xs ml-1 opacity-60">YOU</span>}
+                              {isAdmin && MOCK_NAMES.has(r.playerName) && <span className="text-red-500/40 text-[8px] ml-1">M</span>}
                             </p>
                           </div>
                           <div className="text-right flex-shrink-0">
@@ -433,6 +448,7 @@ export default function RankingPage() {
                     }`}>
                       {r.name}
                       {isMe && <span className="text-xs ml-1 opacity-60">YOU</span>}
+                      {isAdmin && MOCK_NAMES.has(r.name) && <span className="text-red-500/40 text-[8px] ml-1">M</span>}
                     </p>
                   </div>
                   <div className="text-right flex-shrink-0">
@@ -485,8 +501,8 @@ export default function RankingPage() {
             }`}
           >
             {mode === 'versus'
-              ? (lang === 'ja' ? `VERSUS ${difficulty === 'easy' ? 'NORMAL' : 'HARD'} をプレイ` : `Play VERSUS ${difficulty === 'easy' ? 'NORMAL' : 'HARD'}`)
-              : (lang === 'ja' ? `TIMELINE ${difficulty === 'easy' ? 'NORMAL' : 'HARD'} をプレイ` : `Play TIMELINE ${difficulty === 'easy' ? 'NORMAL' : 'HARD'}`)
+              ? (lang === 'ja' ? `WHO? ${difficulty === 'easy' ? 'NORMAL' : 'HARD'} をプレイ` : `Play WHO? ${difficulty === 'easy' ? 'NORMAL' : 'HARD'}`)
+              : (lang === 'ja' ? `WHEN? ${difficulty === 'easy' ? 'NORMAL' : 'HARD'} をプレイ` : `Play WHEN? ${difficulty === 'easy' ? 'NORMAL' : 'HARD'}`)
             }
           </button>
         )}

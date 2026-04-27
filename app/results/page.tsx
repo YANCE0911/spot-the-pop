@@ -109,7 +109,7 @@ export default function Results() {
         {/* Header */}
         <header className="animate-[fadeInUp_0.4s_ease-out]">
           <div className="mb-4"><Logo size="sm" /></div>
-          <h2 className="text-brand text-lg font-bold mb-2 text-center">VERSUS <span className="text-zinc-500 text-sm">{difficulty === 'easy' ? 'NORMAL' : 'HARD'}</span> {t('results', lang)}</h2>
+          <h2 className="text-brand text-lg font-bold mb-2 text-center">WHO? <span className="text-zinc-500 text-sm">{difficulty === 'easy' ? 'NORMAL' : 'HARD'}</span> {t('results', lang)}</h2>
           <div className="text-center">
             <p className="text-5xl font-black animate-[countUp_0.6s_ease-out_0.2s_both]">
               {displayScore.toFixed(2)}

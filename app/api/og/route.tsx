@@ -32,7 +32,7 @@ export async function GET(req: NextRequest) {
   const mode = searchParams.get('mode') ?? 'versus'
   const isTimeline = mode === 'timeline'
   const accentColor = isTimeline ? '#a855f7' : '#1DB954'
-  const modeLabel = isTimeline ? 'TIMELINE' : 'VERSUS'
+  const modeLabel = isTimeline ? 'WHEN?' : 'WHO?'
 
   // Brand mode: static image without scores
   if (brand === '1') {
@@ -43,9 +43,10 @@ export async function GET(req: NextRequest) {
 
     return new ImageResponse(
       (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%', backgroundColor: '#0A0A0A', fontFamily: 'Montserrat' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%', backgroundColor: '#0A0A0A', fontFamily: 'Montserrat', position: 'relative' }}>
           <div style={{ display: 'flex', fontSize: '90px', fontWeight: 900, color: '#A1A1AA', letterSpacing: '-0.02em', lineHeight: 1 }}>SOUND IQ</div>
           <div style={{ display: 'flex', fontSize: '120px', fontWeight: 900, color: '#D4D4D8', fontFamily: 'NotoSansJP', lineHeight: 1, marginTop: '40px' }}>あなたの音楽IQは？</div>
+          <div style={{ display: 'flex', position: 'absolute', bottom: '40px', right: '60px', fontSize: '28px', fontWeight: 900, color: '#71717a', letterSpacing: '0.02em' }}>created by @sbsysil</div>
         </div>
       ),
       {
@@ -62,11 +63,11 @@ export async function GET(req: NextRequest) {
   const numScore = parseFloat(score)
   const grade = getGrade(numScore)
   const artist = searchParams.get('artist')
-  const headerLabel = artist ? `TIMELINE - ${artist}` : `${modeLabel} RESULTS`
+  const headerLabel = artist ? `WHEN? - ${artist}` : `${modeLabel} RESULTS`
 
   return new ImageResponse(
     (
-      <div style={{ display: 'flex', flexDirection: 'column', width: '100%', height: '100%', backgroundColor: '#000', padding: '60px 80px', fontFamily: 'Montserrat' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', width: '100%', height: '100%', backgroundColor: '#000', padding: '60px 80px', fontFamily: 'Montserrat', position: 'relative' }}>
         <div style={{ display: 'flex', fontSize: '52px', fontWeight: 900, color: '#71717a', letterSpacing: '-0.02em' }}>SOUND IQ</div>
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1 }}>
           <div style={{ display: 'flex', fontSize: artist ? '56px' : '32px', fontWeight: 900, color: accentColor, letterSpacing: '0.08em', fontFamily: 'NotoSansJP' }}>{headerLabel}</div>
@@ -76,6 +77,7 @@ export async function GET(req: NextRequest) {
           </div>
           <div style={{ display: 'flex', fontSize: '80px', fontWeight: 900, color: grade.color, marginTop: '24px' }}>{grade.label}</div>
         </div>
+        <div style={{ display: 'flex', position: 'absolute', bottom: '32px', right: '60px', fontSize: '24px', fontWeight: 900, color: '#52525b', letterSpacing: '0.02em' }}>created by @sbsysil</div>
       </div>
     ),
     {

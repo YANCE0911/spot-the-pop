@@ -4,11 +4,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## プロジェクト概要
 
-Spotify API を利用した音楽クイズゲーム。2つのゲームモードを搭載:
+Spotify API を利用した音楽クイズゲーム「SOUND IQ」。2つのゲームモードを搭載:
 - **TIMELINE**: 曲の発売年を当てるクイズ（10問、速度ボーナスあり）
 - **VERSUS**: お題アーティストと同じくらいのフォロワー数を持つアーティストを予想（5問）
 
 各モードに NORMAL/HARD の難易度があり、四半期シーズン制のランキングで競う。PWA 対応・EN/JA バイリンガルの Web アプリ。
+ドメイン: soundiq.app
 
 ## 技術スタック
 
@@ -47,6 +48,11 @@ npm run expand-pool          # アーティストプール拡張
 npm run expand-pool:dry      # ドライラン
 npm run discover-playlists   # プレイリストからアーティスト発見
 npm run discover-playlists:dry
+
+# ランキングデータ管理（手動実行）
+npx ts-node scripts/seedRankings.ts       # モックランキングデータ投入
+npx ts-node scripts/seedArtistPlays.ts    # モックアーティストプレイ数投入
+npx ts-node scripts/resetRankings.ts      # モックデータリセット＋再投入
 ```
 
 ## ディレクトリ構成
@@ -67,27 +73,29 @@ spot-the-pop/
 │   ├── ranking/
 │   │   ├── page.tsx          # ランキング一覧（2x2: MODE × DIFFICULTY）
 │   │   └── history/
+│   │       ├── page.tsx      # 歴代ランキング（シーズン選択）
 │   │       └── season0/page.tsx  # シーズン0アーカイブ
 │   ├── challenge/[id]/page.tsx   # フレンドチャレンジ
 │   └── api/og/route.tsx      # OG画像生成（App Router API）
-├── pages/api/                # API Routes (Pages Router)
-│   ├── randomArtist.ts       # ランダムアーティスト取得
-│   ├── popularity.ts         # アーティスト人気度取得
-│   ├── search.ts             # アーティスト検索（オートコンプリート）
-│   ├── ranking.ts            # ※空ファイル（未使用）
-│   ├── ranking/
-│   │   ├── check.ts          # ハイスコア判定 API
-│   │   └── randomArtist.ts   # ランキング用ランダムアーティスト取得
-│   ├── year/
-│   │   └── tracks.ts         # TIMELINE用 楽曲+発売年取得
-│   ├── daily/
-│   │   ├── questions.ts      # デイリー出題
-│   │   └── ranking.ts        # デイリーランキング
-│   ├── challenge/
-│   │   ├── create.ts         # チャレンジ作成
-│   │   └── [id].ts           # チャレンジ取得
-│   └── artists/
-│       └── expand.ts         # アーティストプール拡張
+├── pages/                    # Pages Router
+│   ├── share.tsx             # シェア用OGメタページ（SSR、即トップへリダイレクト）
+│   └── api/                  # API Routes
+│       ├── randomArtist.ts       # ランダムアーティスト取得
+│       ├── popularity.ts         # アーティスト人気度取得
+│       ├── search.ts             # アーティスト検索（オートコンプリート）
+│       ├── ranking/
+│       │   ├── check.ts          # ハイスコア判定 API
+│       │   └── randomArtist.ts   # ランキング用ランダムアーティスト取得
+│       ├── year/
+│       │   └── tracks.ts         # TIMELINE用 楽曲+発売年取得
+│       ├── daily/
+│       │   ├── questions.ts      # デイリー出題
+│       │   └── ranking.ts        # デイリーランキング
+│       ├── challenge/
+│       │   ├── create.ts         # チャレンジ作成
+│       │   └── [id].ts           # チャレンジ取得
+│       └── artists/
+│           └── expand.ts         # アーティストプール拡張
 ├── components/               # UI コンポーネント
 │   ├── GameScreen.tsx        # VERSUSゲーム画面（入力 + オートコンプリート）
 │   ├── ArtistSearch.tsx      # アーティスト検索ドロップダウン
@@ -135,15 +143,21 @@ spot-the-pop/
 │   ├── expandJP.ts               # JPアーティストプール拡張
 │   ├── expandPool.ts             # 一般プール拡張
 │   ├── enrichArtists.ts          # ジャンル・画像拡充
-│   └── archiveSeason.ts          # シーズンアーカイブ
-├── data/                     # 問題バンク（JSON、gitignore推奨の大容量ファイル）
-│   ├── questionBank.json         # JP問題バンク（~11MB）
-│   └── globalQuestionBank.json   # グローバル問題バンク（~15MB）
+│   ├── archiveSeason.ts          # シーズンアーカイブ
+│   ├── seedRankings.ts           # ランキングモックデータ投入
+│   ├── seedArtistPlays.ts        # アーティストプレイ数モックデータ投入
+│   └── resetRankings.ts          # ランキングモックデータリセット＋再投入
+├── data/                     # 問題バンク（JSON、大容量ファイル）
+│   ├── questionBank.json             # JP問題バンク（~11MB）
+│   ├── questionBank.partial.json     # JP問題バンク（部分）
+│   ├── globalQuestionBank.json       # グローバル問題バンク（~15MB）
+│   └── globalQuestionBank.partial.json # グローバル問題バンク（部分、~16MB）
 └── public/                   # 静的ファイル・PWA
     ├── manifest.json         # PWA マニフェスト（テーマカラー: #1DB954）
     ├── sw.js                 # Service Worker（next-pwa 自動生成）
     ├── packs/                # TIMELINE週間パック（buildWeeklyPacks.ts で生成）
-    │   └── jp/week-YYYY-WXX.json
+    │   ├── jp/week-YYYY-WXX.json
+    │   └── global/week-YYYY-WXX.json
     └── workbox-*.js          # Workbox ランタイム
 ```
 
@@ -154,10 +168,11 @@ spot-the-pop/
 - **Pages Router**（`pages/api/`）: API Routes を担当
 - 両方が混在しているため、ページ追加は `app/` に、API 追加は `pages/api/` に配置すること
 - 例外: `app/api/og/route.tsx` は App Router 側の API Route（OG画像生成用）
+- 例外: `pages/share.tsx` は Pages Router 側のページ（SSR で OG メタタグを生成し、即トップへリダイレクト）
 
 ### ゲームモード
 
-#### TIMELINE（`app/year/page.tsx`、~730行）
+#### TIMELINE（`app/year/page.tsx`、~960行）
 - 曲のアルバムアートを見て発売年を当てる
 - 10問、テンキー入力（1960-2026）
 - スコア計算（難易度別）:
@@ -165,7 +180,7 @@ spot-the-pop/
   - **HARD**: ベース `7.5 × (1 - diff/11)^1.13`（差0→7.5pt）+ 速度ボーナス（5秒以内+2.5pt、10秒以内+1.5pt、15秒以内+0.5pt）。合計最大100pt
 - 週間パック: `/packs/jp/week-YYYY-WXX.json`（静的）をまず試行、失敗時は API フォールバック
 
-#### VERSUS（`app/game/page.tsx`、174行）
+#### VERSUS（`app/game/page.tsx`、~180行）
 - お題アーティストと同じフォロワー数のアーティストを予想
 - 5問、テキスト入力（オートコンプリート付き）
 - スコア計算: `max(0, 20 - 20 × |log10(theme) - log10(answer)|)`
@@ -190,6 +205,7 @@ spot-the-pop/
 - **レート制限**: プレイヤーあたり60秒に5回まで
 - **TOP50表示**: メダル（金銀銅）、自分のハイライト、圏外時はランク表示
 - **シーズン0**: 2026年4月以前の旧スコアリング（アーカイブ済み）
+- **歴代ランキング**: `app/ranking/history/page.tsx` でシーズン選択→各シーズンの記録を閲覧
 
 ### 環境変数マッピング（next.config.js）
 `next.config.js` で環境変数名をリマッピング:
@@ -202,6 +218,12 @@ spot-the-pop/
 - ランキング登録は `lib/ranking.ts` の `saveRanking()` 経由で Firestore に保存
 - 重複登録防止: `rankingSubmittedScore` を localStorage に保存
 - プレイヤー識別: `playerId`（UUID、localStorage 永続）
+
+### シェアフロー
+- 結果画面の ShareButton/ShareSection から X/Twitter にシェア
+- シェアURL は `pages/share.tsx` を経由（SSR で OG メタタグを動的生成）
+- OG 画像は `app/api/og/route.tsx` で動的生成
+- `pages/share.tsx` は表示後すぐにトップページへリダイレクト
 
 ### アーティストデータ
 - `lib/JapaneseArtists.ts`: 約2,200組（nameJa, genres, popularity, followers付き）
@@ -247,17 +269,22 @@ NEXT_PUBLIC_FIREBASE_APP_ID=xxx
 
 - `Difficulty = 'easy' | 'hard'`
 - `GameMode = 'classic' | 'daily' | 'genre' | 'challenge'`
-- `MetricMode = 'followers' | 'popularity'`（popularity は実質未使用）
-- `GenreCategory = 'rock' | 'pop' | 'hiphop' | 'electronic' | 'idol' | 'anime' | 'all'`
-- `Ranking`: playerName, score, gameType('versus'|'timeline'), region('jp'|'global'), difficulty, createdAt, playerId
+- `MetricMode = 'popularity' | 'followers'`（popularity は実質未使用）
+- `GenreCategory` = `GENRE_CATEGORIES[number]['id']`（rock, pop, hiphop, electronic, idol, anime, all）
+- `Artist`: id, name, nameJa?, popularity, followers?, genres?, imageUrl?
+- `GameResult`: theme, themeArtist, answer, answerArtist, diff, baseScore?, timeBonus?, metric, hintUsed?
+- `GameState`: mode, metric, genre?, rounds, results, score, challengeId?
+- `Challenge`: id, questions, metric, genre?, creatorName, creatorScore, createdAt
+- `DailyChallenge`: date, questions, metric
+- `Ranking`: name, score, gameType('versus'|'timeline'), region('jp'|'global'), difficulty, createdAt, playerId
 
 ## 注意事項
 
-- App Router と Pages Router が混在（ページは `app/`、API は `pages/api/`、例外: `app/api/og/`）
+- App Router と Pages Router が混在（ページは `app/`、API は `pages/api/`、例外: `app/api/og/`、`pages/share.tsx`）
 - `components/ResultScreen.tsx`、`NameRegistration.tsx`、`RankingList.tsx` は空ファイル（機能はページに直接実装済み）
-- `pages/api/ranking.ts` も空ファイル（ランキング操作は `lib/ranking.ts` + Firestore で対応済み）
 - PostCSS 設定ファイルが2つ存在（`.mjs` が有効、`.js` は旧構成）
 - tsconfig.json の `module` は `CommonJS`（ts-node でのスクリプト実行に対応）
 - `data/` 配下の JSON ファイルは大容量（合計 50MB+）
 - `main.py` は初期プロトタイプで本番未使用。**Spotify API 認証情報がハードコード**されているため公開時は要削除
-- TIMELINE の週間パックは `scripts/buildWeeklyPacks.ts` で事前生成し `public/packs/` に配置
+- TIMELINE の週間パックは `scripts/buildWeeklyPacks.ts` で事前生成し `public/packs/` に配置（jp + global）
+- `scripts/seedRankings.ts` 等のシードスクリプトには **Firebase 認証情報がハードコード**されているため公開時は要注意

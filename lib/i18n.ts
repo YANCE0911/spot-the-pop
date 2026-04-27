@@ -56,8 +56,8 @@ const translations = {
     rulesPopularity: 'Popularity reflects recent streams & listeners (0-100)',
     rulesFollowers: 'Followers is the total Spotify follower count',
     dailyRules: '5 questions, same for everyone today. 60 seconds per question. Hints available (with penalty).',
-    // TIMELINE
-    tl_title: 'TIMELINE',
+    // TIMELINE (display: WHEN?)
+    tl_title: 'WHEN?',
     tl_tagline: 'Guess the release year!',
     tl_loading: 'Loading tracks...',
     tl_loadFailed: 'Failed to load tracks. Please try again.',
@@ -145,8 +145,8 @@ const translations = {
     rulesPopularity: 'Popularityは最近の再生数・リスナー数を反映 (0-100)',
     rulesFollowers: 'FollowersはSpotifyの総フォロワー数',
     dailyRules: '5問・全員共通のお題。1問60秒。ヒントあり（ペナルティ付き）。',
-    // TIMELINE
-    tl_title: 'TIMELINE',
+    // TIMELINE (display: WHEN?)
+    tl_title: 'WHEN?',
     tl_tagline: 'リリース年を当てよう!',
     tl_loading: '曲を読み込み中...',
     tl_loadFailed: '曲の読み込みに失敗しました。もう一度お試しください。',

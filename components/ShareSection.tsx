@@ -26,7 +26,7 @@ export default function ShareSection({ score, mode, lang = 'en', challengeUrl, a
   const [copied, setCopied] = useState(false)
 
   const displayScore = Math.round(score * 100) / 100
-  const modeLabel = artistName ? `TIMELINE - ${artistName}` : mode === 'versus' ? 'VERSUS' : 'TIMELINE'
+  const modeLabel = artistName ? `WHEN? - ${artistName}` : mode === 'versus' ? 'WHO?' : 'WHEN?'
   const rank = getRankLabel(displayScore)
 
   const origin = typeof window !== 'undefined' ? window.location.origin : BASE_URL
@@ -36,8 +36,8 @@ export default function ShareSection({ score, mode, lang = 'en', challengeUrl, a
 
   const line = '━━━━━━━━━━━━'
   const shareText = artistName
-    ? `${artistName}で${displayScore.toFixed(2)}点｜SOUND IQ\n${line}\n判定：${rank}ランク\n${line}\nあなたは何点？\n${shareUrl}`
-    : `SOUND IQ - ${modeLabel}\n${line}\n${displayScore.toFixed(2)}点\n判定：${rank}ランク\n${line}\nあなたの音楽IQは？\n${shareUrl}`
+    ? `${artistName}で${displayScore.toFixed(2)}点｜SOUND IQ\n${line}\n判定：${rank}ランク\n${line}\nあなたは何点？\n${shareUrl}\ncreated by @sbsysil`
+    : `SOUND IQ - ${modeLabel}\n${line}\n${displayScore.toFixed(2)}点\n判定：${rank}ランク\n${line}\nあなたの音楽IQは？\n${shareUrl}\ncreated by @sbsysil`
 
   const handleShare = () => {
     const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}`

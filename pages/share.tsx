@@ -24,7 +24,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async ({ query }) =
 export default function SharePage({ score, mode, artist, ogUrl }: Props) {
   const router = useRouter()
   const isTimeline = mode === 'timeline'
-  const modeLabel = artist ? `TIMELINE - ${artist}` : isTimeline ? 'TIMELINE' : 'VERSUS'
+  const modeLabel = artist ? `WHEN? - ${artist}` : isTimeline ? 'WHEN?' : 'WHO?'
   const title = artist
     ? `SOUND IQ - ${artist} ${score}点`
     : `SOUND IQ ${modeLabel} - Score: ${score}/100`

@@ -360,7 +360,7 @@ function YearGame() {
     return (
       <main className="min-h-screen bg-black text-white flex items-center justify-center">
         <div className="text-center">
-          <p className="text-accent text-sm font-bold tracking-widest mb-4">TIMELINE</p>
+          <p className="text-accent text-sm font-bold tracking-widest mb-4">WHEN?</p>
           <p
             key={countdown}
             className="text-8xl font-black text-accent animate-[popIn_0.4s_ease-out]"
@@ -715,7 +715,7 @@ function TimelineResults({
         <header className="animate-[fadeInUp_0.4s_ease-out]">
           <div className="mb-4"><Logo size="sm" /></div>
           <h2 className="text-accent text-lg font-bold mb-2 text-center">
-            {artistName ? `TIMELINE - ${artistName}` : 'TIMELINE'}{' '}
+            {artistName ? `WHEN? - ${artistName}` : 'WHEN?'}{' '}
             {!artistName && <span className="text-zinc-500 text-sm">{difficulty === 'easy' ? 'NORMAL' : 'HARD'}</span>}{' '}
             {t('results', lang)}
           </h2>
